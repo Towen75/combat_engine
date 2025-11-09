@@ -9,7 +9,7 @@ This project is the development of a modular combat engine for a dungeon crawler
 - **Damage Calculation**: Implement the core formula `Damage Dealt = MAX((Attack Damage - Defences), (Attack Damage * Pierce Ratio))` with support for flat and multiplier modifiers
 - **Critical Hits**: Multi-tier critical system where rarity determines crit scope (Base, Pre-Pierce, Post-Pierce, Full)
 - **Secondary Effects**: Event-driven system for DoTs (Bleed, Poison, Burn, Life Drain) and status effects with stacking mechanics
-- **Defensive Mechanics**: Armor reduction for physical damage, resistances for elemental damage
+- **Defensive Mechanics**: Armour reduction for physical damage, resistances for elemental damage
 
 ### Character Systems
 - **Skills**: Three unique skills per character (Passive, Special, Ultimate) plus normal attack, all upgradeable

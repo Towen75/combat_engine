@@ -27,13 +27,13 @@ The Combat Engine project addresses the need for a sophisticated, modular combat
 ### Core Gameplay Loop
 1. **Combat Engagement**: Players enter dungeons with procedurally generated floors
 2. **Strategic Decision Making**: Choose skills, position, and timing based on enemy types and player build
-3. **Damage Resolution**: Complex calculations determine hit effectiveness, with pierce bypassing armor and crits amplifying damage based on rarity
+3. **Damage Resolution**: Complex calculations determine hit effectiveness, with pierce bypassing armour and crits amplifying damage based on rarity
 4. **Secondary Effects**: DoTs and status effects create ongoing tactical considerations
 5. **Progression Milestones**: Level-ups provide choice rewards, boss fights unlock rarity upgrades
 
 ### Combat Flow
 - **Initiation**: Player selects target and activates skill
-- **Calculation**: Engine resolves damage using attacker stats, defender defenses, and skill properties
+- **Calculation**: Engine resolves damage using attacker stats, defender defences, and skill properties
 - **Events**: Triggers fire based on outcomes (OnHit, OnCrit, OnKill)
 - **Effects**: Secondary systems apply DoTs, buffs, or status effects
 - **Feedback**: Clear visual/audio indicators of damage, crits, and effect applications
