@@ -115,6 +115,8 @@
 ## Success Metrics
 
 ### Phase 1 Milestones
+- [x] Entity and EntityStats data models implemented with validation
+- [ ] StateManager for entity state tracking
 - [ ] Core damage formula implemented and tested
 - [ ] Entity and StateManager classes functional
 - [ ] Unit test coverage > 80% for core systems
