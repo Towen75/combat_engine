@@ -45,7 +45,7 @@ class TestStateManager:
         """Test successful entity registration."""
         manager = StateManager()
         stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", stats=stats)
+        entity = Entity(id="test_entity", base_stats=stats)
 
         manager.register_entity(entity)
 
@@ -62,7 +62,7 @@ class TestStateManager:
         """Test that registering the same entity twice raises ValueError."""
         manager = StateManager()
         stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", stats=stats)
+        entity = Entity(id="test_entity", base_stats=stats)
 
         manager.register_entity(entity)
 
@@ -73,7 +73,7 @@ class TestStateManager:
         """Test successful entity unregistration."""
         manager = StateManager()
         stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", stats=stats)
+        entity = Entity(id="test_entity", base_stats=stats)
 
         manager.register_entity(entity)
         assert len(manager) == 1
@@ -101,7 +101,7 @@ class TestStateManager:
         """Test applying damage less than current health."""
         manager = StateManager()
         stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", stats=stats)
+        entity = Entity(id="test_entity", base_stats=stats)
 
         manager.register_entity(entity)
         damage_applied = manager.apply_damage("test_entity", 30.0)
@@ -116,7 +116,7 @@ class TestStateManager:
         """Test applying damage exactly equal to current health."""
         manager = StateManager()
         stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", stats=stats)
+        entity = Entity(id="test_entity", base_stats=stats)
 
         manager.register_entity(entity)
         damage_applied = manager.apply_damage("test_entity", 100.0)
@@ -131,7 +131,7 @@ class TestStateManager:
         """Test that damage to dead entities does nothing."""
         manager = StateManager()
         stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", stats=stats)
+        entity = Entity(id="test_entity", base_stats=stats)
 
         manager.register_entity(entity)
         manager.apply_damage("test_entity", 100.0)  # Kill the entity
@@ -155,7 +155,7 @@ class TestStateManager:
         """Test that negative damage raises ValueError."""
         manager = StateManager()
         stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", stats=stats)
+        entity = Entity(id="test_entity", base_stats=stats)
 
         manager.register_entity(entity)
 
@@ -166,7 +166,7 @@ class TestStateManager:
         """Test healing an entity."""
         manager = StateManager()
         stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", stats=stats)
+        entity = Entity(id="test_entity", base_stats=stats)
 
         manager.register_entity(entity)
         manager.apply_damage("test_entity", 50.0)  # Health now 50
@@ -183,7 +183,7 @@ class TestStateManager:
         """Test healing beyond max health caps at max."""
         manager = StateManager()
         stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", stats=stats)
+        entity = Entity(id="test_entity", base_stats=stats)
 
         manager.register_entity(entity)
         manager.apply_damage("test_entity", 20.0)  # Health now 80
@@ -200,7 +200,7 @@ class TestStateManager:
         """Test that healing dead entities does nothing."""
         manager = StateManager()
         stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", stats=stats)
+        entity = Entity(id="test_entity", base_stats=stats)
 
         manager.register_entity(entity)
         manager.apply_damage("test_entity", 100.0)  # Kill the entity
@@ -219,7 +219,7 @@ class TestStateManager:
         """Test that negative healing raises ValueError."""
         manager = StateManager()
         stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", stats=stats)
+        entity = Entity(id="test_entity", base_stats=stats)
 
         manager.register_entity(entity)
 
@@ -231,8 +231,8 @@ class TestStateManager:
         manager = StateManager()
         stats = EntityStats(max_health=100.0)
 
-        entity1 = Entity(id="entity1", stats=stats)
-        entity2 = Entity(id="entity2", stats=stats)
+        entity1 = Entity(id="entity1", base_stats=stats)
+        entity2 = Entity(id="entity2", base_stats=stats)
 
         manager.register_entity(entity1)
         manager.register_entity(entity2)
@@ -252,7 +252,7 @@ class TestStateManager:
         """Test resetting the state manager."""
         manager = StateManager()
         stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", stats=stats)
+        entity = Entity(id="test_entity", base_stats=stats)
 
         manager.register_entity(entity)
         assert len(manager) == 1
@@ -265,7 +265,7 @@ class TestStateManager:
         """Test __len__ and __contains__ methods."""
         manager = StateManager()
         stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", stats=stats)
+        entity = Entity(id="test_entity", base_stats=stats)
 
         assert len(manager) == 0
         assert "test_entity" not in manager

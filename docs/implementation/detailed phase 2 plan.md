@@ -282,3 +282,32 @@ state_manager = StateManager()
 # Create entities
 attacker_stats = EntityStats(crit_chance=0.50, crit_damage=2.0)
 attacker = Entity(id="player_1
+
+defender_stats = EntityStats(max_health=2000, armor=100)
+defender = Entity(id="enemy_1", stats=defender_stats)
+
+state_manager.register_entity(attacker)
+state_manager.register_entity(defender)
+
+# Register the handler
+bleed_handler = BleedHandler(event_bus, state_manager, proc_rate=0.5)
+
+# --- Simulation ---
+print(f"--- Phase 2: Crit & Event Test ---")
+print(f"Attacker is '{attacker.rarity}', using Crit Tier {attacker.get_crit_tier()}.")
+for i in range(5):
+    print(f"\nAttack #{i+1}:")
+    process_attack(attacker, defender, event_bus, state_manager)
+    
+    hit_event = ... # In a real system, the event would be passed to a logger
+    is_crit_str = "CRITICAL HIT!" if hit_event.is_crit else "Normal Hit."
+    print(f"  > {is_crit_str} Damage: {hit_event.damage_dealt:.2f}")
+
+print(f"\n--- Final State ---")
+defender_state = state_manager.get_state(defender.id)
+print(f"Defender Health: {defender_state.current_health:.2f} / {defender.stats.max_health}")
+if defender_state.active_debuffs:
+    for debuff in defender_state.active_debuffs.values():
+        print(f"Debuff: {debuff.name}, Stacks: {debuff.stacks}")
+else:
+    print("No debuffs applied.")

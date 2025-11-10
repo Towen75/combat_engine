@@ -1,7 +1,17 @@
 """Data models for combat entities and their statistics."""
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, List, Literal, Dict
+
+# Rarity to critical hit tier mapping
+RARITY_TO_CRIT_TIER = {
+    "Common": 1,
+    "Uncommon": 1,
+    "Rare": 2,
+    "Epic": 2,
+    "Legendary": 3,
+    "Mythic": 3
+}
 
 
 @dataclass
@@ -46,27 +56,127 @@ class EntityStats:
 class Entity:
     """Represents a participant in combat.
 
-    An Entity has static stats and a unique identifier.
+    An Entity has base stats, equipment that modifies final stats, and a unique identifier.
     Dynamic state (health, buffs, etc.) is managed separately.
     """
 
-    def __init__(self, id: str, stats: EntityStats, name: Optional[str] = None):
+    def __init__(self, id: str, base_stats: EntityStats, name: Optional[str] = None, rarity: str = "Common"):
         """Initialize an Entity.
 
         Args:
             id: Unique identifier for this entity
-            stats: Static statistics for this entity
+            base_stats: Base statistics for this entity (before equipment modifiers)
             name: Optional display name (defaults to id)
+            rarity: Character rarity tier (Common, Uncommon, Rare, Epic, Legendary, Mythic)
         """
         if not id:
             raise ValueError("Entity id cannot be empty")
 
+        if rarity not in RARITY_TO_CRIT_TIER:
+            raise ValueError(f"Invalid rarity: {rarity}. Must be one of {list(RARITY_TO_CRIT_TIER.keys())}")
+
         self.id = id
-        self.stats = stats
+        self.base_stats = base_stats
         self.name = name or id
+        self.rarity = rarity
+        self.equipment: Dict[str, Item] = {}
+        self.final_stats = self.calculate_final_stats()
 
     def __repr__(self) -> str:
         return f"Entity(id='{self.id}', name='{self.name}')"
 
     def __str__(self) -> str:
         return self.name
+
+    def get_crit_tier(self) -> int:
+        """Get the critical hit tier based on entity rarity.
+
+        Returns:
+            Critical hit tier (1, 2, or 3)
+        """
+        return RARITY_TO_CRIT_TIER.get(self.rarity, 1)
+
+    def equip_item(self, item: "Item") -> None:
+        """Equip an item to its designated slot and recalculate stats.
+
+        Args:
+            item: The item to equip
+        """
+        self.equipment[item.slot] = item
+        self.recalculate_stats()
+
+    def recalculate_stats(self) -> None:
+        """Public method to trigger stat recalculation."""
+        self.final_stats = self.calculate_final_stats()
+
+    def calculate_final_stats(self) -> EntityStats:
+        """Calculate the final stats by applying equipment modifiers.
+
+        Order of operations: Multipliers first, then flats (revised from GDD 2.1).
+        Validates that final stats meet minimum requirements.
+
+        Returns:
+            EntityStats with final calculated values
+        """
+        # Start with a copy of the base stats
+        final_stats_dict = self.base_stats.__dict__.copy()
+
+        # 1. Apply all MULTIPLIER affixes first
+        for item in self.equipment.values():
+            for affix in item.affixes:
+                if affix.mod_type == "multiplier":
+                    final_stats_dict[affix.stat] *= affix.value
+
+        # 2. Apply all FLAT affixes second
+        for item in self.equipment.values():
+            for affix in item.affixes:
+                if affix.mod_type == "flat":
+                    final_stats_dict[affix.stat] += affix.value
+
+        # Create new EntityStats object from modified dictionary
+        final_stats = EntityStats(**final_stats_dict)
+
+        # Additional validation to ensure final stats are valid
+        if final_stats.base_damage < 0:
+            final_stats.base_damage = 0
+        if final_stats.attack_speed <= 0:
+            final_stats.attack_speed = 0.1  # Minimum speed
+        if final_stats.crit_chance < 0:
+            final_stats.crit_chance = 0
+        if final_stats.crit_chance > 1:
+            final_stats.crit_chance = 1
+        if final_stats.crit_damage < 1:
+            final_stats.crit_damage = 1
+        if final_stats.pierce_ratio < 0.01:
+            final_stats.pierce_ratio = 0.01
+        if final_stats.max_health <= 0:
+            final_stats.max_health = 1
+        if final_stats.armor < 0:
+            final_stats.armor = 0
+        if final_stats.resistances < 0:
+            final_stats.resistances = 0
+
+        return final_stats
+
+
+@dataclass
+class Affix:
+    """Represents a single magical property on an item.
+
+    Based on GDD Sections 7.3 and 7.5.
+    """
+    stat: str  # e.g., "base_damage", "crit_chance", "armor"
+    mod_type: Literal["flat", "multiplier"]
+    value: float
+
+
+@dataclass
+class Item:
+    """Represents a piece of equipment.
+
+    Based on GDD Section 7.1.
+    """
+    id: str
+    name: str
+    slot: Literal["Head", "Chest", "Hands", "Feet", "Weapon", "OffHand", "Ring1", "Ring2", "Amulet", "Belt", "Shoulders", "Pants"]
+    affixes: List[Affix]

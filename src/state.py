@@ -1,8 +1,17 @@
 """State management for combat entities - tracking dynamic properties like health."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Optional
 from .models import Entity
+
+
+@dataclass
+class Debuff:
+    """Represents a damage-over-time effect or debuff applied to an entity."""
+    name: str
+    stacks: int = 1
+    max_duration: float = 10.0
+    time_remaining: float = 10.0
 
 
 @dataclass
@@ -14,6 +23,7 @@ class EntityState:
     """
     current_health: float
     is_alive: bool = True
+    active_debuffs: Dict[str, Debuff] = field(default_factory=dict)
 
     def __post_init__(self):
         """Validate state after initialization."""
@@ -47,7 +57,7 @@ class StateManager:
         if entity.id in self.states:
             raise ValueError(f"Entity '{entity.id}' is already registered")
 
-        self.states[entity.id] = EntityState(current_health=entity.stats.max_health)
+        self.states[entity.id] = EntityState(current_health=entity.final_stats.max_health)
 
     def unregister_entity(self, entity_id: str) -> None:
         """Remove an entity from state tracking.
@@ -105,8 +115,8 @@ class StateManager:
         if not state or not state.is_alive:
             return 0.0
 
-        # Apply damage
-        state.current_health -= damage
+        # Apply damage (ensure it doesn't go below 0)
+        state.current_health = max(0, state.current_health - damage)
 
         # Handle death
         if state.current_health <= 0:
@@ -140,6 +150,41 @@ class StateManager:
         state.current_health = min(state.current_health + healing, max_health)
 
         return state.current_health - old_health
+
+    def add_or_refresh_debuff(self, entity_id: str, debuff_name: str, stacks_to_add: int = 1, duration: float = 10.0) -> None:
+        """Add a new debuff or refresh an existing one using combined refresh model.
+
+        Args:
+            entity_id: ID of the entity to apply debuff to
+            debuff_name: Name of the debuff effect
+            stacks_to_add: Number of stacks to add (default 1)
+            duration: Duration of the debuff in seconds (default 10.0)
+
+        Raises:
+            ValueError: If stacks_to_add is not positive or duration is not positive
+        """
+        if stacks_to_add <= 0:
+            raise ValueError("stacks_to_add must be positive")
+        if duration <= 0:
+            raise ValueError("duration must be positive")
+
+        state = self.get_state(entity_id)
+        if not state or not state.is_alive:
+            return
+
+        if debuff_name in state.active_debuffs:
+            # Refresh existing debuff: add stacks and reset duration
+            debuff = state.active_debuffs[debuff_name]
+            debuff.stacks += stacks_to_add
+            debuff.time_remaining = duration
+        else:
+            # Apply new debuff
+            state.active_debuffs[debuff_name] = Debuff(
+                name=debuff_name,
+                stacks=stacks_to_add,
+                max_duration=duration,
+                time_remaining=duration
+            )
 
     def get_all_states(self) -> Dict[str, EntityState]:
         """Get a copy of all entity states.
