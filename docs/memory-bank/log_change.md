@@ -6,6 +6,128 @@ This log documents all significant changes, implementations, and milestones in t
 
 ---
 
+## [2025-11-11] Code Review Fixes Complete: Critical Infrastructure Improvements
+
+### Major Milestone: Code Review Remediation ✅
+**Status**: Complete - All findings from "Combat Engine - High-Level Review.md" addressed
+**Duration**: ~2 days from review completion
+**Test Coverage**: Expanded to 96 unit tests, 100% pass rate
+**Impact**: Production-quality reliability with proper determinism and validation
+
+### Files Created/Modified
+
+#### RNG Injection & Determinism
+- **UPDATED**: `src/engine.py` - CombatEngine now accepts optional RNG parameter, removed global random.seed()
+- **UPDATED**: `src/effect_handlers.py` - EffectHandler base class and BleedHandler/PoisonHandler support RNG injection
+- **NEW**: `tests/fixtures.py` - Test fixtures with make_rng(), make_entity(), make_attacker(), make_defender() helpers
+- **UPDATED**: All test files to use deterministic RNG injection instead of global seeding
+
+#### Input Validation & Safety
+- **UPDATED**: `src/engine.py` - Added pierce_ratio upper bound validation (≤1.0)
+- **NEW**: Comprehensive validation tests in `tests/test_engine.py`
+
+#### Test Infrastructure Improvements
+- **NEW**: `tests/test_skills.py` - 5 comprehensive tests for multi-hit skills, triggers, and state accumulation
+- **NEW**: `tests/test_simulation.py` - 7 tests for DoT time-based effects, damage accumulation, and event dispatching
+- **UPDATED**: `tests/test_engine.py` - Added final_damage assignment tests and crit path coverage
+
+#### Documentation & Policy
+- **NEW**: `README.md` - Comprehensive project documentation with RNG policy and testing conventions
+- **UPDATED**: `docs/memory-bank/activeContext.md` - Documented all fixes and infrastructure improvements
+- **UPDATED**: `docs/memory-bank/log_change.md` - This change log entry
+
+### Technical Achievements
+
+#### Deterministic Testing Infrastructure
+- ✅ **RNG Injection**: All random behavior now supports deterministic testing
+- ✅ **Test Fixtures**: Reusable helpers reduce duplication and improve maintainability
+- ✅ **No Global Seeding**: Eliminated brittle global RNG state management
+- ✅ **Production Safety**: Injectable RNG prevents hidden randomness in production
+
+#### Input Validation & Robustness
+- ✅ **Bounds Checking**: pierce_ratio validated to be ≤1.0 (was missing upper bound)
+- ✅ **Comprehensive Tests**: Edge cases and boundary conditions covered
+- ✅ **Error Prevention**: Invalid inputs caught early with clear error messages
+
+#### Multi-Hit Skills Testing
+- ✅ **Deterministic Execution**: Skills tested with controlled RNG for predictable outcomes
+- ✅ **Per-Hit Independence**: Each hit in multi-hit skills validated independently
+- ✅ **State Accumulation**: Complex interactions between damage and effects verified
+- ✅ **Trigger Proc Rates**: Skill triggers tested with various proc rate scenarios
+
+#### Time-Based DoT Simulation
+- ✅ **Damage Accumulation**: DoT effects accumulate damage correctly over time
+- ✅ **Duration Management**: Effect expiration and time remaining tracking
+- ✅ **Stacking Behavior**: Multiple applications and refresh mechanics
+- ✅ **Event Dispatching**: DoT ticks properly dispatch DamageTickEvent
+- ✅ **Dead Entity Safety**: DoT effects don't damage already-dead entities
+
+### Validation Results
+
+#### Test Execution Summary
+```
+================================================== test session starts ===================================================
+platform win32 -- Python 3.12.10, pytest-9.0.0, pluggy-1.6.0
+collected 96 items
+
+tests\test_engine.py .....................                                                                          [ 21%]
+tests\test_events.py ........                                                                                       [ 30%]
+tests\test_fixtures.py ........                                                                                     [ 38%]
+tests\test_models.py ........................                                                                       [ 63%]
+tests\test_simulation.py .......                                                                                    [ 70%]
+tests\test_skills.py.....                                                                                          [ 76%]
+tests\test_state.py .......................                                                                         [100%]
+
+=================================================== 96 passed in 0.19s ===================================================
+```
+
+#### Key Improvements Verified
+- **RNG Determinism**: All random behavior controllable via injection
+- **Final Damage Assignment**: Verified in all crit tiers and non-crit cases
+- **Input Validation**: pierce_ratio bounds properly enforced
+- **Multi-Hit Skills**: Complex skill behaviors fully tested
+- **DoT Time Simulation**: Complete time-based effect system validated
+
+### Design Decisions Implemented
+
+#### RNG Architecture
+- **Injection Pattern**: Optional RNG parameters throughout the codebase
+- **Fallback Behavior**: Uses random.random() when no RNG provided (production compatibility)
+- **Test Determinism**: All tests use seeded RNG for reproducible results
+- **Zero Global State**: No reliance on global RNG seeding
+
+#### Test Infrastructure
+- **Fixture Functions**: Reusable entity creation helpers reduce duplication
+- **Deterministic Helpers**: make_rng() provides predictable random sequences
+- **Comprehensive Coverage**: All major systems have dedicated test suites
+- **Integration Focus**: Tests validate complex interactions between systems
+
+#### Validation Strategy
+- **Early Error Detection**: Input validation prevents invalid game states
+- **Clear Error Messages**: Descriptive validation failures aid debugging
+- **Boundary Testing**: Edge cases explicitly tested and documented
+- **Performance Preservation**: Validation adds minimal overhead
+
+### Technical Innovations
+- **Type-Safe RNG Injection**: Full type hints for optional RNG parameters
+- **Modular Test Fixtures**: Extensible fixture system for future test needs
+- **Time-Based Testing**: Comprehensive DoT simulation framework
+- **Event-Driven Validation**: DoT effects tested through event dispatching
+
+### Risk Mitigation
+- **Determinism Guarantee**: RNG injection prevents flaky production behavior
+- **Test Reliability**: Deterministic tests catch regressions reliably
+- **Input Safety**: Validation prevents crashes from invalid inputs
+- **Documentation**: Clear policies prevent future violations
+
+### Impact on Godot Port
+- **Clean Architecture**: RNG injection pattern easily adapts to GDScript
+- **Test Coverage**: Comprehensive tests ensure port correctness
+- **Validation Layer**: Input checking prevents Godot runtime errors
+- **Documentation**: Clear conventions guide Godot implementation
+
+---
+
 ## [2025-11-09] Phase 1 Complete: Full Combat Foundation
 
 ### Major Milestone: Phase 1 Implementation ✅

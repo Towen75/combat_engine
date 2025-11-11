@@ -29,6 +29,16 @@ All Python prototype phases have been successfully completed. The combat engine 
 - **Integration Validation**: Full system simulation with seeded scenarios confirmed working
 - **Documentation**: Created attack_speed design document and updated memory bank
 
+### Code Review Fixes Complete ✅ (Critical Infrastructure Improvements)
+- **RNG Injection Refactor**: Removed global `random.seed()` calls, implemented injectable RNG throughout CombatEngine, EffectHandlers, and all tests
+- **Final Damage Assignment**: Verified `ctx.final_damage` is always properly set in all code paths
+- **Test Infrastructure**: Created comprehensive test fixtures (`tests/fixtures.py`) with `make_entity()`, `make_attacker()`, `make_rng()` helpers
+- **Input Validation**: Added pierce_ratio upper bound checking (≤1.0) and comprehensive validation tests
+- **Multi-Hit Skills Testing**: Added 5 comprehensive tests for skill determinism, trigger proc rates, and state accumulation
+- **DoT Time-Based Testing**: Added 7 tests covering damage accumulation, effect expiration, stacking, and event dispatching
+- **Documentation**: Created comprehensive README.md with RNG policy and testing conventions
+- **Test Coverage**: Expanded to 96 unit tests with 100% pass rate across all systems
+
 ### Phase 3 Complete ✅
 - **Full Game Systems**: Implemented complete Phase 3 with Item/Affix models, Equipment system, Skills with triggers, and EffectHandler framework
 - **Dynamic Stat Calculation**: Equipment properly modifies base stats with flat and multiplier bonuses

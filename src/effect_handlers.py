@@ -13,15 +13,18 @@ class EffectHandler(ABC):
     effect application logic.
     """
 
-    def __init__(self, event_bus: EventBus, state_manager: StateManager):
+    def __init__(self, event_bus: EventBus, state_manager: StateManager, rng=None):
         """Initialize the effect handler.
 
         Args:
             event_bus: The event bus to subscribe to
             state_manager: The state manager for applying effects
+            rng: Random number generator for deterministic testing. If None,
+                 uses random.random() without seeding.
         """
         self.event_bus = event_bus
         self.state_manager = state_manager
+        self.rng = rng
 
     @abstractmethod
     def setup_subscriptions(self):
@@ -32,15 +35,17 @@ class EffectHandler(ABC):
 class BleedHandler(EffectHandler):
     """Handles Bleed DoT application on hit events."""
 
-    def __init__(self, event_bus: EventBus, state_manager: StateManager, proc_rate: float = 0.5):
+    def __init__(self, event_bus: EventBus, state_manager: StateManager, proc_rate: float = 0.5, rng=None):
         """Initialize the Bleed handler.
 
         Args:
             event_bus: The event bus to subscribe to
             state_manager: The state manager for applying debuffs
             proc_rate: Probability of bleed procing on hit (0.0 to 1.0)
+            rng: Random number generator for deterministic testing. If None,
+                 uses random.random() without seeding.
         """
-        super().__init__(event_bus, state_manager)
+        super().__init__(event_bus, state_manager, rng)
         self.proc_rate = proc_rate
         self.setup_subscriptions()
 
@@ -54,7 +59,8 @@ class BleedHandler(EffectHandler):
         Args:
             event: The hit event that occurred
         """
-        if random.random() < self.proc_rate:
+        rng_value = self.rng.random() if self.rng else random.random()
+        if rng_value < self.proc_rate:
             print(f"    -> Bleed proc'd on {event.defender.id}!")
             self.state_manager.add_or_refresh_debuff(
                 entity_id=event.defender.id,
@@ -67,15 +73,17 @@ class BleedHandler(EffectHandler):
 class PoisonHandler(EffectHandler):
     """Handles Poison DoT application on hit events."""
 
-    def __init__(self, event_bus: EventBus, state_manager: StateManager, proc_rate: float = 0.33):
+    def __init__(self, event_bus: EventBus, state_manager: StateManager, proc_rate: float = 0.33, rng=None):
         """Initialize the Poison handler.
 
         Args:
             event_bus: The event bus to subscribe to
             state_manager: The state manager for applying debuffs
             proc_rate: Probability of poison procing on hit (0.0 to 1.0)
+            rng: Random number generator for deterministic testing. If None,
+                 uses random.random() without seeding.
         """
-        super().__init__(event_bus, state_manager)
+        super().__init__(event_bus, state_manager, rng)
         self.proc_rate = proc_rate
         self.setup_subscriptions()
 
@@ -89,7 +97,8 @@ class PoisonHandler(EffectHandler):
         Args:
             event: The hit event that occurred
         """
-        if random.random() < self.proc_rate:
+        rng_value = self.rng.random() if self.rng else random.random()
+        if rng_value < self.proc_rate:
             print(f"    -> Poison proc'd on {event.defender.id}!")
             self.state_manager.add_or_refresh_debuff(
                 entity_id=event.defender.id,

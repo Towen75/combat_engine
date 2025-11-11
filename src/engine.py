@@ -31,8 +31,16 @@ class CombatEngine:
     providing pure functions for hit resolution and damage calculation.
     """
 
-    @staticmethod
-    def resolve_hit(attacker: Entity, defender: Entity) -> HitContext:
+    def __init__(self, rng=None):
+        """Initialize CombatEngine with optional RNG for deterministic testing.
+
+        Args:
+            rng: Random number generator for reproducible results. If None,
+                 uses random.random() without seeding.
+        """
+        self.rng = rng
+
+    def resolve_hit(self, attacker: Entity, defender: Entity) -> HitContext:
         """Calculate the damage of a single hit with critical hit support.
 
         Implements the core damage formula with crit tier progression:
@@ -49,9 +57,9 @@ class CombatEngine:
         ctx = HitContext(attacker=attacker, defender=defender, base_damage=attacker.final_stats.base_damage)
 
         # --- 2. Critical Hit Check ---
-        # Use seeded random for reproducible testing
-        random.seed(42)  # For consistent test results
-        if random.random() < attacker.final_stats.crit_chance:
+        # Use injected RNG for deterministic testing, fallback to random.random()
+        rng_value = self.rng.random() if self.rng else random.random()
+        if rng_value < attacker.final_stats.crit_chance:
             ctx.is_crit = True
 
         # --- 3. Pre-Mitigation Damage Calculation ---
@@ -131,6 +139,9 @@ class CombatEngine:
         if attacker.final_stats.pierce_ratio < 0.01:
             return f"Attacker pierce_ratio below minimum: {attacker.final_stats.pierce_ratio}"
 
+        if attacker.final_stats.pierce_ratio > 1.0:
+            return f"Attacker pierce_ratio above maximum: {attacker.final_stats.pierce_ratio}"
+
         if defender.final_stats.armor < 0:
             return f"Defender armor cannot be negative: {defender.final_stats.armor}"
 
@@ -165,8 +176,7 @@ class CombatEngine:
             # Update final damage directly based on new calculation
             ctx.final_damage = max(0, max(pre_pierce_damage, pierced_damage))
 
-    @staticmethod
-    def process_skill_use(attacker: Entity, defender: Entity, skill: Skill, event_bus: EventBus, state_manager: StateManager):
+    def process_skill_use(self, attacker: Entity, defender: Entity, skill: Skill, event_bus: EventBus, state_manager: StateManager):
         """Process a full skill use, including all hits and triggers.
 
         Args:
@@ -178,7 +188,7 @@ class CombatEngine:
         """
         for _ in range(skill.hits):
             # 1. Resolve the damage for a single hit
-            hit_context = CombatEngine.resolve_hit(attacker, defender)
+            hit_context = self.resolve_hit(attacker, defender)
             damage = hit_context.final_damage
             state_manager.apply_damage(defender.id, damage)
 
@@ -199,7 +209,8 @@ class CombatEngine:
             for trigger in skill.triggers:
                 if trigger.event == "OnHit":
                     # Perform the check (e.g., proc rate)
-                    if random.random() < trigger.check.get("proc_rate", 1.0):
+                    rng_value = self.rng.random() if self.rng else random.random()
+                    if rng_value < trigger.check.get("proc_rate", 1.0):
                         # Execute the result
                         if "apply_debuff" in trigger.result:
                             state_manager.add_or_refresh_debuff(

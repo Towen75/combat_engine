@@ -1,3 +1,7 @@
+# [](https://github.com/Towen75/combat_engine/compare/v0.4.0...v) (2025-11-11)
+
+
+
 # Changelog
 
 All notable changes to this project will be documented in this file.

@@ -18,7 +18,8 @@ class TestCombatEngineResolveHit:
         defender_stats = EntityStats(armor=0.0)
         defender = Entity(id="defender", base_stats=defender_stats)
 
-        ctx = CombatEngine.resolve_hit(attacker, defender)
+        engine = CombatEngine()
+        ctx = engine.resolve_hit(attacker, defender)
         assert ctx.final_damage == 100.0
         assert ctx.is_crit is False  # No crit with default crit_chance
 
@@ -35,7 +36,8 @@ class TestCombatEngineResolveHit:
         # PrePierceDamage = 100 - 120 = -20
         # PiercedDamage = 100 * 0.1 = 10
         # Final = max(-20, 10) = 10
-        ctx = CombatEngine.resolve_hit(attacker, defender)
+        engine = CombatEngine()
+        ctx = engine.resolve_hit(attacker, defender)
         assert ctx.final_damage == 10.0
 
     def test_armor_greater_than_pierced_damage(self):
@@ -51,7 +53,8 @@ class TestCombatEngineResolveHit:
         # PrePierceDamage = 100 - 80 = 20
         # PiercedDamage = 100 * 0.3 = 30
         # Final = max(20, 30) = 30
-        ctx = CombatEngine.resolve_hit(attacker, defender)
+        engine = CombatEngine()
+        ctx = engine.resolve_hit(attacker, defender)
         assert ctx.final_damage == 30.0
 
     def test_armor_less_than_pierced_damage(self):
@@ -67,7 +70,8 @@ class TestCombatEngineResolveHit:
         # PrePierceDamage = 100 - 60 = 40
         # PiercedDamage = 100 * 0.3 = 30
         # Final = max(40, 30) = 40
-        ctx = CombatEngine.resolve_hit(attacker, defender)
+        engine = CombatEngine()
+        ctx = engine.resolve_hit(attacker, defender)
         assert ctx.final_damage == 40.0
 
     def test_zero_damage_prevents_negative(self):
@@ -83,7 +87,8 @@ class TestCombatEngineResolveHit:
         # PrePierceDamage = 50 - 100 = -50
         # PiercedDamage = 50 * 0.01 = 0.5
         # Final = max(-50, 0.5) = 0.5, then max(0, 0.5) = 0.5
-        ctx = CombatEngine.resolve_hit(attacker, defender)
+        engine = CombatEngine()
+        ctx = engine.resolve_hit(attacker, defender)
         assert ctx.final_damage == 0.5
 
     def test_minimum_pierce_ratio(self):
@@ -99,7 +104,8 @@ class TestCombatEngineResolveHit:
         # PrePierceDamage = 100 - 50 = 50
         # PiercedDamage = 100 * 0.01 = 1
         # Final = max(50, 1) = 50
-        ctx = CombatEngine.resolve_hit(attacker, defender)
+        engine = CombatEngine()
+        ctx = engine.resolve_hit(attacker, defender)
         assert ctx.final_damage == 50.0
 
 
@@ -181,9 +187,49 @@ class TestCombatEngineValidateDamageCalculation:
         error = CombatEngine.validate_damage_calculation(attacker, defender)
         assert error is None
 
-    # Note: Additional validation tests removed since EntityStats dataclass
+    def test_validation_pierce_ratio_above_maximum(self):
+        """Test validation of pierce_ratio above maximum (1.0)."""
+        attacker_stats = EntityStats(base_damage=100.0, pierce_ratio=1.5)
+        attacker = Entity(id="attacker", base_stats=attacker_stats)
+
+        defender_stats = EntityStats(armor=50.0)
+        defender = Entity(id="defender", base_stats=defender_stats)
+
+        error = CombatEngine.validate_damage_calculation(attacker, defender)
+        assert error == "Attacker pierce_ratio above maximum: 1.5"
+
+    def test_validation_pierce_ratio_at_maximum(self):
+        """Test validation accepts pierce_ratio at maximum (1.0)."""
+        attacker_stats = EntityStats(base_damage=100.0, pierce_ratio=1.0)
+        attacker = Entity(id="attacker", base_stats=attacker_stats)
+
+        defender_stats = EntityStats(armor=50.0)
+        defender = Entity(id="defender", base_stats=defender_stats)
+
+        error = CombatEngine.validate_damage_calculation(attacker, defender)
+        assert error is None
+
+    def test_validation_edge_cases(self):
+        """Test validation of edge cases and boundary conditions."""
+        # Test pierce_ratio at minimum
+        attacker_stats = EntityStats(base_damage=100.0, pierce_ratio=0.01)
+        attacker = Entity(id="attacker", base_stats=attacker_stats)
+        defender_stats = EntityStats(armor=50.0)
+        defender = Entity(id="defender", base_stats=defender_stats)
+
+        error = CombatEngine.validate_damage_calculation(attacker, defender)
+        assert error is None
+
+        # Test zero armor (should be valid)
+        defender_stats = EntityStats(armor=0.0)
+        defender = Entity(id="defender", base_stats=defender_stats)
+
+        error = CombatEngine.validate_damage_calculation(attacker, defender)
+        assert error is None
+
+    # Note: Additional validation tests for negative values removed since EntityStats dataclass
     # already validates these conditions at creation time, making CombatEngine
-    # validation redundant for these cases.
+    # validation redundant for those cases.
 
 
 class TestCombatEngineCriticalHits:
@@ -191,8 +237,7 @@ class TestCombatEngineCriticalHits:
 
     def test_critical_hit_tier_1_common(self):
         """Test that Common rarity entities have crit tier 1 (no special crit effects)."""
-        import random
-        random.seed(42)  # For predictable crit
+        from tests.fixtures import make_rng
 
         attacker_stats = EntityStats(base_damage=100.0, crit_chance=1.0, crit_damage=2.0)
         attacker = Entity(id="attacker", base_stats=attacker_stats, rarity="Common")
@@ -200,7 +245,8 @@ class TestCombatEngineCriticalHits:
         defender_stats = EntityStats(armor=0.0)
         defender = Entity(id="defender", base_stats=defender_stats)
 
-        ctx = CombatEngine.resolve_hit(attacker, defender)
+        engine = CombatEngine(rng=make_rng(42))  # Deterministic crit
+        ctx = engine.resolve_hit(attacker, defender)
 
         assert ctx.is_crit is True
         assert ctx.final_damage == 100.0  # No crit multiplier applied for tier 1
@@ -208,8 +254,7 @@ class TestCombatEngineCriticalHits:
 
     def test_critical_hit_tier_2_rare(self):
         """Test that Rare rarity entities have crit tier 2 (pre-pierce multiplier)."""
-        import random
-        random.seed(42)  # For predictable crit
+        from tests.fixtures import make_rng
 
         attacker_stats = EntityStats(base_damage=100.0, crit_chance=1.0, crit_damage=2.0)
         attacker = Entity(id="attacker", base_stats=attacker_stats, rarity="Rare")
@@ -217,7 +262,8 @@ class TestCombatEngineCriticalHits:
         defender_stats = EntityStats(armor=50.0)
         defender = Entity(id="defender", base_stats=defender_stats)
 
-        ctx = CombatEngine.resolve_hit(attacker, defender)
+        engine = CombatEngine(rng=make_rng(42))  # Deterministic crit
+        ctx = engine.resolve_hit(attacker, defender)
 
         assert ctx.is_crit is True
         assert ctx.final_damage == 150.0  # (100 * 2.0 - 50) = 150, max(150, 100 * 0.01) = 150
@@ -225,8 +271,7 @@ class TestCombatEngineCriticalHits:
 
     def test_critical_hit_tier_3_legendary(self):
         """Test that Legendary rarity entities have crit tier 3 (post-pierce multiplier)."""
-        import random
-        random.seed(42)  # For predictable crit
+        from tests.fixtures import make_rng
 
         attacker_stats = EntityStats(base_damage=100.0, crit_chance=1.0, crit_damage=2.0, pierce_ratio=0.2)
         attacker = Entity(id="attacker", base_stats=attacker_stats, rarity="Legendary")
@@ -234,7 +279,8 @@ class TestCombatEngineCriticalHits:
         defender_stats = EntityStats(armor=50.0)
         defender = Entity(id="defender", base_stats=defender_stats)
 
-        ctx = CombatEngine.resolve_hit(attacker, defender)
+        engine = CombatEngine(rng=make_rng(42))  # Deterministic crit
+        ctx = engine.resolve_hit(attacker, defender)
 
         assert ctx.is_crit is True
         # Tier 3: Re-calculates with crit damage applied to pierce as well
@@ -247,8 +293,7 @@ class TestCombatEngineCriticalHits:
 
     def test_no_critical_hit_when_chance_zero(self):
         """Test that no crit occurs when crit_chance is 0."""
-        import random
-        random.seed(42)
+        from tests.fixtures import make_rng
 
         attacker_stats = EntityStats(base_damage=100.0, crit_chance=0.0, crit_damage=2.0)
         attacker = Entity(id="attacker", base_stats=attacker_stats, rarity="Legendary")
@@ -256,7 +301,8 @@ class TestCombatEngineCriticalHits:
         defender_stats = EntityStats(armor=0.0)
         defender = Entity(id="defender", base_stats=defender_stats)
 
-        ctx = CombatEngine.resolve_hit(attacker, defender)
+        engine = CombatEngine(rng=make_rng(42))
+        ctx = engine.resolve_hit(attacker, defender)
 
         assert ctx.is_crit is False
         assert ctx.final_damage == 100.0
@@ -285,3 +331,69 @@ class TestHitContext:
         assert ctx.mitigated_damage == 0.0
         assert ctx.final_damage == 0.0
         assert ctx.is_crit is False
+
+    def test_final_damage_always_assigned(self):
+        """Test that ctx.final_damage is always assigned in all code paths."""
+        from tests.fixtures import make_rng
+
+        attacker_stats = EntityStats(base_damage=100.0, crit_chance=1.0, crit_damage=2.0)
+        defender_stats = EntityStats(armor=50.0)
+
+        # Test all rarity tiers with guaranteed crits
+        for rarity in ["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"]:
+            attacker = Entity(id="attacker", base_stats=attacker_stats, rarity=rarity)
+            defender = Entity(id="defender", base_stats=defender_stats)
+
+            engine = CombatEngine(rng=make_rng(42))  # Deterministic crit
+            ctx = engine.resolve_hit(attacker, defender)
+
+            # final_damage should always be set and non-negative
+            assert ctx.final_damage is not None
+            assert ctx.final_damage >= 0.0
+            assert isinstance(ctx.final_damage, float)
+
+    def test_tier_3_post_pierce_crit_recalculation(self):
+        """Test that Tier 3 crits properly recalculate damage with pierce."""
+        from tests.fixtures import make_rng
+
+        # Legendary = Tier 3 crit
+        attacker_stats = EntityStats(
+            base_damage=100.0,
+            crit_chance=1.0,
+            crit_damage=2.0,
+            pierce_ratio=0.2
+        )
+        attacker = Entity(id="attacker", base_stats=attacker_stats, rarity="Legendary")
+
+        defender_stats = EntityStats(armor=50.0)
+        defender = Entity(id="defender", base_stats=defender_stats)
+
+        engine = CombatEngine(rng=make_rng(42))  # Deterministic crit
+        ctx = engine.resolve_hit(attacker, defender)
+
+        assert ctx.is_crit is True
+        assert attacker.get_crit_tier() == 3
+
+        # Tier 3 calculation:
+        # crit_pre_mit = 100 * 2.0 = 200
+        # pre_pierce = 200 - 50 = 150
+        # pierced = 200 * 0.2 = 40
+        # final = max(150, 40) = 150
+        assert ctx.final_damage == 150.0
+
+    def test_non_crit_damage_assignment(self):
+        """Test that non-crit hits properly assign mitigated_damage to final_damage."""
+        from tests.fixtures import make_rng
+
+        attacker_stats = EntityStats(base_damage=100.0, crit_chance=0.0)  # No crit chance
+        attacker = Entity(id="attacker", base_stats=attacker_stats, rarity="Common")
+
+        defender_stats = EntityStats(armor=30.0)
+        defender = Entity(id="defender", base_stats=defender_stats)
+
+        engine = CombatEngine(rng=make_rng(42))
+        ctx = engine.resolve_hit(attacker, defender)
+
+        assert ctx.is_crit is False
+        # Should be: max(100-30, 100*0.01) = max(70, 1) = 70
+        assert ctx.final_damage == 70.0
