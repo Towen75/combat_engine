@@ -1,7 +1,11 @@
 """State management for combat entities - tracking dynamic properties like health."""
 
 from dataclasses import dataclass, field
-from typing import Dict, Optional
+from typing import Dict, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .events import EventBus
+
 from .models import Entity
 
 
@@ -206,3 +210,70 @@ class StateManager:
     def __contains__(self, entity_id: str) -> bool:
         """Check if an entity ID is registered."""
         return entity_id in self.states
+
+    def update_dot_effects(self, delta_time: float, event_bus: Optional["EventBus"] = None) -> None:
+        """Update damage-over-time effects for all entities.
+
+        Args:
+            delta_time: Time elapsed since last update in seconds
+            event_bus: Optional event bus to dispatch DamageTickEvent
+        """
+        from .events import DamageTickEvent
+
+        entities_to_remove = []
+
+        for entity_id, state in self.states.items():
+            if not state.is_alive:
+                continue
+
+            debuffs_to_remove = []
+
+            for debuff_name, debuff in state.active_debuffs.items():
+                # Decrease time remaining
+                debuff.time_remaining -= delta_time
+
+                # Check if it's time to tick (every 1 second for simplicity)
+                # In a real implementation, this could be configurable per debuff type
+                tick_interval = 1.0  # seconds between ticks
+                ticks_this_update = int(delta_time / tick_interval)
+
+                if ticks_this_update > 0:
+                    # Calculate damage per tick (example: 5 damage per stack per tick)
+                    damage_per_tick = 5.0 * debuff.stacks
+
+                    for _ in range(ticks_this_update):
+                        actual_damage = self.apply_damage(entity_id, damage_per_tick)
+
+                        # Dispatch DamageTickEvent if event bus is provided
+                        if event_bus and actual_damage > 0:
+                            # Get the entity object (this assumes we have access to it)
+                            # For now, we'll create a minimal entity representation
+                            from .models import Entity, EntityStats
+                            target_entity = Entity(
+                                id=entity_id,
+                                base_stats=EntityStats(),  # Minimal stats for event
+                                name=entity_id
+                            )
+
+                            tick_event = DamageTickEvent(
+                                target=target_entity,
+                                effect_name=debuff_name,
+                                damage_dealt=actual_damage,
+                                stacks=debuff.stacks
+                            )
+                            event_bus.dispatch(tick_event)
+
+                # Remove expired debuffs
+                if debuff.time_remaining <= 0:
+                    debuffs_to_remove.append(debuff_name)
+
+            # Remove expired debuffs
+            for debuff_name in debuffs_to_remove:
+                del state.active_debuffs[debuff_name]
+
+            # Check if entity died from DoT
+            if not state.is_alive:
+                entities_to_remove.append(entity_id)
+
+        # Note: In a real implementation, you might want to handle entity removal
+        # or dispatch death events here, but for simulation purposes we'll keep them

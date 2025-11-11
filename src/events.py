@@ -31,6 +31,15 @@ class OnCritEvent(Event):
     hit_event: OnHitEvent
 
 
+@dataclass
+class DamageTickEvent(Event):
+    """Event fired when a damage-over-time effect ticks."""
+    target: "Entity"
+    effect_name: str
+    damage_dealt: float
+    stacks: int
+
+
 class EventBus:
     """Central dispatcher for combat events using the Observer pattern.
 
