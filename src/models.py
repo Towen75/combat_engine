@@ -1,6 +1,6 @@
 """Data models for combat entities and their statistics."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Optional, List, Literal, Dict
 
 # Rarity to critical hit tier mapping
@@ -125,13 +125,14 @@ class Entity:
         for item in self.equipment.values():
             for affix in item.affixes:
                 if affix.mod_type == "multiplier":
-                    final_stats_dict[affix.stat] *= affix.value
+                    # Assumes value is percentage (e.g., 0.2 for 20% increase)
+                    final_stats_dict[affix.stat_affected] *= (1 + affix.value)
 
         # 2. Apply all FLAT affixes second
         for item in self.equipment.values():
             for affix in item.affixes:
                 if affix.mod_type == "flat":
-                    final_stats_dict[affix.stat] += affix.value
+                    final_stats_dict[affix.stat_affected] += affix.value
 
         # Create new EntityStats object from modified dictionary
         final_stats = EntityStats(**final_stats_dict)
@@ -160,23 +161,22 @@ class Entity:
 
 
 @dataclass
-class Affix:
-    """Represents a single magical property on an item.
-
-    Based on GDD Sections 7.3 and 7.5.
-    """
-    stat: str  # e.g., "base_damage", "crit_chance", "armor"
-    mod_type: Literal["flat", "multiplier"]
+class RolledAffix:
+    affix_id: str
+    stat_affected: str
+    mod_type: Literal['flat', 'multiplier']
+    description: str
+    base_value: float
     value: float
 
 
 @dataclass
 class Item:
-    """Represents a piece of equipment.
-
-    Based on GDD Section 7.1.
-    """
-    id: str
+    instance_id: str
+    base_id: str
     name: str
-    slot: Literal["Head", "Chest", "Hands", "Feet", "Weapon", "OffHand", "Ring1", "Ring2", "Amulet", "Belt", "Shoulders", "Pants"]
-    affixes: List[Affix]
+    slot: str
+    rarity: str
+    quality_tier: str
+    quality_roll: int
+    affixes: List[RolledAffix] = field(default_factory=list)

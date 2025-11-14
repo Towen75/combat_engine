@@ -45,10 +45,18 @@
 - **Report Generator**: Performance metrics and balance analysis
 - **Balancing Tools**: Data-driven balance adjustment framework
 
+### Phase 5: Procedural Item Generator (Complete ✅)
+- **Item Generator**: Two-step quality rolls with sub-variation system
+- **Data Pipeline**: CSV-to-JSON parsing system for affixes, items, quality tiers
+- **Sub-Quality Variation**: Each affix rolls individually within item quality ceiling
+- **Content System**: 17 items × 9 affixes across all equipment slots and rarities
+- **Data-Driven Design**: Add new content without code changes
+- **Display Formatting**: Automatic percentage formatting for multiplier stats
+
 ### Code Review Fixes (Complete ✅)
 - **RNG Infrastructure**: Deterministic RNG injection throughout codebase
 - **Input Validation**: Bounds checking for pierce_ratio and other parameters
-- **Test Coverage**: 96 unit tests covering all critical paths and edge cases
+- **Test Coverage**: 93 unit tests covering all critical paths and edge cases
 - **Documentation**: Complete README.md and updated memory bank
 
 ### Post-Phase 4 (Future)

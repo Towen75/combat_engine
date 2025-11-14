@@ -1,4 +1,29 @@
-# [](https://github.com/Towen75/combat_engine/compare/v0.4.0...v) (2025-11-11)
+# [](https://github.com/Towen75/combat_engine/compare/v0.5.0...v) (2025-11-11)
+
+## [0.6.0] - 2025-11-14
+
+### Added
+- **Phase 5 Complete**: Procedural Item Generator system implementation
+  - **ItemGenerator**: Two-phase quality rolls with sub-quality variation preventing identical items
+  - **Data Pipeline**: CSV-to-JSON parsing system for affixes, items, and quality tiers
+  - **Sub-Quality Variation**: Each affix rolls 0-X% where X = item's quality ceiling for unique characteristics
+  - **Content Library**: 17 items × 9 affixes covering all equipment slots and rarities
+  - **Data-Driven Design**: Add new content without code changes using CSV files
+  - **Display Formatting**: Smart percentage formatting for multiplier stats (crits, pierce, resistance)
+
+### Technical Details
+- **Performance**: 93 unit tests with 100% pass rate, sub-millisecond item generation
+- **Architecture**: Data-driven item generation with quality ceilings preventing overpowered items
+- **Testing**: Comprehensive unit tests with RNG seeding for deterministic validation
+- **Extensibility**: CSV-based content system supporting unlimited item/affix additions
+- **Integration**: Full compatibility with existing Entity equipment system
+
+### Breaking Changes
+- **Item Model Update**: New Item dataclass with procedural generation mechanics
+- **Affix System Refactor**: RolledAffix replaces static Affix with rolled values
+- **Entity Integration**: Updated stat calculation for percentage-formatted multipliers
+
+## [0.5.0] - 2025-11-11
 
 
 

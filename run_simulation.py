@@ -13,6 +13,7 @@ from src.events import EventBus
 from src.engine import CombatEngine
 from src.effect_handlers import BleedHandler, PoisonHandler
 from src.simulation import SimulationRunner, ReportGenerator
+from src.item_generator import ItemGenerator
 
 
 def create_sample_entities() -> list[Entity]:
@@ -248,6 +249,23 @@ def main():
 
     # Save report
     save_report_to_file(report, args.output)
+
+    # Item generation demo
+    print("\n--- Item Generation Demo ---")
+    try:
+        with open('data/game_data.json', 'r') as f:
+            game_data = json.load(f)
+        item_gen = ItemGenerator(game_data)
+
+        # Generate a few random items
+        for base_id in ['base_iron_axe', 'base_gold_ring', 'base_leather_chest']:
+            item = item_gen.generate(base_id)
+            print(f"Generated: {item.name} (Quality: {item.quality_tier}, Rarity: {item.rarity})")
+            for affix in item.affixes:
+                print(f"  - {affix.description.replace('{value}', str(affix.value))}")
+
+    except Exception as e:
+        print(f"Item generation demo failed: {e}")
 
     print(f"\nSimulation complete! Report saved to {args.output}")
 

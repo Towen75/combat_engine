@@ -1,52 +1,52 @@
 {
   "damage_analysis": {
     "summary": {
-      "total_damage": 110.04,
+      "total_damage": 180.97,
       "total_hits": 14,
-      "total_crits": 0,
-      "overall_crit_rate": 0.0,
-      "avg_damage_per_hit": 7.86
+      "total_crits": 3,
+      "overall_crit_rate": 0.21428571428571427,
+      "avg_damage_per_hit": 12.926428571428572
     },
     "entity_breakdown": {
       "assassin": {
-        "total_damage": 19.8,
-        "damage_percentage": 17.993456924754632,
+        "total_damage": 82.6,
+        "damage_percentage": 45.642924241587004,
         "hits": 7,
-        "crits": 0,
-        "crit_rate": 0.0,
-        "avg_damage_per_hit": 2.8285714285714287,
-        "avg_crit_damage": 0,
-        "avg_normal_damage": 2.8285714285714287
+        "crits": 3,
+        "crit_rate": 0.42857142857142855,
+        "avg_damage_per_hit": 11.799999999999999,
+        "avg_crit_damage": 19.333333333333332,
+        "avg_normal_damage": 6.15
       },
       "warrior": {
-        "total_damage": 60.0,
-        "damage_percentage": 54.52562704471101,
+        "total_damage": 46.25,
+        "damage_percentage": 25.55672210863679,
         "hits": 3,
+        "crits": 0,
+        "crit_rate": 0.0,
+        "avg_damage_per_hit": 15.416666666666666,
+        "avg_crit_damage": 0,
+        "avg_normal_damage": 15.416666666666666
+      },
+      "mage": {
+        "total_damage": 40.0,
+        "damage_percentage": 22.10311101287506,
+        "hits": 2,
         "crits": 0,
         "crit_rate": 0.0,
         "avg_damage_per_hit": 20.0,
         "avg_crit_damage": 0,
         "avg_normal_damage": 20.0
       },
-      "mage": {
-        "total_damage": 30.0,
-        "damage_percentage": 27.262813522355504,
-        "hits": 2,
-        "crits": 0,
-        "crit_rate": 0.0,
-        "avg_damage_per_hit": 15.0,
-        "avg_crit_damage": 0,
-        "avg_normal_damage": 15.0
-      },
       "tank": {
-        "total_damage": 0.24,
-        "damage_percentage": 0.21810250817884402,
+        "total_damage": 12.12,
+        "damage_percentage": 6.6972426369011435,
         "hits": 2,
         "crits": 0,
         "crit_rate": 0.0,
-        "avg_damage_per_hit": 0.12,
+        "avg_damage_per_hit": 6.06,
         "avg_crit_damage": 0,
-        "avg_normal_damage": 0.12
+        "avg_normal_damage": 6.06
       }
     }
   },
@@ -60,18 +60,18 @@
     "entity_breakdown": {}
   },
   "performance_analysis": {
-    "simulation_duration": 0.0020020008087158203,
+    "simulation_duration": 0.0020029544830322266,
     "total_events": 14,
-    "events_per_second": 6993.004168155294,
+    "events_per_second": 6989.674562552077,
     "performance_rating": "Excellent"
   },
   "balance_insights": {
     "damage_distribution": {
       "distribution_type": "unbalanced",
-      "max_damage_percentage": 54.52562704471101,
-      "min_damage_percentage": 0.21810250817884402,
-      "variance": 385.0292666451814,
-      "range": 54.30752453653216
+      "max_damage_percentage": 45.642924241587004,
+      "min_damage_percentage": 6.6972426369011435,
+      "variance": 192.4557884115851,
+      "range": 38.94568160468586
     },
     "effect_balance": {
       "entities_with_effects": 0,
@@ -83,7 +83,7 @@
       "Effects are underutilized - consider increasing proc rates or effect triggers"
     ]
   },
-  "generated_at": 1762858553.979794,
+  "generated_at": 1763124029.6314027,
   "metadata": {
     "seed": 42,
     "duration": 5.0,

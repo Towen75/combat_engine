@@ -1,0 +1,612 @@
+{
+  "affixes": {
+    "flat_dmg": {
+      "affix_id": "flat_dmg",
+      "stat_affected": "base_damage",
+      "mod_type": "flat",
+      "affix_pools": [
+        "weapon_pool",
+        "axe_pool"
+      ],
+      "base_value": 50.0,
+      "description": "+{value} Base Damage"
+    },
+    "crit_dmg": {
+      "affix_id": "crit_dmg",
+      "stat_affected": "crit_damage",
+      "mod_type": "flat",
+      "affix_pools": [
+        "weapon_pool",
+        "jewelry_pool"
+      ],
+      "base_value": 0.5,
+      "description": "+{value}% Crit Damage"
+    },
+    "bleed_chance": {
+      "affix_id": "bleed_chance",
+      "stat_affected": "proc_rate_bleed",
+      "mod_type": "flat",
+      "affix_pools": [
+        "axe_pool",
+        "sword_pool"
+      ],
+      "base_value": 0.25,
+      "description": "{value}% chance to Bleed"
+    },
+    "flat_armor": {
+      "affix_id": "flat_armor",
+      "stat_affected": "armor",
+      "mod_type": "flat",
+      "affix_pools": [
+        "armor_pool"
+      ],
+      "base_value": 150.0,
+      "description": "+{value} Armor"
+    },
+    "attack_speed": {
+      "affix_id": "attack_speed",
+      "stat_affected": "attack_speed",
+      "mod_type": "multiplier",
+      "affix_pools": [
+        "weapon_pool"
+      ],
+      "base_value": 0.2,
+      "description": "+{value}% Attack Speed"
+    },
+    "health": {
+      "affix_id": "health",
+      "stat_affected": "max_health",
+      "mod_type": "flat",
+      "affix_pools": [
+        "armor_pool",
+        "jewelry_pool"
+      ],
+      "base_value": 100.0,
+      "description": "+{value} Health"
+    },
+    "crit_chance": {
+      "affix_id": "crit_chance",
+      "stat_affected": "crit_chance",
+      "mod_type": "flat",
+      "affix_pools": [
+        "jewelry_pool"
+      ],
+      "base_value": 0.1,
+      "description": "{value}% Critical Strike Chance"
+    },
+    "pierce_bonus": {
+      "affix_id": "pierce_bonus",
+      "stat_affected": "pierce_ratio",
+      "mod_type": "flat",
+      "affix_pools": [
+        "weapon_pool"
+      ],
+      "base_value": 0.08,
+      "description": "{value}% Pierce Ratio"
+    },
+    "resistance": {
+      "affix_id": "resistance",
+      "stat_affected": "resistances",
+      "mod_type": "flat",
+      "affix_pools": [
+        "armor_pool"
+      ],
+      "base_value": 0.15,
+      "description": "{value}% Elemental Resistances"
+    }
+  },
+  "items": {
+    "base_iron_axe": {
+      "item_id": "base_iron_axe",
+      "name": "Iron Axe",
+      "slot": "Weapon",
+      "rarity": "Rare",
+      "affix_pools": [
+        "weapon_pool",
+        "axe_pool"
+      ],
+      "implicit_affixes": [],
+      "num_random_affixes": 2
+    },
+    "base_gold_ring": {
+      "item_id": "base_gold_ring",
+      "name": "Gold Ring",
+      "slot": "Ring",
+      "rarity": "Legendary",
+      "affix_pools": [
+        "jewelry_pool"
+      ],
+      "implicit_affixes": [
+        "crit_dmg"
+      ],
+      "num_random_affixes": 3
+    },
+    "base_leather_chest": {
+      "item_id": "base_leather_chest",
+      "name": "Leather Tunic",
+      "slot": "Chest",
+      "rarity": "Common",
+      "affix_pools": [
+        "armor_pool"
+      ],
+      "implicit_affixes": [],
+      "num_random_affixes": 1
+    },
+    "base_steel_sword": {
+      "item_id": "base_steel_sword",
+      "name": "Steel Sword",
+      "slot": "Weapon",
+      "rarity": "Uncommon",
+      "affix_pools": [
+        "weapon_pool",
+        "sword_pool"
+      ],
+      "implicit_affixes": [],
+      "num_random_affixes": 2
+    },
+    "base_iron_helm": {
+      "item_id": "base_iron_helm",
+      "name": "Iron Helm",
+      "slot": "Head",
+      "rarity": "Epic",
+      "affix_pools": [
+        "armor_pool"
+      ],
+      "implicit_affixes": [],
+      "num_random_affixes": 2
+    },
+    "base_leather_gloves": {
+      "item_id": "base_leather_gloves",
+      "name": "Leather Gloves",
+      "slot": "Hands",
+      "rarity": "Rare",
+      "affix_pools": [
+        "armor_pool"
+      ],
+      "implicit_affixes": [],
+      "num_random_affixes": 1
+    },
+    "base_steel_boots": {
+      "item_id": "base_steel_boots",
+      "name": "Steel Boots",
+      "slot": "Feet",
+      "rarity": "Uncommon",
+      "affix_pools": [
+        "armor_pool"
+      ],
+      "implicit_affixes": [],
+      "num_random_affixes": 1
+    },
+    "base_wooden_shield": {
+      "item_id": "base_wooden_shield",
+      "name": "Wooden Shield",
+      "slot": "OffHand",
+      "rarity": "Common",
+      "affix_pools": [
+        "armor_pool"
+      ],
+      "implicit_affixes": [],
+      "num_random_affixes": 1
+    },
+    "base_silver_amulet": {
+      "item_id": "base_silver_amulet",
+      "name": "Silver Amulet",
+      "slot": "Amulet",
+      "rarity": "Mythic",
+      "affix_pools": [
+        "jewelry_pool"
+      ],
+      "implicit_affixes": [],
+      "num_random_affixes": 3
+    },
+    "base_leather_belt": {
+      "item_id": "base_leather_belt",
+      "name": "Leather Belt",
+      "slot": "Belt",
+      "rarity": "Epic",
+      "affix_pools": [
+        "armor_pool",
+        "jewelry_pool"
+      ],
+      "implicit_affixes": [],
+      "num_random_affixes": 2
+    },
+    "base_plate_shoulders": {
+      "item_id": "base_plate_shoulders",
+      "name": "Plate Shoulders",
+      "slot": "Shoulders",
+      "rarity": "Rare",
+      "affix_pools": [
+        "armor_pool"
+      ],
+      "implicit_affixes": [],
+      "num_random_affixes": 2
+    },
+    "base_cloth_pants": {
+      "item_id": "base_cloth_pants",
+      "name": "Cloth Pants",
+      "slot": "Pants",
+      "rarity": "Uncommon",
+      "affix_pools": [
+        "armor_pool"
+      ],
+      "implicit_affixes": [],
+      "num_random_affixes": 1
+    },
+    "base_onyx_ring": {
+      "item_id": "base_onyx_ring",
+      "name": "Onyx Ring",
+      "slot": "Ring",
+      "rarity": "Mythic",
+      "affix_pools": [
+        "jewelry_pool"
+      ],
+      "implicit_affixes": [],
+      "num_random_affixes": 3
+    },
+    "base_dragon_scale": {
+      "item_id": "base_dragon_scale",
+      "name": "Demon Scale",
+      "slot": "Chest",
+      "rarity": "Epic",
+      "affix_pools": [
+        "armor_pool",
+        "jewelry_pool"
+      ],
+      "implicit_affixes": [
+        "resistance"
+      ],
+      "num_random_affixes": 3
+    },
+    "base_mystic_staff": {
+      "item_id": "base_mystic_staff",
+      "name": "Mystic Staff",
+      "slot": "Weapon",
+      "rarity": "Legendary",
+      "affix_pools": [
+        "jewelry_pool",
+        "weapon_pool"
+      ],
+      "implicit_affixes": [
+        "attack_speed"
+      ],
+      "num_random_affixes": 3
+    },
+    "base_ancient_sword": {
+      "item_id": "base_ancient_sword",
+      "name": "Ancient Sword",
+      "slot": "Weapon",
+      "rarity": "Mythic",
+      "affix_pools": [
+        "weapon_pool",
+        "sword_pool"
+      ],
+      "implicit_affixes": [
+        "flat_dmg"
+      ],
+      "num_random_affixes": 3
+    },
+    "base_fire_staff": {
+      "item_id": "base_fire_staff",
+      "name": "Fire Staff",
+      "slot": "Weapon",
+      "rarity": "Epic",
+      "affix_pools": [
+        "jewelry_pool",
+        "weapon_pool"
+      ],
+      "implicit_affixes": [
+        "attack_speed"
+      ],
+      "num_random_affixes": 2
+    }
+  },
+  "quality_tiers": [
+    {
+      "quality_id": 1,
+      "tier_name": "Awful",
+      "min_range": 0,
+      "max_range": 5,
+      "Normal": 35,
+      "Common": 15,
+      "Unusual": 5,
+      "Uncommon": 0,
+      "Rare": 0,
+      "Exotic": 0,
+      "Epic": 0,
+      "Glorious": 0,
+      "Exalted": 0,
+      "Legendary": 0,
+      "Mythic": 0,
+      "Godly": 0
+    },
+    {
+      "quality_id": 2,
+      "tier_name": "Dull",
+      "min_range": 6,
+      "max_range": 10,
+      "Normal": 30,
+      "Common": 20,
+      "Unusual": 10,
+      "Uncommon": 5,
+      "Rare": 0,
+      "Exotic": 0,
+      "Epic": 0,
+      "Glorious": 0,
+      "Exalted": 0,
+      "Legendary": 0,
+      "Mythic": 0,
+      "Godly": 0
+    },
+    {
+      "quality_id": 3,
+      "tier_name": "Mundane",
+      "min_range": 11,
+      "max_range": 15,
+      "Normal": 40,
+      "Common": 30,
+      "Unusual": 20,
+      "Uncommon": 10,
+      "Rare": 5,
+      "Exotic": 0,
+      "Epic": 0,
+      "Glorious": 0,
+      "Exalted": 0,
+      "Legendary": 0,
+      "Mythic": 0,
+      "Godly": 0
+    },
+    {
+      "quality_id": 4,
+      "tier_name": "Decent",
+      "min_range": 16,
+      "max_range": 20,
+      "Normal": 30,
+      "Common": 40,
+      "Unusual": 30,
+      "Uncommon": 20,
+      "Rare": 10,
+      "Exotic": 5,
+      "Epic": 0,
+      "Glorious": 0,
+      "Exalted": 0,
+      "Legendary": 0,
+      "Mythic": 0,
+      "Godly": 0
+    },
+    {
+      "quality_id": 5,
+      "tier_name": "Fine",
+      "min_range": 21,
+      "max_range": 25,
+      "Normal": 20,
+      "Common": 30,
+      "Unusual": 40,
+      "Uncommon": 30,
+      "Rare": 20,
+      "Exotic": 10,
+      "Epic": 0,
+      "Glorious": 0,
+      "Exalted": 0,
+      "Legendary": 0,
+      "Mythic": 0,
+      "Godly": 0
+    },
+    {
+      "quality_id": 6,
+      "tier_name": "Good",
+      "min_range": 26,
+      "max_range": 30,
+      "Normal": 10,
+      "Common": 20,
+      "Unusual": 30,
+      "Uncommon": 40,
+      "Rare": 30,
+      "Exotic": 20,
+      "Epic": 5,
+      "Glorious": 0,
+      "Exalted": 0,
+      "Legendary": 0,
+      "Mythic": 0,
+      "Godly": 0
+    },
+    {
+      "quality_id": 7,
+      "tier_name": "Great",
+      "min_range": 31,
+      "max_range": 35,
+      "Normal": 5,
+      "Common": 10,
+      "Unusual": 20,
+      "Uncommon": 30,
+      "Rare": 40,
+      "Exotic": 30,
+      "Epic": 10,
+      "Glorious": 5,
+      "Exalted": 0,
+      "Legendary": 0,
+      "Mythic": 0,
+      "Godly": 0
+    },
+    {
+      "quality_id": 8,
+      "tier_name": "Excellent",
+      "min_range": 36,
+      "max_range": 40,
+      "Normal": 0,
+      "Common": 5,
+      "Unusual": 10,
+      "Uncommon": 20,
+      "Rare": 30,
+      "Exotic": 40,
+      "Epic": 20,
+      "Glorious": 10,
+      "Exalted": 5,
+      "Legendary": 0,
+      "Mythic": 0,
+      "Godly": 0
+    },
+    {
+      "quality_id": 9,
+      "tier_name": "Superior",
+      "min_range": 41,
+      "max_range": 45,
+      "Normal": 0,
+      "Common": 0,
+      "Unusual": 5,
+      "Uncommon": 10,
+      "Rare": 20,
+      "Exotic": 30,
+      "Epic": 30,
+      "Glorious": 20,
+      "Exalted": 10,
+      "Legendary": 5,
+      "Mythic": 0,
+      "Godly": 0
+    },
+    {
+      "quality_id": 10,
+      "tier_name": "Powerful",
+      "min_range": 46,
+      "max_range": 50,
+      "Normal": 0,
+      "Common": 0,
+      "Unusual": 0,
+      "Uncommon": 5,
+      "Rare": 10,
+      "Exotic": 20,
+      "Epic": 40,
+      "Glorious": 30,
+      "Exalted": 20,
+      "Legendary": 10,
+      "Mythic": 5,
+      "Godly": 0
+    },
+    {
+      "quality_id": 11,
+      "tier_name": "Remarkable",
+      "min_range": 51,
+      "max_range": 55,
+      "Normal": 0,
+      "Common": 0,
+      "Unusual": 0,
+      "Uncommon": 0,
+      "Rare": 5,
+      "Exotic": 10,
+      "Epic": 30,
+      "Glorious": 40,
+      "Exalted": 30,
+      "Legendary": 20,
+      "Mythic": 10,
+      "Godly": 5
+    },
+    {
+      "quality_id": 12,
+      "tier_name": "Extraordinary",
+      "min_range": 56,
+      "max_range": 60,
+      "Normal": 0,
+      "Common": 0,
+      "Unusual": 0,
+      "Uncommon": 0,
+      "Rare": 0,
+      "Exotic": 5,
+      "Epic": 20,
+      "Glorious": 30,
+      "Exalted": 40,
+      "Legendary": 30,
+      "Mythic": 20,
+      "Godly": 10
+    },
+    {
+      "quality_id": 13,
+      "tier_name": "Exceptional",
+      "min_range": 61,
+      "max_range": 65,
+      "Normal": 0,
+      "Common": 0,
+      "Unusual": 0,
+      "Uncommon": 0,
+      "Rare": 0,
+      "Exotic": 0,
+      "Epic": 10,
+      "Glorious": 20,
+      "Exalted": 30,
+      "Legendary": 40,
+      "Mythic": 30,
+      "Godly": 20
+    },
+    {
+      "quality_id": 14,
+      "tier_name": "Magnificent",
+      "min_range": 66,
+      "max_range": 70,
+      "Normal": 0,
+      "Common": 0,
+      "Unusual": 0,
+      "Uncommon": 0,
+      "Rare": 0,
+      "Exotic": 0,
+      "Epic": 5,
+      "Glorious": 10,
+      "Exalted": 20,
+      "Legendary": 30,
+      "Mythic": 40,
+      "Godly": 30
+    },
+    {
+      "quality_id": 15,
+      "tier_name": "Brilliant",
+      "min_range": 71,
+      "max_range": 75,
+      "Normal": 0,
+      "Common": 0,
+      "Unusual": 0,
+      "Uncommon": 0,
+      "Rare": 0,
+      "Exotic": 0,
+      "Epic": 0,
+      "Glorious": 5,
+      "Exalted": 10,
+      "Legendary": 20,
+      "Mythic": 30,
+      "Godly": 40
+    },
+    {
+      "quality_id": 16,
+      "tier_name": "Masterful",
+      "min_range": 76,
+      "max_range": 85,
+      "Normal": 0,
+      "Common": 0,
+      "Unusual": 0,
+      "Uncommon": 0,
+      "Rare": 0,
+      "Exotic": 0,
+      "Epic": 0,
+      "Glorious": 0,
+      "Exalted": 5,
+      "Legendary": 10,
+      "Mythic": 20,
+      "Godly": 30
+    },
+    {
+      "quality_id": 17,
+      "tier_name": "Perfect",
+      "min_range": 91,
+      "max_range": 100,
+      "Normal": 0,
+      "Common": 0,
+      "Unusual": 0,
+      "Uncommon": 0,
+      "Rare": 0,
+      "Exotic": 0,
+      "Epic": 0,
+      "Glorious": 0,
+      "Exalted": 0,
+      "Legendary": 5,
+      "Mythic": 15,
+      "Godly": 35
+    }
+  ]
+}
