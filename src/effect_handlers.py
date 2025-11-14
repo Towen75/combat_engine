@@ -4,6 +4,38 @@ import random
 from abc import ABC, abstractmethod
 from .events import EventBus, OnHitEvent
 from .state import StateManager
+from .models import DamageOnHitConfig
+
+
+# Effect Configuration Constants - can be moved to data files in future
+BLEED_CONFIG = DamageOnHitConfig(
+    debuff_name="Bleed",
+    proc_rate=0.5,
+    duration=5.0,
+    damage_per_tick=2.5,  # Example: 2.5 damage per stack per tick
+    stacks_to_add=1,
+    display_message="Bleed proc'd on {target}!"
+)
+
+POISON_CONFIG = DamageOnHitConfig(
+    debuff_name="Poison",
+    proc_rate=0.33,
+    duration=8.0,
+    damage_per_tick=1.5,  # Example: 1.5 damage per stack per tick
+    stacks_to_add=1,
+    display_message="Poison proc'd on {target}!"
+)
+
+
+# Legacy Handler Functions - for backward compatibility during transition
+def create_bleed_handler(event_bus, state_manager, rng=None):
+    """Create a BleedHandler using the generic DamageOnHitHandler."""
+    return DamageOnHitHandler(BLEED_CONFIG, event_bus, state_manager, rng)
+
+
+def create_poison_handler(event_bus, state_manager, rng=None):
+    """Create a PoisonHandler using the generic DamageOnHitHandler."""
+    return DamageOnHitHandler(POISON_CONFIG, event_bus, state_manager, rng)
 
 
 class EffectHandler(ABC):
@@ -30,6 +62,56 @@ class EffectHandler(ABC):
     def setup_subscriptions(self):
         """Set up event subscriptions. Must be implemented by subclasses."""
         pass
+
+
+class DamageOnHitHandler(EffectHandler):
+    """Generic handler for damage-over-time effects applied on hit events.
+
+    Configured via DamageOnHitConfig for data-driven effect creation.
+    Enables adding new DoT effects without code changes.
+    """
+
+    def __init__(self, config: DamageOnHitConfig, event_bus: EventBus, state_manager: StateManager, rng=None):
+        """Initialize the generic damage-on-hit handler.
+
+        Args:
+            config: Configuration for this effect (name, proc_rate, duration, etc.)
+            event_bus: The event bus to subscribe to
+            state_manager: The state manager for applying effects
+            rng: Random number generator for deterministic testing. If None,
+                 uses random.random() without seeding.
+        """
+        super().__init__(event_bus, state_manager, rng)
+        self.config = config
+        self.setup_subscriptions()
+
+    def setup_subscriptions(self):
+        """Set up event subscriptions for this effect."""
+        self.event_bus.subscribe(OnHitEvent, self.handle_on_hit)
+
+    def handle_on_hit(self, event: OnHitEvent) -> None:
+        """Handle an OnHitEvent by potentially applying the configured effect.
+
+        Args:
+            event: The hit event that occurred
+        """
+        rng_value = self.rng.random() if self.rng else random.random()
+        if rng_value < self.config.proc_rate:
+            # Display message if configured
+            if self.config.display_message:
+                target_name = getattr(event.defender, 'name', event.defender.id)
+                message = self.config.display_message.format(target=target_name)
+                print(f"    -> {message}")
+            else:
+                # Default message format
+                print(f"    -> {self.config.debuff_name} proc'd on {event.defender.id}!")
+
+            self.state_manager.add_or_refresh_debuff(
+                entity_id=event.defender.id,
+                debuff_name=self.config.debuff_name,
+                stacks_to_add=self.config.stacks_to_add,
+                duration=self.config.duration
+            )
 
 
 class BleedHandler(EffectHandler):

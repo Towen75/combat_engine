@@ -2,7 +2,7 @@
 """Phase 3 Integration Test - Items, Skills, and Equipment."""
 
 import random
-from src.models import Entity, EntityStats, Affix, Item
+from src.models import Entity, EntityStats, RolledAffix, Item
 from src.skills import Skill, Trigger
 from src.events import EventBus
 from src.state import StateManager

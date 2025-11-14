@@ -397,3 +397,169 @@ class TestHitContext:
         assert ctx.is_crit is False
         # Should be: max(100-30, 100*0.01) = max(70, 1) = 70
         assert ctx.final_damage == 70.0
+
+
+class TestCombatEngineCalculateSkillUse:
+    """Test the new calculate_skill_use method that returns SkillUseResult."""
+
+    def test_calculate_skill_use_basic_skill(self):
+        """Test calculate_skill_use with a basic single-hit skill."""
+        from tests.fixtures import make_entity, make_rng
+        from src.models import SkillUseResult
+
+        attacker = make_entity("attacker")
+        defender = make_entity("defender")
+
+        # Create a simple skill with 1 hit and no triggers
+        skill = type('Skill', (), {
+            'hits': 1,
+            'name': 'basic_attack',
+            'triggers': []
+        })()
+
+        engine = CombatEngine(rng=make_rng(42))  # Deterministic for testing
+        result = engine.calculate_skill_use(attacker, defender, skill)
+
+        # Should return a SkillUseResult with 1 hit and 3 actions (damage + hit event + possible crit event)
+        assert isinstance(result, SkillUseResult)
+        assert len(result.hit_results) == 1
+
+        # Actions: ApplyDamageAction + DispatchEventAction (OnHitEvent)
+        # Since this is not a crit (default crit_chance=0.05), no crit event
+        assert len(result.actions) == 2
+
+        # First action should be damage application
+        from src.models import ApplyDamageAction, DispatchEventAction
+        damage_action = result.actions[0]
+        assert isinstance(damage_action, ApplyDamageAction)
+        assert damage_action.target_id == defender.id
+        assert damage_action.damage == 50.0  # Default base_damage from fixtures
+        assert damage_action.source == "basic_attack"
+
+        # Second action should be OnHit event dispatch
+        event_action = result.actions[1]
+        assert isinstance(event_action, DispatchEventAction)
+        assert hasattr(event_action, 'event')
+        assert event_action.event.attacker == attacker
+        assert event_action.event.defender == defender
+
+    def test_calculate_skill_use_multi_hit_skill(self):
+        """Test calculate_skill_use with a multi-hit skill."""
+        from tests.fixtures import make_entity, make_rng
+
+        attacker = make_entity("attacker")
+        defender = make_entity("defender")
+
+        # Create a skill with 3 hits
+        skill = type('Skill', (), {
+            'hits': 3,
+            'name': 'triple_slash',
+            'triggers': []
+        })()
+
+        engine = CombatEngine(rng=make_rng(42))
+        result = engine.calculate_skill_use(attacker, defender, skill)
+
+        assert len(result.hit_results) == 3
+        # Each hit: 1 damage action + 1-2 event actions = 6-9 total actions
+        assert len(result.actions) >= 6  # Minimum without crits
+
+        # Verify hit contexts
+        for hit_ctx in result.hit_results:
+            assert hit_ctx.attacker == attacker
+            assert hit_ctx.defender == defender
+            assert hit_ctx.base_damage == 100.0  # Default base_damage from fixtures
+
+    def test_calculate_skill_use_with_crit(self):
+        """Test calculate_skill_use with guaranteed critical hit."""
+        from tests.fixtures import make_entity, make_rng
+
+        # Create attacker with guaranteed crit (Rare for tier 2 crits)
+        attacker = make_entity("attacker", base_damage=50.0, crit_chance=1.0, crit_damage=2.0, rarity="Rare")
+        defender = make_entity("defender")
+
+        skill = type('Skill', (), {
+            'hits': 1,
+            'name': 'crit_attack',
+            'triggers': []
+        })()
+
+        engine = CombatEngine(rng=make_rng(42))  # Deterministic crit
+        result = engine.calculate_skill_use(attacker, defender, skill)
+
+        assert len(result.hit_results) == 1
+        hit_ctx = result.hit_results[0]
+        assert hit_ctx.is_crit is True
+        # Rare = tier 2 crit: pre-pierce multiplier
+        # Base damage: 50 * crit(2.0) = 100, minus defender armor(50) = 50, max with pierced(1)
+        assert hit_ctx.final_damage == 50.0
+
+        # Actions: 1 damage + 2 events (OnHit + OnCrit)
+        assert len(result.actions) == 3
+
+    def test_calculate_skill_use_with_trigger(self):
+        """Test calculate_skill_use with a skill trigger."""
+        from tests.fixtures import make_entity, make_rng
+        from src.models import ApplyEffectAction
+
+        attacker = make_entity("attacker")
+        defender = make_entity("defender")
+
+        # Create a skill with 1 hit and 1 trigger (OnHit apply bleed)
+        # The engine expects triggers to be objects with attributes, not dicts
+        trigger_obj = type('Trigger', (), {
+            'event': 'OnHit',
+            'check': {'proc_rate': 1.0},  # Guaranteed to trigger for testing
+            'result': {'apply_debuff': 'bleed', 'stacks': 2}  # This matches what engine expects
+        })()
+
+        skill = type('Skill', (), {
+            'hits': 1,
+            'name': 'bleed_attack',
+            'triggers': [trigger_obj]
+        })()
+
+        engine = CombatEngine(rng=make_rng(42))
+        result = engine.calculate_skill_use(attacker, defender, skill)
+
+        assert len(result.hit_results) == 1
+        # Actions: 1 damage + 1 OnHit event + 1 ApplyEffect
+        assert len(result.actions) == 3
+
+        # Last action should be the effect application
+        effect_action = result.actions[2]
+        assert isinstance(effect_action, ApplyEffectAction)
+        assert effect_action.target_id == defender.id
+        assert effect_action.effect_name == "bleed"
+        assert effect_action.stacks_to_add == 2
+        assert effect_action.source == "bleed_attack_trigger"
+
+    def test_calculate_skill_use_detached_from_execution(self):
+        """Test that calculate_skill_use performs no side effects."""
+        from tests.fixtures import make_entity, make_rng
+        from unittest.mock import patch, MagicMock
+
+        attacker = make_entity("attacker")
+        defender = make_entity("defender")
+
+        skill = type('Skill', (), {
+            'hits': 1,
+            'name': 'test_skill',
+            'triggers': []
+        })()
+
+        # Mock StateManager and EventBus to ensure they're not called
+        with patch('src.engine.StateManager') as mock_state_manager, \
+             patch('src.engine.EventBus') as mock_event_bus:
+
+            engine = CombatEngine(rng=make_rng(42))
+            result = engine.calculate_skill_use(attacker, defender, skill)
+
+            # Verify no methods were called on the mocks during calculation
+            mock_state_manager.assert_not_called()
+            mock_event_bus.assert_not_called()
+
+        # Verify result is still valid (don't perform isinstance check on mock objects)
+        assert hasattr(result, 'hit_results') and hasattr(result, 'actions')
+        assert len(result.hit_results) == 1
+        assert len(result.actions) >= 2  # At least damage and event actions

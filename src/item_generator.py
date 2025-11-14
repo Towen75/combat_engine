@@ -1,6 +1,7 @@
 import random
 import uuid
 from src.models import Item, RolledAffix
+from src.game_data_provider import GameDataProvider
 
 
 class ItemGenerator:
@@ -9,16 +10,25 @@ class ItemGenerator:
     Uses a two-step quality roll system: first tier based on rarity, then percentage within tier.
     """
 
-    def __init__(self, game_data: dict):
+    def __init__(self, game_data: dict = None):
         """
         Initialize with parsed game data.
 
         Args:
-            game_data: Dictionary from game_data.json with affixes, items, quality_tiers
+            game_data: Optional dictionary from game_data.json with affixes, items, quality_tiers.
+                      If None, data will be loaded from GameDataProvider.
         """
-        self.affix_defs = game_data['affixes']
-        self.item_templates = game_data['items']
-        self.quality_tiers = game_data['quality_tiers']
+        if game_data is not None:
+            # Legacy support - use provided data
+            self.affix_defs = game_data['affixes']
+            self.item_templates = game_data['items']
+            self.quality_tiers = game_data['quality_tiers']
+        else:
+            # Use centralized provider
+            provider = GameDataProvider()
+            self.affix_defs = provider.get_affixes()
+            self.item_templates = provider.get_items()
+            self.quality_tiers = provider.get_quality_tiers()
 
     def generate(self, base_item_id: str) -> Item:
         """

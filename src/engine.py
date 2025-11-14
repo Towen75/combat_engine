@@ -2,8 +2,8 @@
 
 import random
 from dataclasses import dataclass
-from typing import Optional
-from .models import Entity
+from typing import Optional, List
+from .models import Entity, SkillUseResult, ApplyDamageAction, DispatchEventAction, ApplyEffectAction, Action
 from .skills import Skill
 from .events import EventBus, OnHitEvent, OnCritEvent
 from .state import StateManager
@@ -175,6 +175,64 @@ class CombatEngine:
 
             # Update final damage directly based on new calculation
             ctx.final_damage = max(0, max(pre_pierce_damage, pierced_damage))
+
+    def calculate_skill_use(self, attacker: Entity, defender: Entity, skill: Skill) -> SkillUseResult:
+        """Calculate the results of a skill use without executing actions.
+
+        Pure function that computes all hit contexts and intended actions.
+        Separates calculation from execution for architectural purity.
+
+        Args:
+            attacker: The entity using the skill
+            defender: The target of the skill
+            skill: The skill being used
+
+        Returns:
+            SkillUseResult containing calculated hit contexts and actions to execute
+        """
+        hit_results: List[HitContext] = []
+        actions: List[Action] = []
+
+        for _ in range(skill.hits):
+            # 1. Resolve the damage for a single hit
+            hit_context = self.resolve_hit(attacker, defender)
+            hit_results.append(hit_context)
+            damage = hit_context.final_damage
+
+            # 2. Create actions for damage application and event dispatching
+            actions.append(ApplyDamageAction(
+                target_id=defender.id,
+                damage=damage,
+                source=f"{skill.name}"
+            ))
+
+            hit_event = OnHitEvent(
+                attacker=attacker,
+                defender=defender,
+                damage_dealt=damage,
+                is_crit=hit_context.is_crit
+            )
+            actions.append(DispatchEventAction(event=hit_event))
+
+            if hit_context.is_crit:
+                crit_event = OnCritEvent(hit_event=hit_event)
+                actions.append(DispatchEventAction(event=crit_event))
+
+            # 3. Process Skill-Specific Triggers (create effect actions)
+            for trigger in skill.triggers:
+                if trigger.event == "OnHit":
+                    # Calculate if trigger would proc (but don't execute randomness yet)
+                    # For now, we create the action assuming it will proc - execution will check RNG
+                    # TODO: Pre-calculate proc results for true determinism if needed
+                    if "apply_debuff" in trigger.result:
+                        actions.append(ApplyEffectAction(
+                            target_id=defender.id,
+                            effect_name=trigger.result["apply_debuff"],
+                            stacks_to_add=trigger.result.get("stacks", 1),
+                            source=f"{skill.name}_trigger"
+                        ))
+
+        return SkillUseResult(hit_results=hit_results, actions=actions)
 
     def process_skill_use(self, attacker: Entity, defender: Entity, skill: Skill, event_bus: EventBus, state_manager: StateManager):
         """Process a full skill use, including all hits and triggers.

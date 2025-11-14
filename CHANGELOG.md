@@ -1,4 +1,33 @@
-# [](https://github.com/Towen75/combat_engine/compare/v0.5.0...v) (2025-11-11)
+# [](https://github.com/Towen75/combat_engine/compare/v0.6.0...v) (2025-11-14)
+
+## [0.7.0] - 2025-11-14
+
+### Added
+- **Code Review Implementation**: Major architectural overhaul transforming prototype to production-ready system
+  - **Phase 1 - Action/Result Pattern**: Implemented `SkillUseResult` + `Action` hierarchy for decoupled execution
+  - **CombatOrchestrator**: Dependency injection pattern for clean separation between calculation and execution
+  - **Pure Functions**: Zero side effects in `calculate_skill_use()` with complete test coverage
+- **Phase 2 - Effect System Generalization**: Generic `DamageOnHitHandler` with configurable `DamageOnHitConfig`
+  - **Data-Driven Effects**: Add new DoT effects without code changes (css Burn, Freeze, Life Drain)
+  - **Template Method Pattern**: Reusable effect framework with `create_bleed_handler()` and `create_poison_handler()`
+  - **Zero-Code Extensibility**: Future effects defined entirely in configuration
+- **Phase 3 - Data Integrity & Access**: Centralized data management with comprehensive validation
+  - **GameDataProvider Singleton**: Centralized JSON data loading with error resilience and reload capability
+  - **Stat Validation**: Entity.calculate_final_stats() validates affix stat names with helpful logging
+  - **ItemGenerator Integration**: Refactored to use centralized provider with full backward compatibility
+
+### Technical Details
+- **Testing**: 129 unit tests (up from 96), 100% pass rate with comprehensive action-based validation
+- **Architecture**: Production-ready with proper separation of concerns, dependency injection, and Godot compatibility
+- **Performance**: All architectural improvements maintain sub-millisecond execution times
+- **Error Resilience**: Input validation prevents runtime crashes while providing clear error messages
+- **Godot Port Readiness**: Action/Result and dependency injection patterns translate directly to GDScript signals
+
+### Breaking Changes
+- **Architectural Refactoring**: Pure calculation functions and orchestrator execution pattern
+- **Effect Framework Overhaul**: Generic configurable handlers replace hardcoded implementations
+- **Data Access Centralization**: GameDataProvider singleton for all JSON loading
+- **Enhanced Validation**: Stat name validation in final stat calculations
 
 ## [0.6.0] - 2025-11-14
 

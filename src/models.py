@@ -1,7 +1,11 @@
 """Data models for combat entities and their statistics."""
 
 from dataclasses import dataclass, field
-from typing import Optional, List, Literal, Dict
+from typing import Optional, List, Literal, Dict, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .engine import HitContext
+    from .events import Event
 
 # Rarity to critical hit tier mapping
 RARITY_TO_CRIT_TIER = {
@@ -113,7 +117,7 @@ class Entity:
         """Calculate the final stats by applying equipment modifiers.
 
         Order of operations: Multipliers first, then flats (revised from GDD 2.1).
-        Validates that final stats meet minimum requirements.
+        Validates that final stats meet minimum requirements and validates affix stat names.
 
         Returns:
             EntityStats with final calculated values
@@ -121,10 +125,16 @@ class Entity:
         # Start with a copy of the base stats
         final_stats_dict = self.base_stats.__dict__.copy()
 
+        # Get valid stat names for validation
+        valid_stat_names = set(final_stats_dict.keys())
+
         # 1. Apply all MULTIPLIER affixes first
         for item in self.equipment.values():
             for affix in item.affixes:
                 if affix.mod_type == "multiplier":
+                    if affix.stat_affected not in valid_stat_names:
+                        print(f"WARNING: Invalid stat name '{affix.stat_affected}' in affix '{affix.affix_id}'. Valid stats: {sorted(valid_stat_names)}")
+                        continue  # Skip invalid affix rather than crash
                     # Assumes value is percentage (e.g., 0.2 for 20% increase)
                     final_stats_dict[affix.stat_affected] *= (1 + affix.value)
 
@@ -132,6 +142,9 @@ class Entity:
         for item in self.equipment.values():
             for affix in item.affixes:
                 if affix.mod_type == "flat":
+                    if affix.stat_affected not in valid_stat_names:
+                        print(f"WARNING: Invalid stat name '{affix.stat_affected}' in affix '{affix.affix_id}'. Valid stats: {sorted(valid_stat_names)}")
+                        continue  # Skip invalid affix rather than crash
                     final_stats_dict[affix.stat_affected] += affix.value
 
         # Create new EntityStats object from modified dictionary
@@ -180,3 +193,78 @@ class Item:
     quality_tier: str
     quality_roll: int
     affixes: List[RolledAffix] = field(default_factory=list)
+
+
+# Effect Configuration and Handler Data
+
+@dataclass
+class DamageOnHitConfig:
+    """Configuration for damage-over-time effects applied on hit.
+
+    Supports future data-driven configuration from effects.csv file.
+    Enables adding new DoT effects without code changes.
+    """
+    debuff_name: str
+    proc_rate: float
+    duration: float
+    damage_per_tick: float
+    stacks_to_add: int = 1
+    display_message: str = ""  # e.g., "Bleed proc'd on {target}!"
+
+
+# Combat Engine Result Objects
+
+@dataclass
+class SkillUseResult:
+    """Result container for skill use calculations.
+
+    Separates damage calculations from action execution for architectural purity.
+    Godot-friendly structure that translates well to signal/event systems.
+    """
+    hit_results: List["HitContext"]  # Calculated hits from multi-hit skills
+    actions: List["Action"]         # Actions to execute (damage, events, effects)
+
+
+# Action Classes for Decoupled Execution
+
+@dataclass
+class Action:
+    """Base class for executable actions after skill calculation."""
+    pass
+
+
+@dataclass
+class ApplyDamageAction(Action):
+    """Action to apply calculated damage to a target."""
+    target_id: str
+    damage: float
+    source: str = "skill"  # For tracking damage source
+
+
+@dataclass
+class DispatchEventAction(Action):
+    """Action to dispatch an event via the EventBus."""
+    event: "Event"  # The event instance to dispatch
+
+
+@dataclass
+class ApplyEffectAction(Action):
+    """Action to apply a status effect to a target."""
+    target_id: str
+    effect_name: str
+    stacks_to_add: int = 1
+    source: str = "skill"  # For tracking effect source
+
+
+# Forward reference for Action subclasses
+# This will be resolved when imported in the engine
+ApplyDamageAction.__annotations__["target_id"] = str
+ApplyDamageAction.__annotations__["damage"] = float
+ApplyDamageAction.__annotations__["source"] = str
+
+DispatchEventAction.__annotations__["event"] = str  # Simplified for forward reference
+
+ApplyEffectAction.__annotations__["target_id"] = str
+ApplyEffectAction.__annotations__["effect_name"] = str
+ApplyEffectAction.__annotations__["stacks_to_add"] = int
+ApplyEffectAction.__annotations__["source"] = str

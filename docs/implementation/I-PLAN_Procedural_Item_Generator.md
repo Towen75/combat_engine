@@ -13,8 +13,6 @@ To integrate the `ItemGenerator` service, several existing modules will need to 
 2.  **`src/engine.py` / `src/combat.py`**: These files likely contain the core combat logic.
     *   The functions that calculate combat outcomes (e.g., damage dealt, effects applied) will need to be modified to read stat modifiers from the new `Item` objects equipped by an entity. Currently, stats are likely read directly from a character's base stats. The new system will require iterating through an entity's equipped items and applying the `affixes` from each.
 
-3.  **`src/simulation.py` / `run_simulation.py`**: These files manage the high-level simulation flow.
-    *   This is the logical place to integrate the item generation. For example, after a combat encounter, the simulation could call the `ItemGenerator` to create loot drops. This will involve initializing the `ItemGenerator` with the parsed game data and calling its `generate()` method.
 
 ### **Part 2: Step-by-Step Implementation Plan**
 

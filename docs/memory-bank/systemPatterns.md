@@ -47,30 +47,55 @@ The Combat Engine follows a modular, layered architecture designed for maintaina
 
 ## Design Patterns in Use
 
-### Observer Pattern (Event System)
+### COMMAND PATTERN (Code Review Implementation - Action/Result System)
+- **Context**: Combat calculations and execution need complete separation for testing and Godot compatibility
+- **Implementation**: SkillUseResult + Action hierarchy (ApplyDamageAction, DispatchEventAction, ApplyEffectAction)
+- **Benefits**: Zero side effects in calculation, decoupled execution via CombatOrchestrator
+- **Godot Fit**: Direct mapping to Godot's signal/event system
+
+### SINGLETON PATTERN (Code Review Implementation - GameDataProvider)
+- **Context**: Centralized data access for all JSON game data across the application
+- **Implementation**: GameDataProvider singleton with error resilience and reload capabilities
+- **Benefits**: Efficient memory usage, consistent data access, graceful failure handling
+- **Methods**: get_affixes(), get_items(), get_quality_tiers() for specific sections
+
+### TEMPLATE METHOD PATTERN (Code Review Implementation - Generic Effect Framework)
+- **Context**: All DoT effects share common application logic but have different configurations
+- **Implementation**: DamageOnHitHandler provides template, DamageOnHitConfig provides data variation
+- **Benefits**: Zero code changes needed for new effects, comprehensive validation and error handling
+
+### DEPENDENCY INJECTION PATTERN (Code Review Implementation - Orchestrator Architecture)
+- **Context**: Combat execution depends on external services (StateManager, EventBus) for testability
+- **Implementation**: CombatOrchestrator constructor injects all dependencies
+- **Benefits**: Complete test isolation, Godot scene node integration support
+
+### OBSERVER PATTERN (Original Implementation - Event System)
 - **Context**: Combat events need to trigger multiple independent systems
 - **Implementation**: EventBus manages subscriptions, EffectHandlers listen for relevant events
 - **Benefits**: Loose coupling between damage calculation and effect application
+- **Enhanced**: Now integrates seamlessly with new Action/Result pattern
 
-### Component Pattern (Entity Composition)
+### COMPONENT PATTERN (Original Implementation - Entity Composition)
 - **Context**: Characters and items have variable combinations of stats and effects
 - **Implementation**: Entity base class with modular stat components and equipment slots
 - **Benefits**: Flexible character/item building without inheritance hierarchies
+- **Enhanced**: Added stat validation to prevent invalid affix configurations
 
-### State Pattern (Entity States)
+### STATE PATTERN (Original Implementation - Entity States)
 - **Context**: Entities have different states (healthy, stunned, buffed) affecting behavior
 - **Implementation**: StateManager tracks current stats, active effects, and state transitions
 - **Benefits**: Clean handling of temporary modifications and effect stacking
 
-### Factory Pattern (Object Creation)
+### FACTORY PATTERN (Enhanced - Object Creation with Validation)
 - **Context**: Complex object creation with validation and initialization
-- **Implementation**: Factories for characters, items, and skills with data validation
-- **Benefits**: Centralized object creation logic and error handling
+- **Implementation**: ItemGenerator refactored to use GameDataProvider, all creation includes comprehensive validation
+- **Benefits**: Centralized object creation logic and error handling, data integrity guaranteed
 
-### Strategy Pattern (Damage Calculation)
+### STRATEGY PATTERN (Original Implementation - Damage Calculation)
 - **Context**: Different damage calculation strategies based on crit tiers and effect types
 - **Implementation**: CombatEngine uses strategy objects for different calculation paths
 - **Benefits**: Extensible damage formulas without modifying core logic
+- **Enhanced**: Now pure functions within Action/Result architecture
 
 ## Component Relationships
 
