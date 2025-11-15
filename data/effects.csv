@@ -1,0 +1,18 @@
+effect_id,name,type,description,max_stacks,tick_rate,damage_per_tick,stat_multiplier,stat_add,visual_effect,duration
+bleed,Bleeding DoT,debuff,"Bleeding wound that deals physical damage over time.",10,1.0,8.0,0.0,0.0,"red_blood_particles",10.0
+freeze,Frozen,stun,"Frozen solid, preventing all movement and actions.",1,0.0,0.0,0.0,0.0,"ice_crystals",4.0
+burn,Burning DoT,debuff,"Flaming burn that deals fire damage over time.",8,2.0,4.0,0.0,0.0,"flame_particles",8.0
+poison,Venom DoT,debuff,"Venomous poison that deals nature damage over time.",12,1.5,6.0,0.0,0.0,"green_gas_cloud",12.0
+shadow_dot,Shadow Corruption,debuff,"Corrupting shadow energy that saps life.",15,2.0,12.0,0.0,0.0,"dark_smoke",10.0
+stun,Stunned,stun,"Stunned and incapacitated, unable to act.",1,0.0,0.0,0.0,0.0,"yellow_stun_stars",3.0
+crit_bonus_drain,Focused Rage,buff,"Increased critical strike chance.",1,0.0,0.0,0.0,25.0,"golden_buff_particles",5.0
+evasion_penalty,Entropy Penalty,debuff,"Reduced evasion after dodge (temporary).",1,0.0,0.0,0.1,0.0,"gray_particles",2.0
+crit_penalty_disadvantage,Blind Rebuke,debuff,"Reduced critical strike chance after block.",1,0.0,0.0,0.0,-15.0,"dark_buff_particles",3.0
+divine_shield,Divine Protection,buff,"Invulnerable to all damage.",1,0.0,0.0,1.0,0.0,"golden_shield",5.0
+movement_speed_buff,Reactive Step,buff,"Increased movement speed.",1,0.0,0.0,0.0,0.0,"speed_lines",5.0
+lifesteal_buff,Vampiric Touch,buff,"Life steal on attacks.",1,0.0,0.0,0.0,0.0,"blood_trail",8.0
+damage_amp_buff,Berserker Rage,buff,"Increased damage output.",1,0.0,0.0,0.2,0.0,"red_aura",10.0
+heal_over_time_buff,Divine Blessing,buff,"Heal over time.",5,2.0,-15.0,0.0,0.0,"healing_particles",10.0
+defense_buff,Divine Blessing,buff,"Increased damage reduction.",5,0.0,0.0,0.0,500.0,"protective_aura",10.0
+chain_damage_buff,Chain Lightning,buff,"Lightning damage jumps to nearby targets.",1,0.0,0.0,0.6,0.0,"lightning_arcs",1.0
+damage_reflection_buff,Thornmail,buff,"Reflect percentage of blocked damage.",1,0.0,0.0,0.0,0.0,"spike_aura",999.0

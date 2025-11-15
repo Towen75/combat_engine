@@ -2,7 +2,7 @@
 
 import random
 from dataclasses import dataclass
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from .models import Entity, SkillUseResult, ApplyDamageAction, DispatchEventAction, ApplyEffectAction, Action
 from .skills import Skill
 from .events import EventBus, OnHitEvent, OnCritEvent
@@ -22,6 +22,11 @@ class HitContext:
     mitigated_damage: float = 0.0
     final_damage: float = 0.0
     is_crit: bool = False
+    # New fields for Phase 2 evasion/block pipeline
+    is_glancing: bool = False
+    was_dodged: bool = False
+    was_blocked: bool = False
+    damage_blocked: float = 0.0
 
 
 class CombatEngine:
@@ -40,49 +45,134 @@ class CombatEngine:
         """
         self.rng = rng
 
-    def resolve_hit(self, attacker: Entity, defender: Entity) -> HitContext:
-        """Calculate the damage of a single hit with critical hit support.
+    def _get_modified_chance(self, entity: Entity, state_manager: StateManager, base_chance: float, roll_type: str) -> float:
+        """Calculate the final chance after applying bonus/penalty modifiers.
 
-        Implements the core damage formula with crit tier progression:
-        Damage Dealt = MAX((Attack Damage - Defences), (Attack Damage * Pierce Ratio))
+        Args:
+            entity: The entity whose modifiers to check
+            state_manager: StateManager to get entity state
+            base_chance: The base percentage chance (e.g., 0.5 for 50%)
+            roll_type: The type of roll (e.g., 'crit_chance', 'evasion_chance')
+
+        Returns:
+            Final modified chance, clamped to 0-1
+        """
+        state = state_manager.get_state(entity.id)
+        if not state or not state.roll_modifiers.get(roll_type):
+            return base_chance
+
+        total_modifier = 0.0
+        for mod in state.roll_modifiers[roll_type]:
+            total_modifier += mod.value
+
+        final_chance = base_chance + total_modifier
+        return max(0.0, min(1.0, final_chance))  # Clamp to 0-1
+
+    def _perform_evasion_check(self, defender: Entity, state_manager: StateManager) -> tuple[bool, bool]:
+        """Perform evasion check with glancing/dodge mechanics.
+
+        Args:
+            defender: The defending entity
+            state_manager: StateManager for modifiers
+
+        Returns:
+            Tuple of (was_dodged, was_glanced)
+        """
+        # Roll against modified evasion chance
+        evasion_chance = self._get_modified_chance(defender, state_manager, defender.final_stats.evasion_chance, 'evasion_chance')
+        rng_value = self.rng.random() if self.rng else random.random()
+
+        if rng_value >= evasion_chance:
+            return False, False  # Normal hit
+
+        # If evaded, roll for dodge vs glance
+        dodge_chance = self._get_modified_chance(defender, state_manager, defender.final_stats.dodge_chance, 'dodge_chance')
+        rng_value = self.rng.random() if self.rng else random.random()
+
+        # Actual dodge chance is the modified dodge chance
+        # If dodge roll < modified dodge chance, it's a full dodge
+        if rng_value < dodge_chance:
+            return True, False  # Dodged
+
+        return False, True  # Glanced
+
+    def _perform_block_check(self, defender: Entity, state_manager: StateManager) -> bool:
+        """Perform block check for potential damage reduction.
+
+        Args:
+            defender: The defending entity
+            state_manager: StateManager for modifiers
+
+        Returns:
+            True if the attack was blocked
+        """
+        block_chance = self._get_modified_chance(defender, state_manager, defender.final_stats.block_chance, 'block_chance')
+        rng_value = self.rng.random() if self.rng else random.random()
+        return rng_value < block_chance
+
+    def resolve_hit(self, attacker: Entity, defender: Entity, state_manager: StateManager) -> HitContext:
+        """Calculate the damage of a single hit following the 9-step GDD pipeline.
 
         Args:
             attacker: The entity performing the attack
             defender: The entity receiving the attack
+            state_manager: StateManager for accessing entity modifiers
 
         Returns:
-            HitContext with complete damage calculation results
+            HitContext with complete damage calculation results and outcome flags
         """
-        # --- 1. Initial Setup ---
+        # Step 1: Initial Setup
         ctx = HitContext(attacker=attacker, defender=defender, base_damage=attacker.final_stats.base_damage)
 
-        # --- 2. Critical Hit Check ---
-        # Use injected RNG for deterministic testing, fallback to random.random()
-        rng_value = self.rng.random() if self.rng else random.random()
-        if rng_value < attacker.final_stats.crit_chance:
-            ctx.is_crit = True
+        # Step 2: Evasion Check
+        was_dodged, was_glanced = self._perform_evasion_check(defender, state_manager)
+        if was_dodged:
+            ctx.was_dodged = True
+            ctx.final_damage = 0.0
+            return ctx  # Early exit for dodges
 
-        # --- 3. Pre-Mitigation Damage Calculation ---
-        # For now, this is just base damage. Phase 3 will add flat bonuses here.
+        if was_glanced:
+            ctx.is_glancing = True
+
+        # Step 3: Critical Hit Check
+        if not ctx.is_glancing:  # Glancing blows cannot crit
+            crit_chance = self._get_modified_chance(attacker, state_manager, attacker.final_stats.crit_chance, 'crit_chance')
+            rng_value = self.rng.random() if self.rng else random.random()
+            if rng_value < crit_chance:
+                ctx.is_crit = True
+
+        # Step 4: Pre-Mitigation Damage Calculation
         ctx.pre_mitigation_damage = ctx.base_damage
 
-        # Apply Tier 1/2 crits (Base/Pre-Pierce)
-        if ctx.is_crit:
-            CombatEngine._apply_pre_pierce_crit(ctx)
+        # Apply Tier 2 crits (Enhanced) - affects pre-mitigation
+        if ctx.is_crit and attacker.get_crit_tier() == 2:
+            ctx.pre_mitigation_damage *= attacker.final_stats.crit_damage
 
-        # --- 4. Mitigation Calculation (The GDD formula) ---
+        # Step 5: Defense Mitigation (GDD formula)
         pre_pierce_damage = ctx.pre_mitigation_damage - defender.final_stats.armor
         pierced_damage = ctx.pre_mitigation_damage * attacker.final_stats.pierce_ratio
         ctx.mitigated_damage = max(0, max(pre_pierce_damage, pierced_damage))
 
-        # --- 5. Final Damage & Post-Mitigation Crits ---
-        # Phase 3 will add final multipliers here.
+        # Step 6: Post-Mitigation Modifiers
         ctx.final_damage = ctx.mitigated_damage
 
-        # Apply Tier 3 crits (Post-Pierce)
-        if ctx.is_crit:
+        # Apply Tier 3 crits (True) - full recalculation
+        if ctx.is_crit and attacker.get_crit_tier() == 3:
             CombatEngine._apply_post_pierce_crit(ctx)
 
+        # Step 7: Glancing Penalty
+        if ctx.is_glancing:
+            ctx.final_damage *= 0.5  # 50% reduction for glancing blows
+
+        # Step 8: Block Check
+        block_damage_before = ctx.final_damage
+        was_blocked = self._perform_block_check(defender, state_manager)
+        if was_blocked:
+            ctx.was_blocked = True
+            ctx.damage_blocked = min(ctx.final_damage, defender.final_stats.block_amount)
+            ctx.final_damage = max(1, ctx.final_damage - ctx.damage_blocked)  # Cannot block below 1
+
+        # Step 9: Finalization - damage ready
         return ctx
 
     @staticmethod
@@ -176,7 +266,7 @@ class CombatEngine:
             # Update final damage directly based on new calculation
             ctx.final_damage = max(0, max(pre_pierce_damage, pierced_damage))
 
-    def calculate_skill_use(self, attacker: Entity, defender: Entity, skill: Skill) -> SkillUseResult:
+    def calculate_skill_use(self, attacker: Entity, defender: Entity, skill: Skill, state_manager: StateManager) -> SkillUseResult:
         """Calculate the results of a skill use without executing actions.
 
         Pure function that computes all hit contexts and intended actions.
@@ -195,7 +285,7 @@ class CombatEngine:
 
         for _ in range(skill.hits):
             # 1. Resolve the damage for a single hit
-            hit_context = self.resolve_hit(attacker, defender)
+            hit_context = self.resolve_hit(attacker, defender, state_manager)
             hit_results.append(hit_context)
             damage = hit_context.final_damage
 
@@ -234,45 +324,205 @@ class CombatEngine:
 
         return SkillUseResult(hit_results=hit_results, actions=actions)
 
-    def process_skill_use(self, attacker: Entity, defender: Entity, skill: Skill, event_bus: EventBus, state_manager: StateManager):
-        """Process a full skill use, including all hits and triggers.
+    def process_skill_use(self, attacker: Entity, defender: Entity, skill: Skill, event_bus: EventBus, state_manager: StateManager) -> bool:
+        """Process a full skill use with resource checks, executing hits and dispatching all events.
+
+        Primary skill execution method that handles resource consumption, cooldowns,
+        damage application, and comprehensive event dispatching for the full pipeline.
 
         Args:
             attacker: The entity using the skill
             defender: The target of the skill
             skill: The skill being used
             event_bus: The event bus for dispatching events
-            state_manager: The state manager for applying effects
-        """
-        for _ in range(skill.hits):
-            # 1. Resolve the damage for a single hit
-            hit_context = self.resolve_hit(attacker, defender)
-            damage = hit_context.final_damage
-            state_manager.apply_damage(defender.id, damage)
+            state_manager: The state manager for damage/effects/resources
 
-            # 2. Dispatch core events (OnHit, OnCrit)
+        Returns:
+            True if skill was successfully used, False if unable (cooldown/resource issues)
+        """
+        from .events import OnDodgeEvent, OnBlockEvent, OnGlancingBlowEvent, OnSkillUsedEvent
+
+        # 0. Check resource availability
+        attacker_state = state_manager.get_state(attacker.id)
+        if not attacker_state:
+            return False  # Invalid attacker state
+
+        # Assume skill has resource_cost (will be added to skill model)
+        skill_cost = getattr(skill, 'resource_cost', 0.0)
+        if attacker_state.current_resource < skill_cost:
+            return False  # Insufficient resource
+
+        # Check cooldown
+        skill_name = getattr(skill, 'name', str(skill))
+        if attacker_state.active_cooldowns.get(skill_name, 0) > 0:
+            return False  # On cooldown
+
+        # 1. Consume resource and set cooldown
+        if skill_cost > 0:
+            state_manager.spend_resource(attacker.id, skill_cost)
+        if hasattr(skill, 'cooldown') and skill.cooldown > 0:
+            cooldown_duration = skill.cooldown * (1.0 - attacker.final_stats.cooldown_reduction)
+            state_manager.set_cooldown(attacker.id, skill_name, cooldown_duration)
+
+        # 2. Process all hits
+        for hit_num in range(skill.hits):
+            # Resolve the damage for a single hit
+            hit_context = self.resolve_hit(attacker, defender, state_manager)
+
+            # Dispatch outcome-specific events first
+            if hit_context.was_dodged:
+                dodge_event = OnDodgeEvent(attacker=attacker, defender=defender)
+                event_bus.dispatch(dodge_event)
+                # Award evasion resource if applicable
+                state_manager.add_resource(attacker.id, attacker.final_stats.resource_on_kill)  # Attacker evaded, treat as "kill"?
+                continue  # No damage/debuffs on dodge
+
+            # Create the hit event first
             hit_event = OnHitEvent(
                 attacker=attacker,
                 defender=defender,
-                damage_dealt=damage,
+                damage_dealt=hit_context.final_damage,
                 is_crit=hit_context.is_crit
             )
-            event_bus.dispatch(hit_event)
 
+            if hit_context.is_glancing:
+                # OnGlancingBlowEvent for glancing hits
+                event_bus.dispatch(hit_event)
+                glancing_event = OnGlancingBlowEvent(hit_event=hit_event)
+                event_bus.dispatch(glancing_event)
+
+            elif hit_context.was_blocked:
+                # Normal hit with block event
+                event_bus.dispatch(hit_event)
+                block_event = OnBlockEvent(
+                    attacker=attacker,
+                    defender=defender,
+                    damage_before_block=hit_context.mitigated_damage + (hit_context.final_damage * 2 if hit_context.is_glancing else hit_context.final_damage),  # Pre-block damage
+                    damage_blocked=hit_context.damage_blocked,
+                    hit_context=hit_context
+                )
+                event_bus.dispatch(block_event)
+
+            else:
+                # Normal hit event only
+                event_bus.dispatch(hit_event)
+
+            # Apply damage and award resource
+            if hit_context.final_damage > 0:
+                state_manager.apply_damage(defender.id, hit_context.final_damage)
+                state_manager.add_resource(attacker.id, attacker.final_stats.resource_on_hit)
+
+                # OnKill resource bonus (check if defender died)
+                defender_state = state_manager.get_state(defender.id)
+                if defender_state and not defender_state.is_alive:
+                    state_manager.add_resource(attacker.id, attacker.final_stats.resource_on_kill)
+
+            # Dispatch crit event if critical
             if hit_context.is_crit:
                 crit_event = OnCritEvent(hit_event=hit_event)
                 event_bus.dispatch(crit_event)
 
-            # 3. Process Skill-Specific Triggers
-            for trigger in skill.triggers:
-                if trigger.event == "OnHit":
-                    # Perform the check (e.g., proc rate)
+            # Process skill triggers and active triggers
+            self._process_skill_triggers(attacker, defender, skill, hit_context, event_bus, state_manager)
+
+        # 3. Dispatch OnSkillUsed event (after execution)
+        skill_used_event = OnSkillUsedEvent(entity=attacker, skill_id=str(skill), skill_type="damage")
+        event_bus.dispatch(skill_used_event)
+
+        return True  # Successfully used
+
+    def _process_skill_triggers(self, attacker: Entity, defender: Entity, skill: Skill, hit_context: HitContext,
+                               event_bus: EventBus, state_manager: StateManager):
+        """Process skill triggers and active triggers for a hit context."""
+
+        # Process skill-specific triggers
+        for trigger in skill.triggers:
+            if trigger.event == "OnHit" and hit_context.final_damage > 0:
+                rng_value = self.rng.random() if self.rng else random.random()
+                if rng_value < trigger.check.get("proc_rate", 1.0):
+                    self._execute_trigger_result(trigger.result, attacker, defender, hit_context, event_bus, state_manager)
+
+        # Process active triggers from attacker affixes
+        for trigger in attacker.active_triggers:
+            if trigger.event == "OnHit" and hit_context.final_damage > 0:
+                rng_value = self.rng.random() if self.rng else random.random()
+                if rng_value < trigger.check.get("proc_rate", 1.0):
+                    self._execute_trigger_result(trigger.result, attacker, defender, hit_context, event_bus, state_manager)
+
+            elif trigger.event == "OnSkillUsed":
+                # Special case for OnSkillUsed triggers (like Focused Rage)
+                rng_value = self.rng.random() if self.rng else random.random()
+                if rng_value < trigger.check.get("proc_rate", 1.0):
+                    self._execute_trigger_result(trigger.result, attacker, defender, hit_context, event_bus, state_manager)
+
+        # Process defender active triggers (block/dodge effects)
+        defender_state = state_manager.get_state(defender.id)
+        if defender_state and defender_state.is_alive:
+            for trigger in defender.active_triggers:
+                if trigger.event == "OnBlock" and hit_context.was_blocked:
                     rng_value = self.rng.random() if self.rng else random.random()
                     if rng_value < trigger.check.get("proc_rate", 1.0):
-                        # Execute the result
-                        if "apply_debuff" in trigger.result:
-                            state_manager.add_or_refresh_debuff(
-                                entity_id=defender.id,
-                                debuff_name=trigger.result["apply_debuff"],
-                                stacks_to_add=trigger.result.get("stacks", 1)
-                            )
+                        self._execute_trigger_result(trigger.result, defender, attacker, hit_context, event_bus, state_manager)
+
+                elif trigger.event == "OnDodge" and hit_context.was_dodged:
+                    # Defender reactive effects on dodge
+                    pass
+
+    def _execute_trigger_result(self, result: Dict[str, any], source: Entity, target: Entity, hit_context: HitContext,
+                              event_bus: EventBus, state_manager: StateManager):
+        """Execute the result of a trigger with support for complex effects.
+
+        Args:
+            result: The trigger result dictionary
+            source: Entity that triggered the effect
+            target: Entity that receives the effect
+            hit_context: Current hit context for damage calculations
+            event_bus: Event bus for dispatching events
+            state_manager: State manager for applying effects
+        """
+        # Standard debuff application
+        if "apply_debuff" in result:
+            state_manager.apply_debuff(
+                entity_id=target.id,
+                debuff_name=result["apply_debuff"],
+                stacks_to_add=result.get("stacks", 1),
+                max_duration=result.get("duration", 10.0)
+            )
+
+        # Complex effects - Phase 3
+        if "apply_crit_bonus" in result:
+            # Focused Rage effect - apply crit chance bonus to source
+            bonus_value = result["apply_crit_bonus"]
+            duration = result.get("duration", 5.0)
+
+            # Create a crit chance modifier
+            from .state import Modifier
+            modifier = Modifier(
+                value=bonus_value,
+                duration=duration,
+                source="focused_rage"
+            )
+
+            source_state = state_manager.get_state(source.id)
+            if source_state:
+                if 'crit_chance' not in source_state.roll_modifiers:
+                    source_state.roll_modifiers['crit_chance'] = []
+                source_state.roll_modifiers['crit_chance'].append(modifier)
+
+        if "reflect_damage" in result:
+            # Thornmail effect - reflect damage back to attacker
+            reflect_ratio = result["reflect_damage"]
+            reflected_damage = hit_context.final_damage * reflect_ratio
+
+            if reflected_damage > 0:
+                state_manager.apply_damage(source.id, reflected_damage)
+
+                # Create reflect damage event
+                from .events import OnHitEvent
+                reflect_event = OnHitEvent(
+                    attacker=target,  # Defender is now attacker
+                    defender=source, # Attacker becomes defender
+                    damage_dealt=int(reflected_damage),
+                    is_crit=False
+                )
+                event_bus.dispatch(reflect_event)

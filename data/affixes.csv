@@ -1,10 +1,17 @@
-affix_id,stat_affected,mod_type,affix_pools,base_value,description
-flat_dmg,base_damage,flat,weapon_pool|axe_pool,50,+{value} Base Damage
-crit_dmg,crit_damage,flat,weapon_pool|jewelry_pool,0.5,+{value}% Crit Damage
-bleed_chance,proc_rate_bleed,flat,axe_pool|sword_pool,0.25,{value}% chance to Bleed
-flat_armor,armor,flat,armor_pool,150,+{value} Armor
-attack_speed,attack_speed,multiplier,weapon_pool,0.2,+{value}% Attack Speed
-health,max_health,flat,armor_pool|jewelry_pool,100,+{value} Health
-crit_chance,crit_chance,flat,jewelry_pool,0.1,{value}% Critical Strike Chance
-pierce_bonus,pierce_ratio,flat,weapon_pool,0.08,{value}% Pierce Ratio
-resistance,resistances,flat,armor_pool,0.15,{value}% Elemental Resistances
+affix_id,stat_affected,mod_type,affix_pools,base_value,description,trigger_event,proc_rate,trigger_result,trigger_duration,stacks_max,dual_stat,scaling_power,complex_effect
+flat_dmg,base_damage,flat,weapon_pool|axe_pool,50,+{value} Base Damage,,,,,,,,
+crit_dmg,crit_damage,flat,weapon_pool|jewelry_pool,0.5,+{value}% Crit Damage,,,,,,,,
+bleed_chance,base_damage,flat,axe_pool|sword_pool,0,+{value}% chance to Bleed,OnHit,0.25,bleed,10.0,5,,,,,
+flat_armor,armor,flat,armor_pool,150,+{value} Armor,,,,,,,,
+attack_speed,attack_speed,multiplier,weapon_pool,0.2,+{value}% Attack Speed,,,,,,,,
+health,max_health,flat,armor_pool|jewelry_pool,100,+{value} Health,,,,,,,,
+crit_chance,crit_chance,flat,jewelry_pool,0.1,{value}% Critical Strike Chance,,,,,,,,
+pierce_bonus,pierce_ratio,flat,weapon_pool,0.08,{value}% Pierce Ratio,,,,,,,,
+resistance,resistances,flat,armor_pool,0.15,{value}% Elemental Resistances,,,,,,,,
+# Advanced Affixes - Phase 3
+devastating_strikes,crit_chance;crit_damage,flat;flat,jewelry_pool,0.075;0.375,{value}% Crit & {dual_value}% Crit Damage,,,,,,,true,,
+precision_power,pierce_ratio;max_resource,multiplier;flat,weapon_pool,0.15;25,{value}% Pierce & {dual_value} Max Resource,,,,,,,true,,
+berserker_rage,base_damage;crit_chance,scaling;scaling,jewelry_pool,0.5;0.3,{value}% Damage & Crit (scales with power),,,,,,,true,true,
+focused_rage,,,jewelry_pool,,,,OnSkillUsed,1.0,apply_crit_bonus:0.25,5.0,3,,true,true|special_skill,
+thornmail,,,armor_pool,,,,OnBlock,0.5,reflect_damage:0.3,,,,true,,
+swiftslayer,attack_speed;cooldown_reduction,multiplier;flat,weapon_pool,0.25;0.08,{value}% Attack Speed & {dual_value}% CD Reduction,,,,,,,true,,

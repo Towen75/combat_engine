@@ -1,12 +1,20 @@
 """State management for combat entities - tracking dynamic properties like health."""
 
 from dataclasses import dataclass, field
-from typing import Dict, Optional, TYPE_CHECKING
+from typing import Dict, Optional, TYPE_CHECKING, List
 
 if TYPE_CHECKING:
     from .events import EventBus
 
 from .models import Entity
+
+
+@dataclass
+class Modifier:
+    """Represents a temporary modifier that can affect roll chances or other stats."""
+    value: float  # Positive for bonus, negative for penalty
+    duration: float  # Time remaining in seconds
+    source: str = "unknown"  # What applied this modifier
 
 
 @dataclass
@@ -29,6 +37,12 @@ class EntityState:
     is_alive: bool = True
     active_debuffs: Dict[str, Debuff] = field(default_factory=dict)
 
+    # New fields for Phase 1 implementation
+    current_resource: float = 0.0  # Current resource amount
+    max_resource: float = 100.0    # Store max for clamping resource adds
+    roll_modifiers: Dict[str, List[Modifier]] = field(default_factory=dict)  # e.g., {'crit_chance': [Modifier], 'evasion_chance': [...]}
+    active_cooldowns: Dict[str, float] = field(default_factory=dict)  # skill_name -> remaining cooldown seconds
+
     def __post_init__(self):
         """Validate state after initialization."""
         if self.current_health < 0:
@@ -36,6 +50,10 @@ class EntityState:
         if self.current_health == 0 and self.is_alive:
             # Auto-correct inconsistent state
             self.is_alive = False
+        if self.current_resource < 0:
+            raise ValueError("current_resource cannot be negative")
+        if self.max_resource <= 0:
+            raise ValueError("max_resource must be positive")
 
 
 class StateManager:
@@ -61,7 +79,11 @@ class StateManager:
         if entity.id in self.states:
             raise ValueError(f"Entity '{entity.id}' is already registered")
 
-        self.states[entity.id] = EntityState(current_health=entity.final_stats.max_health)
+        self.states[entity.id] = EntityState(
+            current_health=entity.final_stats.max_health,
+            current_resource=entity.final_stats.max_resource,
+            max_resource=entity.final_stats.max_resource
+        )
 
     def unregister_entity(self, entity_id: str) -> None:
         """Remove an entity from state tracking.
@@ -155,40 +177,109 @@ class StateManager:
 
         return state.current_health - old_health
 
-    def add_or_refresh_debuff(self, entity_id: str, debuff_name: str, stacks_to_add: int = 1, duration: float = 10.0) -> None:
-        """Add a new debuff or refresh an existing one using combined refresh model.
+    def add_resource(self, entity_id: str, amount: float) -> float:
+        """Add resource to an entity, clamping at max_resource.
 
         Args:
-            entity_id: ID of the entity to apply debuff to
-            debuff_name: Name of the debuff effect
-            stacks_to_add: Number of stacks to add (default 1)
-            duration: Duration of the debuff in seconds (default 10.0)
+            entity_id: ID of the entity to add resource to
+            amount: Amount of resource to add
+
+        Returns:
+            The actual resource added (0 if entity not found or dead)
 
         Raises:
-            ValueError: If stacks_to_add is not positive or duration is not positive
+            ValueError: If amount is negative
         """
-        if stacks_to_add <= 0:
-            raise ValueError("stacks_to_add must be positive")
-        if duration <= 0:
-            raise ValueError("duration must be positive")
+        if amount < 0:
+            raise ValueError("Amount cannot be negative")
 
         state = self.get_state(entity_id)
         if not state or not state.is_alive:
-            return
+            return 0.0
+
+        old_resource = state.current_resource
+        state.current_resource = min(state.current_resource + amount, state.max_resource)
+
+        return state.current_resource - old_resource
+
+    def spend_resource(self, entity_id: str, amount: float) -> bool:
+        """Spend resource from an entity.
+
+        Args:
+            entity_id: ID of the entity to spend resource from
+            amount: Amount of resource to spend
+
+        Returns:
+            True if enough resource was spent, False if insufficient resource
+
+        Raises:
+            ValueError: If amount is negative
+        """
+        if amount < 0:
+            raise ValueError("Amount cannot be negative")
+
+        state = self.get_state(entity_id)
+        if not state or not state.is_alive:
+            return False
+
+        if state.current_resource >= amount:
+            state.current_resource -= amount
+            return True
+        return False
+
+    def set_cooldown(self, entity_id: str, skill_name: str, cooldown_seconds: float) -> None:
+        """Set a cooldown for a skill on an entity.
+
+        Args:
+            entity_id: ID of the entity
+            skill_name: Name of the skill
+            cooldown_seconds: Duration of cooldown
+
+        Raises:
+            ValueError: If cooldown is negative or invalid entity
+        """
+        if cooldown_seconds < 0:
+            raise ValueError("Cooldown cannot be negative")
+
+        state = self.get_state(entity_id)
+        if not state:
+            raise ValueError(f"No state found for entity {entity_id}")
+
+        state.active_cooldowns[skill_name] = cooldown_seconds
+
+    def apply_debuff(self, entity_id: str, debuff_name: str, stacks_to_add: int = 1, max_duration: float = 10.0) -> None:
+        """Apply or refresh a debuff on an entity.
+
+        Args:
+            entity_id: ID of the target entity
+            debuff_name: Name of the debuff to apply
+            stacks_to_add: Number of stacks to add (default 1)
+            max_duration: Maximum duration for the debuff
+
+        Raises:
+            ValueError: If invalid parameters or entity not found
+        """
+        if stacks_to_add <= 0:
+            raise ValueError("stacks_to_add must be positive")
+
+        state = self.get_state(entity_id)
+        if not state:
+            raise ValueError(f"No state found for entity {entity_id}")
 
         if debuff_name in state.active_debuffs:
-            # Refresh existing debuff: add stacks and reset duration
+            # Refresh existing debuff
             debuff = state.active_debuffs[debuff_name]
-            debuff.stacks += stacks_to_add
-            debuff.time_remaining = duration
+            debuff.stacks = min(debuff.stacks + stacks_to_add, 99)  # Cap at 99 stacks
+            debuff.time_remaining = max(debuff.time_remaining, max_duration)
         else:
-            # Apply new debuff
-            state.active_debuffs[debuff_name] = Debuff(
+            # Create new debuff
+            debuff = Debuff(
                 name=debuff_name,
                 stacks=stacks_to_add,
-                max_duration=duration,
-                time_remaining=duration
+                max_duration=max_duration,
+                time_remaining=max_duration
             )
+            state.active_debuffs[debuff_name] = debuff
 
     def get_all_states(self) -> Dict[str, EntityState]:
         """Get a copy of all entity states.
@@ -211,8 +302,8 @@ class StateManager:
         """Check if an entity ID is registered."""
         return entity_id in self.states
 
-    def update_dot_effects(self, delta_time: float, event_bus: Optional["EventBus"] = None) -> None:
-        """Update damage-over-time effects for all entities.
+    def update(self, delta_time: float, event_bus: Optional["EventBus"] = None) -> None:
+        """Update temporary effects, cooldowns, and damage-over-time effects for all entities.
 
         Args:
             delta_time: Time elapsed since last update in seconds
@@ -226,6 +317,32 @@ class StateManager:
             if not state.is_alive:
                 continue
 
+            # Update active cooldowns
+            expired_cooldowns = []
+            for skill_name, remaining in state.active_cooldowns.items():
+                state.active_cooldowns[skill_name] = max(0, remaining - delta_time)
+                if state.active_cooldowns[skill_name] <= 0:
+                    expired_cooldowns.append(skill_name)
+
+            for skill_name in expired_cooldowns:
+                del state.active_cooldowns[skill_name]
+
+            # Update roll modifiers
+            expired_modifiers = []
+            for roll_type in list(state.roll_modifiers.keys()):
+                new_mods = []
+                for mod in state.roll_modifiers[roll_type]:
+                    mod.duration = max(0, mod.duration - delta_time)
+                    if mod.duration > 0:
+                        new_mods.append(mod)
+                state.roll_modifiers[roll_type] = new_mods
+                if not state.roll_modifiers[roll_type]:
+                    expired_modifiers.append(roll_type)
+
+            for roll_type in expired_modifiers:
+                del state.roll_modifiers[roll_type]
+
+            # Update DoTs
             debuffs_to_remove = []
 
             for debuff_name, debuff in state.active_debuffs.items():

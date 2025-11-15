@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from models import Entity
+    from engine import HitContext
 
 
 @dataclass
@@ -38,6 +39,37 @@ class DamageTickEvent(Event):
     effect_name: str
     damage_dealt: float
     stacks: int
+
+
+@dataclass
+class OnDodgeEvent(Event):
+    """Fired when an attack is fully dodged."""
+    attacker: "Entity"
+    defender: "Entity"
+
+
+@dataclass
+class OnBlockEvent(Event):
+    """Fired when a hit is successfully blocked."""
+    attacker: "Entity"
+    defender: "Entity"
+    damage_before_block: float
+    damage_blocked: float
+    hit_context: "HitContext"
+
+
+@dataclass
+class OnGlancingBlowEvent(Event):
+    """Fired when a hit is downgraded to a Glancing Blow."""
+    hit_event: OnHitEvent
+
+
+@dataclass
+class OnSkillUsedEvent(Event):
+    """Fired when an entity successfully uses a skill (after cost/cooldown checks)."""
+    entity: "Entity"
+    skill_id: str
+    skill_type: str
 
 
 class EventBus:
