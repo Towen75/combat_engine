@@ -21,24 +21,28 @@ class TestDoTSystem:
         state_manager.register_entity(defender)
 
         # Apply Bleed debuff with 5 stacks
-        state_manager.add_or_refresh_debuff(
+        state_manager.apply_debuff(
             entity_id=defender.id,
             debuff_name="Bleed",
             stacks_to_add=5,
-            duration=10.0  # 10 seconds
+            max_duration=10.0,  # 10 seconds
+            tick_interval=1.0,
+            damage_per_tick=5.0
         )
 
         # Verify initial state
         defender_state = state_manager.get_state(defender.id)
+        assert defender_state is not None
         assert defender_state.current_health == 1000.0
         assert "Bleed" in defender_state.active_debuffs
         assert defender_state.active_debuffs["Bleed"].stacks == 5
 
         # Simulate 3 seconds of time (should trigger 3 ticks at 5 damage per stack = 25 damage per tick)
-        state_manager.update_dot_effects(delta_time=3.0, event_bus=event_bus)
+        state_manager.tick(delta=3.0, event_bus=event_bus)
 
         # Check damage accumulation: 3 ticks * 5 stacks * 5 damage = 75 damage
         defender_state = state_manager.get_state(defender.id)
+        assert defender_state is not None
         assert defender_state.current_health == 1000.0 - 75.0  # 925.0
 
         # Check that duration decreased
@@ -53,26 +57,31 @@ class TestDoTSystem:
         state_manager.register_entity(defender)
 
         # Apply Bleed (5 stacks) and Poison (3 stacks)
-        state_manager.add_or_refresh_debuff(
+        state_manager.apply_debuff(
             entity_id=defender.id,
             debuff_name="Bleed",
             stacks_to_add=5,
-            duration=10.0
+            max_duration=10.0,
+            tick_interval=1.0,
+            damage_per_tick=5.0
         )
-        state_manager.add_or_refresh_debuff(
+        state_manager.apply_debuff(
             entity_id=defender.id,
             debuff_name="Poison",
             stacks_to_add=3,
-            duration=8.0
+            max_duration=8.0,
+            tick_interval=1.0,
+            damage_per_tick=5.0
         )
 
         # Simulate 2 seconds (2 ticks)
         # Bleed: 2 * 5 * 5 = 50 damage
         # Poison: 2 * 3 * 5 = 30 damage (assuming same 5 damage per stack)
         # Total: 80 damage
-        state_manager.update_dot_effects(delta_time=2.0, event_bus=event_bus)
+        state_manager.tick(delta=2.0, event_bus=event_bus)
 
         defender_state = state_manager.get_state(defender.id)
+        assert defender_state is not None
         assert defender_state.current_health == 1000.0 - 80.0  # 920.0
 
         # Check both effects are present with correct remaining durations

@@ -32,11 +32,11 @@ def main():
 
     # Attacker: Strong but low pierce
     attacker_stats = EntityStats(base_damage=120.0, pierce_ratio=0.1)
-    attacker = Entity(id="player_1", stats=attacker_stats, name="Hero")
+    attacker = Entity(id="player_1", base_stats=attacker_stats, name="Hero")
 
     # Defender: Heavily armored
     defender_stats = EntityStats(max_health=1000.0, armor=150.0)
-    defender = Entity(id="enemy_1", stats=defender_stats, name="Armored Knight")
+    defender = Entity(id="enemy_1", base_stats=defender_stats, name="Armored Knight")
 
     print(f"   Attacker: {attacker} (Damage: {attacker.stats.base_damage}, Pierce: {attacker.stats.pierce_ratio})")
     print(f"   Defender: {defender} (Health: {defender.stats.max_health}, Armor: {defender.stats.armor})")
@@ -58,7 +58,9 @@ def main():
     print("3. Executing attack...")
 
     # Calculate damage
-    damage = CombatEngine.resolve_hit(attacker, defender)
+    engine = CombatEngine()
+    damage_context = engine.resolve_hit(attacker, defender, state_manager)
+    damage = damage_context.final_damage
     print(f"   {attacker} attacks {defender} for {damage:.2f} damage")
 
     # Show damage breakdown for analysis

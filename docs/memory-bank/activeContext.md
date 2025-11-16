@@ -32,6 +32,38 @@
 
 ## Recent Changes
 
+### PR4 Implementation Complete ✅ (Centralized Tick System)
+- **Centralized Tick Processing**: Implemented `StateManager.tick()` method for unified time-based processing
+- **Time-Based Mechanics**: Integrated DoT ticks, cooldowns, and effect expiration through single tick entry point
+- **Event Integration**: DamageTickEvent dispatching through event bus with proper timing
+- **Performance Validation**: 17,953 events/second rating "Excellent" in full system simulation
+- **Backward Compatibility**: Maintained existing API while adding centralized processing
+- **Comprehensive Testing**: Updated simulation tests to validate tick-based damage accumulation
+
+### PR3 Implementation Complete ✅ (Event Bus Enhancements)
+- **Unsubscribe Support**: Added `EventBus.unsubscribe()` and `EventBus.unsubscribe_all()` methods
+- **Exception Isolation**: Event handlers now catch exceptions to prevent system-wide failures
+- **Safe Iteration**: Listeners list is snapshotted during dispatch to prevent modification during iteration
+- **Logging Infrastructure**: Added comprehensive logging system for event debugging and profiling
+- **Listener Priorities**: Prototype support for prioritized event handling (extensible for future needs)
+- **Event Profiling**: Metrics collection for performance monitoring and optimization
+
+### PR2 Implementation Complete ✅ (Generic Effect Framework)
+- **Handler Generalization**: Created `DamageOnHitHandler` template with `DamageOnHitConfig` data variation
+- **Data-Driven Expansion**: New DoTs (Burn, Freeze, etc.) added via JSON configuration without code changes
+- **Handler Migration**: Converted existing BleedHandler/PoisonHandler to use generic framework
+- **Zero-Code Effects**: Future effect implementations require only JSON data entries
+- **Configurable Mechanics**: Effect duration, tick interval, stacking behavior all data-driven
+- **Handler Validation**: Comprehensive input validation for all effect configurations
+
+### PR1 Implementation Complete ✅ (Production Architecture Overhaul)
+- **Action/Result Pattern**: Implemented `SkillUseResult` + Action hierarchy for execution decoupling
+- **Pure Functions**: Created `CombatEngine.calculate_skill_use()` with complete side effect isolation
+- **CombatOrchestrator**: Added dependency injection for clean separation between calculation and execution
+- **Godot Compatibility**: Architecture alignment with Godot's signal/event system validated
+- **Modular Execution**: Actions can be serialized, replayed, and tested independently
+- **Error Resilience**: Calculation phase completely isolated from execution failures
+
 ### Phase 4 Complete ✅ (Major Milestone)
 - **Simulation Framework**: Implemented comprehensive CombatLogger, SimulationRunner, and ReportGenerator
 - **Performance Excellence**: Achieved 6993 events/second in simulation testing

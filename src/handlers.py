@@ -3,12 +3,15 @@ Event-driven handlers for conditional affixes.
 Phase 3: Simulation & Balancing implementation.
 """
 
+import logging
 from .events import EventBus, OnSkillUsedEvent, OnBlockEvent
 from .state import Modifier
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .state import StateManager
+
+logger = logging.getLogger(__name__)
 
 
 class FocusedRageHandler:
@@ -87,6 +90,6 @@ def setup_conditional_affix_handlers(event_bus: EventBus, state_manager: "StateM
     FocusedRageHandler(event_bus, state_manager)
     BlindingRebukeHandler(event_bus, state_manager)
 
-    print("Conditional affix handlers initialized:")
-    print("  ✅ Focused Rage: Crit bonus on special skill use")
-    print("  ✅ Blinding Rebuke: Evasion penalty on attacker when blocked")
+    logger.info("Conditional affix handlers initialized")
+    logger.info("  ✅ Focused Rage: Crit bonus on special skill use")
+    logger.info("  ✅ Blinding Rebuke: Evasion penalty on attacker when blocked")

@@ -314,7 +314,7 @@ class SimulationRunner:
                     target = self.get_random_target(entity.id)
                     if target:
                         # Perform attack using the combat engine
-                        hit_context = self.combat_engine.resolve_hit(entity, target)
+                        hit_context = self.combat_engine.resolve_hit(entity, target, self.state_manager)
 
                         # Apply damage
                         damage = hit_context.final_damage
@@ -337,8 +337,8 @@ class SimulationRunner:
                         # Reset attack timer
                         self.attack_timers[entity.id] = 1.0 / entity.final_stats.attack_speed
 
-        # Update DoT effects
-        self.state_manager.update_dot_effects(delta_time, self.event_bus)
+        # Update DoT effects (PR4: centralized tick processing)
+        self.state_manager.tick(delta_time, self.event_bus)
 
     def run_simulation(self, duration: float, time_step: float = 0.1) -> None:
         """Run a simulation for the specified duration.

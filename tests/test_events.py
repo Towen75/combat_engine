@@ -63,7 +63,10 @@ class TestEventBus:
         bus.subscribe(OnHitEvent, mock_listener)
 
         assert OnHitEvent in bus.listeners
-        assert mock_listener in bus.listeners[OnHitEvent]
+        # With PR3, listeners are now ListenerEntry objects
+        listener_entries = bus.listeners[OnHitEvent]
+        assert len(listener_entries) == 1
+        assert listener_entries[0].listener == mock_listener
 
     def test_dispatch_calls_listener(self):
         """Test that dispatch calls the subscribed listener with the event."""

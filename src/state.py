@@ -24,6 +24,9 @@ class Debuff:
     stacks: int = 1
     max_duration: float = 10.0
     time_remaining: float = 10.0
+    accumulator: float = 0.0  # Accumulated time towards next tick
+    tick_interval: float = 1.0  # Seconds between ticks
+    damage_per_tick: float = 5.0  # Base damage per tick per stack
 
 
 @dataclass
@@ -202,6 +205,96 @@ class StateManager:
 
         return state.current_resource - old_resource
 
+    def tick(self, delta: float, event_bus: Optional["EventBus"] = None) -> None:
+        """Centralized tick processing for all timed effects (PR4).
+
+        This is the single source of truth for all periodic effect processing:
+        - Duration decrement
+        - Accumulator-based tick timing (fractional time support)
+        - Damage application
+        - Event dispatch (DamageTickEvent)
+        - Effect expiration
+
+        Args:
+            delta: Time elapsed since last tick in seconds
+            event_bus: Optional event bus for dispatching tick events
+        """
+        from .events import DamageTickEvent
+
+        expired = []
+
+        for entity_id, state in self.states.items():
+            if not state.is_alive:
+                continue
+
+            # Process cooldowns
+            expired_cooldowns = []
+            for skill_name, remaining in state.active_cooldowns.items():
+                state.active_cooldowns[skill_name] = max(0, remaining - delta)
+                if state.active_cooldowns[skill_name] <= 0:
+                    expired_cooldowns.append(skill_name)
+
+            for skill_name in expired_cooldowns:
+                del state.active_cooldowns[skill_name]
+
+            # Process roll modifiers
+            expired_modifiers = []
+            for roll_type in list(state.roll_modifiers.keys()):
+                new_mods = []
+                for mod in state.roll_modifiers[roll_type]:
+                    mod.duration = max(0, mod.duration - delta)
+                    if mod.duration > 0:
+                        new_mods.append(mod)
+                state.roll_modifiers[roll_type] = new_mods
+                if not state.roll_modifiers[roll_type]:
+                    expired_modifiers.append(roll_type)
+
+            for roll_type in expired_modifiers:
+                del state.roll_modifiers[roll_type]
+
+            # Process debuffs with proper accumulator-based ticking
+            expired_debuffs = []
+            for debuff_name, debuff in state.active_debuffs.items():
+                # Decrement duration
+                debuff.time_remaining -= delta
+
+                # Accumulate time towards next tick
+                debuff.accumulator += delta
+
+                # Process all pending ticks
+                while debuff.accumulator >= debuff.tick_interval:
+                    debuff.accumulator -= debuff.tick_interval
+
+                    # Calculate and apply damage
+                    damage = debuff.damage_per_tick * debuff.stacks
+                    actual_damage = self.apply_damage(entity_id, damage)
+
+                    # Dispatch event if event bus provided and damage was applied
+                    if event_bus and actual_damage > 0:
+                        # Create a minimal entity representation for the event
+                        from .models import Entity, EntityStats
+                        target_entity = Entity(
+                            id=entity_id,
+                            base_stats=EntityStats(),  # Minimal stats for event
+                            name=entity_id
+                        )
+
+                        tick_event = DamageTickEvent(
+                            target=target_entity,
+                            effect_name=debuff_name,
+                            damage_dealt=actual_damage,
+                            stacks=debuff.stacks
+                        )
+                        event_bus.dispatch(tick_event)
+
+                # Check for expiration
+                if debuff.time_remaining <= 0:
+                    expired_debuffs.append(debuff_name)
+
+            # Clean up expired debuffs
+            for debuff_name in expired_debuffs:
+                del state.active_debuffs[debuff_name]
+
     def spend_resource(self, entity_id: str, amount: float) -> bool:
         """Spend resource from an entity.
 
@@ -247,7 +340,8 @@ class StateManager:
 
         state.active_cooldowns[skill_name] = cooldown_seconds
 
-    def apply_debuff(self, entity_id: str, debuff_name: str, stacks_to_add: int = 1, max_duration: float = 10.0) -> None:
+    def apply_debuff(self, entity_id: str, debuff_name: str, stacks_to_add: int = 1, max_duration: float = 10.0,
+                     tick_interval: float = 1.0, damage_per_tick: float = 5.0) -> None:
         """Apply or refresh a debuff on an entity.
 
         Args:
@@ -255,6 +349,8 @@ class StateManager:
             debuff_name: Name of the debuff to apply
             stacks_to_add: Number of stacks to add (default 1)
             max_duration: Maximum duration for the debuff
+            tick_interval: Seconds between ticks (default 1.0)
+            damage_per_tick: Base damage per tick per stack (default 5.0)
 
         Raises:
             ValueError: If invalid parameters or entity not found
@@ -272,12 +368,14 @@ class StateManager:
             debuff.stacks = min(debuff.stacks + stacks_to_add, 99)  # Cap at 99 stacks
             debuff.time_remaining = max(debuff.time_remaining, max_duration)
         else:
-            # Create new debuff
+            # Create new debuff with PR4 tick fields
             debuff = Debuff(
                 name=debuff_name,
                 stacks=stacks_to_add,
                 max_duration=max_duration,
-                time_remaining=max_duration
+                time_remaining=max_duration,
+                tick_interval=tick_interval,
+                damage_per_tick=damage_per_tick
             )
             state.active_debuffs[debuff_name] = debuff
 

@@ -117,11 +117,11 @@ class TestDamageOnHitHandler:
         mock_print.assert_called_once_with("    -> Custom message for TestDefender!")
 
         # Verify debuff was applied to state manager
-        state_manager.add_or_refresh_debuff.assert_called_once_with(
+        state_manager.apply_debuff.assert_called_once_with(
             entity_id=defender.id,
             debuff_name="TestEffect",
             stacks_to_add=1,
-            duration=5.0
+            max_duration=5.0
         )
 
     def test_handle_on_hit_no_proc(self):
@@ -151,7 +151,7 @@ class TestDamageOnHitHandler:
         handler.handle_on_hit(event)
 
         # Verify nothing was applied
-        state_manager.add_or_refresh_debuff.assert_not_called()
+        state_manager.apply_debuff.assert_not_called()
 
     def test_handle_on_hit_default_message(self):
         """Test handle_on_hit with default message when no custom message configured."""
@@ -192,11 +192,11 @@ class TestDamageOnHitHandler:
         assert "DefaultEffect proc'd on defender!" in output
 
         # Verify debuff was applied
-        state_manager.add_or_refresh_debuff.assert_called_once_with(
+        state_manager.apply_debuff.assert_called_once_with(
             entity_id=defender.id,
             debuff_name="DefaultEffect",
             stacks_to_add=1,
-            duration=3.0
+            max_duration=3.0
         )
 
 
@@ -230,11 +230,11 @@ class TestBleedHandlerLegacy:
 
         mock_print.assert_called_once_with("    -> Bleed proc'd on defender!")
 
-        state_manager.add_or_refresh_debuff.assert_called_once_with(
+        state_manager.apply_debuff.assert_called_once_with(
             entity_id=defender.id,
             debuff_name="Bleed",
             stacks_to_add=1,
-            duration=5.0
+            max_duration=5.0
         )
 
 
@@ -268,9 +268,9 @@ class TestPoisonHandlerLegacy:
 
         mock_print.assert_called_once_with("    -> Poison proc'd on defender!")
 
-        state_manager.add_or_refresh_debuff.assert_called_once_with(
+        state_manager.apply_debuff.assert_called_once_with(
             entity_id=defender.id,
             debuff_name="Poison",
             stacks_to_add=1,
-            duration=8.0
+            max_duration=8.0
         )

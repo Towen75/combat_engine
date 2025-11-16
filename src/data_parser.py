@@ -1,6 +1,9 @@
 import csv
 import json
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 def parse_csv_data():
     """
@@ -80,4 +83,4 @@ def parse_csv_data():
 
 if __name__ == "__main__":
     parse_csv_data()
-    print("Data parsed and game_data.json created successfully.")
+    logger.info("Data parsed and game_data.json created successfully.")

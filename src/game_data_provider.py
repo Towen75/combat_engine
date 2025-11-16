@@ -5,8 +5,11 @@ Centralizes data loading and provides consistent access patterns across the appl
 """
 
 import json
+import logging
 import os
 from typing import Dict, Any, Optional
+
+logger = logging.getLogger(__name__)
 
 
 class GameDataProvider:
@@ -37,17 +40,17 @@ class GameDataProvider:
         try:
             with open(data_file, 'r', encoding='utf-8') as f:
                 self._data = json.load(f)
-            print(f"GameDataProvider: Successfully loaded data from {data_file}")
+            logger.info("GameDataProvider: Successfully loaded data from %s", data_file)
 
         except FileNotFoundError:
-            print(f"ERROR: GameDataProvider: Data file not found: {data_file}")
-            print("Please run src/data_parser.py to generate game_data.json")
+            logger.error("GameDataProvider: Data file not found: %s", data_file)
+            logger.info("Please run src/data_parser.py to generate game_data.json")
             self._data = {}
         except json.JSONDecodeError as e:
-            print(f"ERROR: GameDataProvider: Invalid JSON in {data_file}: {e}")
+            logger.error("GameDataProvider: Invalid JSON in %s: %s", data_file, e)
             self._data = {}
         except Exception as e:
-            print(f"ERROR: GameDataProvider: Unexpected error loading data: {e}")
+            logger.error("GameDataProvider: Unexpected error loading data: %s", e)
             self._data = {}
 
     def get_data(self) -> Dict[str, Any]:
@@ -106,11 +109,11 @@ class GameDataProvider:
             self._load_game_data()
             success = self._data is not None and len(self._data) > 0
             if not success:
-                print("GameDataProvider: Reload failed, reverting to previous data")
+                logger.warning("GameDataProvider: Reload failed, reverting to previous data")
                 self._data = old_data
             return success
         except Exception:
-            print("GameDataProvider: Reload failed, reverting to previous data")
+            logger.warning("GameDataProvider: Reload failed, reverting to previous data")
             self._data = old_data
             return False
 

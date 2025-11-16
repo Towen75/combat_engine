@@ -118,7 +118,7 @@ defender = Entity(id="monster", base_stats=defender_stats)
 
 # Resolve hit
 engine = CombatEngine()
-hit_context = engine.resolve_hit(attacker, defender)
+hit_context = engine.resolve_hit(attacker, defender, state_manager)
 
 print(f"Damage dealt: {hit_context.final_damage}")
 print(f"Was critical: {hit_context.is_crit}")
@@ -175,7 +175,7 @@ engine.process_skill_use(attacker, defender, skill, event_bus, state_manager)
 ## API Reference
 
 ### CombatEngine
-- `resolve_hit(attacker, defender)`: Calculate single hit damage
+- `resolve_hit(attacker, defender, state_manager)`: Calculate single hit damage
 - `calculate_effective_damage(attacker, defender)`: Get detailed breakdown
 - `validate_damage_calculation(attacker, defender)`: Check calculation validity
 - `process_skill_use(attacker, defender, skill, event_bus, state_manager)`: Execute skill

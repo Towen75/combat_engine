@@ -5,6 +5,7 @@ Phase 4: Complete data-driven combat system.
 
 import csv
 import os
+import logging
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from .skills import Skill, Trigger
@@ -65,6 +66,9 @@ class LoadedSkill:
         )
 
 
+logger = logging.getLogger(__name__)
+
+
 class MasterRuleData:
     """Central repository for all CSV-driven combat data.
     Phase 4: Complete data-driven combat system."""
@@ -88,7 +92,7 @@ class MasterRuleData:
         """Load affixes.csv into RolledAffix objects"""
         path = os.path.join(self.data_dir, "affixes.csv")
         if not os.path.exists(path):
-            print(f"Warning: affixes.csv not found at {path}")
+            logger.warning("affixes.csv not found at %s", path)
             return
 
         with open(path, 'r', newline='', encoding='utf-8') as csvfile:
@@ -149,13 +153,13 @@ class MasterRuleData:
                     self.affixes[affix.affix_id] = affix
 
                 except Exception as e:
-                    print(f"Error loading affix {row.get('affix_id', 'unknown')}: {e}")
+                    logger.error("Error loading affix %s: %s", row.get('affix_id', 'unknown'), e)
 
     def _load_skills(self):
         """Load skills.csv into LoadedSkill objects"""
         path = os.path.join(self.data_dir, "skills.csv")
         if not os.path.exists(path):
-            print(f"Warning: skills.csv not found at {path}")
+            logger.warning("skills.csv not found at %s", path)
             return
 
         with open(path, 'r', newline='', encoding='utf-8') as csvfile:
@@ -202,13 +206,13 @@ class MasterRuleData:
                     self.skills[skill.skill_id] = skill
 
                 except Exception as e:
-                    print(f"Error loading skill {row.get('skill_id', 'unknown')}: {e}")
+                    logger.error("Error loading skill %s: %s", row.get('skill_id', 'unknown'), e)
 
     def _load_effects(self):
         """Load effects.csv into EffectDefinition objects"""
         path = os.path.join(self.data_dir, "effects.csv")
         if not os.path.exists(path):
-            print(f"Warning: effects.csv not found at {path}")
+            logger.warning("effects.csv not found at %s", path)
             return
 
         with open(path, 'r', newline='', encoding='utf-8') as csvfile:
@@ -231,7 +235,7 @@ class MasterRuleData:
                     self.effects[effect.effect_id] = effect
 
                 except Exception as e:
-                    print(f"Error loading effect {row.get('effect_id', 'unknown')}: {e}")
+                    logger.error("Error loading effect %s: %s", row.get('effect_id', 'unknown'), e)
 
     # Query methods
     def get_affix(self, affix_id: str) -> Optional[RolledAffix]:

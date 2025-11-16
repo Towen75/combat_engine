@@ -18,7 +18,7 @@ def process_attack(attacker, defender, event_bus: EventBus, state_manager: State
         HitContext containing the complete damage calculation results
     """
     # Calculate the hit using the combat engine
-    hit_context = CombatEngine.resolve_hit(attacker, defender)
+    hit_context = CombatEngine.resolve_hit(attacker, defender, state_manager)
 
     # Apply damage to the defender
     damage = hit_context.final_damage

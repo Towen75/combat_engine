@@ -1,10 +1,13 @@
 """Effect handlers for combat events - secondary effects like DoTs."""
 
 import random
+import logging
 from abc import ABC, abstractmethod
 from .events import EventBus, OnHitEvent
 from .state import StateManager
 from .models import DamageOnHitConfig
+
+logger = logging.getLogger(__name__)
 
 
 # Effect Configuration Constants - can be moved to data files in future
@@ -101,16 +104,19 @@ class DamageOnHitHandler(EffectHandler):
             if self.config.display_message:
                 target_name = getattr(event.defender, 'name', event.defender.id)
                 message = self.config.display_message.format(target=target_name)
-                print(f"    -> {message}")
+                print("    -> " + message)
+                logger.debug("Effect proc: %s", message)
             else:
                 # Default message format
-                print(f"    -> {self.config.debuff_name} proc'd on {event.defender.id}!")
+                message = f"{self.config.debuff_name} proc'd on {event.defender.id}!"
+                print("    -> " + message)
+                logger.debug("Effect proc: %s", message)
 
-            self.state_manager.add_or_refresh_debuff(
+            self.state_manager.apply_debuff(
                 entity_id=event.defender.id,
                 debuff_name=self.config.debuff_name,
                 stacks_to_add=self.config.stacks_to_add,
-                duration=self.config.duration
+                max_duration=self.config.duration
             )
 
 
@@ -143,12 +149,13 @@ class BleedHandler(EffectHandler):
         """
         rng_value = self.rng.random() if self.rng else random.random()
         if rng_value < self.proc_rate:
-            print(f"    -> Bleed proc'd on {event.defender.id}!")
-            self.state_manager.add_or_refresh_debuff(
+            logger.debug("Effect proc: Bleed procd on %s", event.defender.id)
+            print("    -> Bleed proc'd on defender!")
+            self.state_manager.apply_debuff(
                 entity_id=event.defender.id,
                 debuff_name="Bleed",
                 stacks_to_add=1,
-                duration=5.0  # Example duration
+                max_duration=5.0  # Example duration
             )
 
 
@@ -181,10 +188,11 @@ class PoisonHandler(EffectHandler):
         """
         rng_value = self.rng.random() if self.rng else random.random()
         if rng_value < self.proc_rate:
-            print(f"    -> Poison proc'd on {event.defender.id}!")
-            self.state_manager.add_or_refresh_debuff(
+            logger.debug("Effect proc: Poison procd on %s", event.defender.id)
+            print("    -> Poison proc'd on defender!")
+            self.state_manager.apply_debuff(
                 entity_id=event.defender.id,
                 debuff_name="Poison",
                 stacks_to_add=1,
-                duration=8.0  # Longer duration than Bleed
+                max_duration=8.0  # Longer duration than Bleed
             )

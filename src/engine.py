@@ -110,7 +110,7 @@ class CombatEngine:
         rng_value = self.rng.random() if self.rng else random.random()
         return rng_value < block_chance
 
-    def resolve_hit(self, attacker: Entity, defender: Entity, state_manager: StateManager) -> HitContext:
+    def resolve_hit(self, attacker: Entity, defender: Entity, state_manager: "StateManager") -> "HitContext":
         """Calculate the damage of a single hit following the 9-step GDD pipeline.
 
         Args:
@@ -121,6 +121,12 @@ class CombatEngine:
         Returns:
             HitContext with complete damage calculation results and outcome flags
         """
+        if state_manager is None:
+            raise ValueError(
+                "CombatEngine.resolve_hit() requires state_manager parameter. "
+                "Hit resolution needs entity state for crit/evasion/block modifiers. "
+                "Example: engine.resolve_hit(attacker, defender, state_manager)"
+            )
         # Step 1: Initial Setup
         ctx = HitContext(attacker=attacker, defender=defender, base_damage=attacker.final_stats.base_damage)
 

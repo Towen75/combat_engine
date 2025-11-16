@@ -47,11 +47,29 @@ The Combat Engine follows a modular, layered architecture designed for maintaina
 
 ## Design Patterns in Use
 
-### COMMAND PATTERN (Code Review Implementation - Action/Result System)
+### ACTION/RESULT PATTERN (PR1 - Production Architecture)
 - **Context**: Combat calculations and execution need complete separation for testing and Godot compatibility
 - **Implementation**: SkillUseResult + Action hierarchy (ApplyDamageAction, DispatchEventAction, ApplyEffectAction)
 - **Benefits**: Zero side effects in calculation, decoupled execution via CombatOrchestrator
 - **Godot Fit**: Direct mapping to Godot's signal/event system
+
+### CENTRALIZED TICK PATTERN (PR4 - Time-Based Processing)
+- **Context**: Time-based effects (DoTs, cooldowns, modifiers) need unified processing for consistency
+- **Implementation**: StateManager.tick() method as single entry point for all time-based updates
+- **Benefits**: Predictable timing, event-driven effects, performance optimization through batching
+- **Integration**: Seamless event dispatching with DamageTickEvent for effect notifications
+
+### PUBLISHER-SUBSCRIBER ENHANCED PATTERN (PR3 - Event Bus Robustness)
+- **Context**: Event system needs robustness for production use with error handling and performance
+- **Implementation**: EventBus.unsubscribe(), exception isolation, safe iteration, logging infrastructure
+- **Benefits**: System stability, debugging capabilities, listener management, priority support preparation
+- **Performance**: Async-safe dispatching prevents modification issues during event processing
+
+### TEMPLATE METHOD + CONFIGURATION PATTERN (PR2 - Generic Effect Framework)
+- **Context**: DoT effects share common mechanics but need data-driven variation
+- **Implementation**: DamageOnHitHandler template with DamageOnHitConfig for effect parameters
+- **Benefits**: No code changes for new effects, centralized validation, consistent behavior
+- **Extensibility**: JSON-only additions for new effect types (Burn, Freeze, etc.)
 
 ### SINGLETON PATTERN (Code Review Implementation - GameDataProvider)
 - **Context**: Centralized data access for all JSON game data across the application

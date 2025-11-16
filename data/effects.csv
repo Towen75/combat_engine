@@ -1,18 +1,31 @@
 effect_id,name,type,description,max_stacks,tick_rate,damage_per_tick,stat_multiplier,stat_add,visual_effect,duration
-bleed,Bleeding DoT,debuff,"Bleeding wound that deals physical damage over time.",10,1.0,8.0,0.0,0.0,"red_blood_particles",10.0
-freeze,Frozen,stun,"Frozen solid, preventing all movement and actions.",1,0.0,0.0,0.0,0.0,"ice_crystals",4.0
-burn,Burning DoT,debuff,"Flaming burn that deals fire damage over time.",8,2.0,4.0,0.0,0.0,"flame_particles",8.0
-poison,Venom DoT,debuff,"Venomous poison that deals nature damage over time.",12,1.5,6.0,0.0,0.0,"green_gas_cloud",12.0
-shadow_dot,Shadow Corruption,debuff,"Corrupting shadow energy that saps life.",15,2.0,12.0,0.0,0.0,"dark_smoke",10.0
-stun,Stunned,stun,"Stunned and incapacitated, unable to act.",1,0.0,0.0,0.0,0.0,"yellow_stun_stars",3.0
-crit_bonus_drain,Focused Rage,buff,"Increased critical strike chance.",1,0.0,0.0,0.0,25.0,"golden_buff_particles",5.0
-evasion_penalty,Entropy Penalty,debuff,"Reduced evasion after dodge (temporary).",1,0.0,0.0,0.1,0.0,"gray_particles",2.0
-crit_penalty_disadvantage,Blind Rebuke,debuff,"Reduced critical strike chance after block.",1,0.0,0.0,0.0,-15.0,"dark_buff_particles",3.0
-divine_shield,Divine Protection,buff,"Invulnerable to all damage.",1,0.0,0.0,1.0,0.0,"golden_shield",5.0
-movement_speed_buff,Reactive Step,buff,"Increased movement speed.",1,0.0,0.0,0.0,0.0,"speed_lines",5.0
-lifesteal_buff,Vampiric Touch,buff,"Life steal on attacks.",1,0.0,0.0,0.0,0.0,"blood_trail",8.0
-damage_amp_buff,Berserker Rage,buff,"Increased damage output.",1,0.0,0.0,0.2,0.0,"red_aura",10.0
-heal_over_time_buff,Divine Blessing,buff,"Heal over time.",5,2.0,-15.0,0.0,0.0,"healing_particles",10.0
-defense_buff,Divine Blessing,buff,"Increased damage reduction.",5,0.0,0.0,0.0,500.0,"protective_aura",10.0
-chain_damage_buff,Chain Lightning,buff,"Lightning damage jumps to nearby targets.",1,0.0,0.0,0.6,0.0,"lightning_arcs",1.0
-damage_reflection_buff,Thornmail,buff,"Reflect percentage of blocked damage.",1,0.0,0.0,0.0,0.0,"spike_aura",999.0
+bleed,Bleed,DoT,Deals physical damage over time.,10,1,8,0,0,red_blood_splt,10
+freeze,Frozen,stun,"Frozen solid, preventing all movement and actions.",1,0,0,0,0,ice_crystals,4
+burn,Burn,DoT,Deals Fire daamge each second.,8,2,4,0,0,fire_burn,8
+poison,Posion,DoT,Deals posion damage and reduces healing received,12,1.5,6,0,0,posion_cloud,12
+shadow_dot,Shadow Corruption,debuff,Corrupting shadow energy that saps life.,15,2,12,0,0,dark_smoke,10
+stun,Stunned,stun,"Stunned and incapacitated, unable to act.",1,0,0,0,0,yellow_stun_stars,3
+crit_bonus_drain,Focused Rage,buff,Increased critical strike chance.,1,0,0,0,25,golden_buff_particles,5
+evasion_penalty,Entropy Penalty,debuff,Reduced evasion after dodge (temporary).,1,0,0,0.1,0,gray_particles,2
+crit_penalty_disadvantage,Blind Rebuke,debuff,Reduced critical strike chance after block.,1,0,0,0,-15,dark_buff_particles,3
+divine_shield,Divine Protection,buff,Invulnerable to all damage.,1,0,0,1,0,golden_shield,5
+movement_speed_buff,Reactive Step,buff,Increased movement speed.,1,0,0,0,0,speed_lines,5
+lifesteal_buff,Vampiric Touch,buff,Life steal on attacks.,1,0,0,0,0,blood_trail,8
+damage_amp_buff,Berserker Rage,buff,Increased damage output.,1,0,0,0.2,0,red_aura,10
+heal_over_time_buff,Divine Blessing,buff,Heal over time.,5,2,-15,0,0,healing_particles,10
+defense_buff,Divine Blessing,buff,Increased damage reduction.,5,0,0,0,500,protective_aura,10
+chain_damage_buff,Chain Lightning,buff,Lightning damage jumps to nearby targets.,1,0,0,0.6,0,lightning_arcs,1
+damage_reflection_buff,Thornmail,buff,Reflect percentage of blocked damage.,1,0,0,0,0,spike_aura,999
+corrosion,Corrosion,DoT,Deals damage and reduces armor by 10 while active.,5,1.0,4,0,10,acid_mist,8
+frostbite,Frostbite,Debuff,Slows target and deals minor cold damage.,3,1.0,3,0,0,frost_glow,6
+shock_pulse,Shock Pulse,Debuff,Pulses small shock damage and reduces attack speed by 10%,3,1.0,4,0.9,0,lightning_arc,5
+soul_burn,Soul Burn,DoT,Deals increasing damage each tick.,10,1.0,2,0,0,shadow_flare,10
+cripple,Cripple,Debuff,Reduces attack power by 15.,1,0,0,0,15,bone_crack,6
+vulnerability,Vulnerability,Debuff,Target takes 20% more damage.,1,0,0,1.2,0,mark_glow,6
+weaken,Weaken,Debuff,Reduces outgoing damage by 12%. ,1,0,0,0.88,0,grey_swirl,6
+focus,Focus,Buff,Increases critical chance by 15%. ,1,0,0,1.15,0,focus_glow,8
+rage,Rage,Buff,Grants 20% increased damage but take 10% more.,1,0,0,1.2,0,rage_flare,6
+stoneform,Stoneform,Buff,Increases armor by 50.,1,0,0,1.0,50,stone_shield,10
+haste,Haste,Buff,Increases attack speed by 20%. ,1,0,0,1.2,0,wind_lines,6
+echo_mark,Echo Mark,Special,Stores 30% of damage taken and releases it after expiry.,1,0,0,0,0,echo_glow,5
+

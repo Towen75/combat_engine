@@ -15,3 +15,16 @@ flame_burst,Flame Burst,Fire,1,Explosive fire damage that burns enemies.,25,4.0,
 thunder_clap,Thunder Clap,Magic,1,Shockwave that stuns multiple targets.,35,7.0,OnHit,0.9,apply_stun,1.5,1
 vampiric_touch,Vampiric Touch,Shadow,1,Drain life from enemy over time.,40,8.0,OnHit,1.0,drain_life:0.05,8.0,1
 divine_blessing,Divine Blessing,Divine,1,Grant protection and healing to allies.,60,15.0,OnSkillUsed,1.0,bless_allies:0.3,10.0,1
+whirlwind,Whirlwind Strike,physical,3,Spin attack hitting all nearby enemies.,20,6.0,OnHit,0.35,apply_effect:bleed,6,3
+focus_shot,Focus Shot,piercing,1,Well-aimed shot that deals high damage.,15,4.0,OnCrit,1.0,apply_effect:focus,8,1
+shadow_slash,Shadow Slash,shadow,2,A quick two-hit shadow strike.,10,3.0,OnHit,0.25,apply_effect:soul_burn,10,5
+poison_stab,Poison Stab,poison,1,A precise stab that poisons the target.,8,2.5,OnHit,0.40,apply_effect:poison,6,5
+flame_arc,Flame Arc,fire,1,A wide fire arc that scorches all enemies in front.,18,5.0,OnHit,0.30,apply_effect:burn,5,3
+glacial_spike,Glacial Spike,cold,1,Launch a frozen spike that slows enemies.,16,4.0,OnHit,0.25,apply_effect:frostbite,6,3
+corrosive_wave,Corrosive Wave,acid,1,Unleashes a wave of acid that corrodes armor.,22,8.0,OnHit,0.35,apply_effect:corrosion,8,5
+echo_strike,Echo Strike,physical,1,A heavy blow that leaves the target marked for echo burst.,20,10.0,OnHit,0.50,apply_effect:echo_mark,5,1
+rallying_cry,Rallying Cry,light,0,A powerful shout empowering the caster.,0,12.0,OnUse,1.0,apply_effect:haste,6,1
+stone_guard,Stone Guard,earth,0,Reinforce yourself with protective stone.,0,14.0,OnUse,1.0,apply_effect:stoneform,10,1
+berserker_charge,Berserker Charge,physical,1,A furious charge that empowers further attacks.,25,16.0,OnHit,1.0,apply_effect:rage,6,1
+shock_burst,Shock Burst,lightning,1,High-voltage burst that destabilizes and shocks enemies.,18,7.0,OnHit,0.30,apply_effect:shock_pulse,5,3
+
