@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional
 
 if TYPE_CHECKING:
-    from models import Entity
+    from models import Entity, EffectInstance
     from engine import HitContext
 
 logger = logging.getLogger(__name__)
@@ -78,6 +78,29 @@ class OnSkillUsedEvent(Event):
     entity: "Entity"
     skill_id: str
     skill_type: str
+
+
+@dataclass
+class EffectApplied(Event):
+    """Fired when a status effect is applied to an entity."""
+    entity_id: str
+    effect: "EffectInstance"
+
+
+@dataclass
+class EffectExpired(Event):
+    """Fired when a status effect expires from an entity."""
+    entity_id: str
+    effect: "EffectInstance"
+
+
+@dataclass
+class EffectTick(Event):
+    """Fired when a periodic effect applies its tick damage/healing."""
+    entity_id: str
+    effect: "EffectInstance"
+    damage_applied: float
+    stacks: int = 1
 
 
 @dataclass

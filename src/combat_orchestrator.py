@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from .state import StateManager
     from .events import EventBus
 
-from .models import ApplyDamageAction, DispatchEventAction, ApplyEffectAction
+from .models import ApplyDamageAction, DispatchEventAction, ApplyEffectAction, EffectInstance
 
 
 class CombatOrchestrator:
@@ -90,11 +90,18 @@ class CombatOrchestrator:
             should_apply = rng_value < proc_rate
 
         if should_apply:
-            self.state_manager.add_or_refresh_debuff(
-                entity_id=action.target_id,
-                debuff_name=action.effect_name,
-                stacks_to_add=action.stacks_to_add
+            # PR8c: Updated to use modern StateManager API instead of legacy compatibility method
+            # Create an EffectInstance from the action parameters
+            effect = EffectInstance(
+                id=f"{action.effect_name}_{action.target_id}",  # Simple unique ID
+                definition_id=action.effect_name,
+                source_id=action.source,
+                time_remaining=10.0,  # Default duration - should be made configurable
+                stacks=action.stacks_to_add,
+                value=0.0,  # Will be overridden by effect definition
+                tick_interval=1.0  # Default tick interval
             )
+            self.state_manager.apply_effect(action.target_id, effect)
 
 
 # Convenience function for executing skill results

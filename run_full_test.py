@@ -6,7 +6,7 @@ IP Requirement: "Run run_full_test.py" - Setup scenario with attacker/defender, 
 import time
 from src.models import Entity, EntityStats, RolledAffix, Item
 from src.state import StateManager
-from src.engine import CombatEngine
+from src import engine
 from src.events import EventBus
 from src.data_loader import get_data_loader, reload_data
 from src.handlers import setup_conditional_affix_handlers
@@ -31,7 +31,7 @@ state_manager = StateManager()
 setup_conditional_affix_handlers(event_bus, state_manager)
 
 # Create combat engine
-engine = CombatEngine()
+engine_instance = engine.CombatEngine()
 
 print('✅ Full event-driven system initialized')
 print()
@@ -153,7 +153,7 @@ while current_time < SIMULATION_TIME:
             skill_obj = skill_data.to_skill_object()
 
             # Attempt skill use (this will consume resources, apply cooldowns, trigger handlers)
-            success = engine.process_skill_use(attacker, defender, skill_obj, event_bus, state_manager)
+            success = engine_instance.process_skill_use(attacker, defender, skill_obj, event_bus, state_manager)
 
             if success:
                 stats_report['total_skills_used'] += 1

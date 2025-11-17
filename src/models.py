@@ -5,7 +5,7 @@ from typing import Optional, List, Literal, Dict, TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from .engine import HitContext
-    from .events import Event
+    from .events import Event, EffectApplied, EffectExpired
     from .skills import Trigger
 
 # Rarity to critical hit tier mapping
@@ -413,6 +413,27 @@ class ApplyEffectAction(Action):
     effect_name: str
     stacks_to_add: int = 1
     source: str = "skill"  # For tracking effect source
+
+
+@dataclass
+class EffectInstance:
+    """Runtime instance of a status effect applied to an entity.
+
+    PR8a: New normalized effect data structure.
+    Supports DoTs, buffs, debuffs, and complex reactive mechanics.
+    """
+    id: str                    # unique instance ID
+    definition_id: str         # reference to effect definition
+    source_id: str            # who applied this effect
+    time_remaining: float
+    tick_interval: float      # seconds between ticks (0 for no ticks)
+    accumulator: float = 0.0  # time accumulator for ticking
+    stacks: int = 1
+    value: float = 0.0        # damage per tick, stat modifier, etc.
+    expires_on_zero: bool = True
+
+    def __repr__(self) -> str:
+        return f"EffectInstance(id='{self.id}', definition='{self.definition_id}', stacks={self.stacks})"
 
 
 # Forward reference for Action subclasses
