@@ -1,32 +1,21 @@
 """Core combat engine - damage calculation and hit resolution."""
 
 import random
-from dataclasses import dataclass
 from typing import Optional, List, Dict, Any
 from .models import Entity, SkillUseResult, ApplyDamageAction, DispatchEventAction, ApplyEffectAction, Action
 from .skills import Skill
 from .events import EventBus, OnHitEvent, OnCritEvent
 from .state import StateManager
-
-
-@dataclass
-class HitContext:
-    """Data container for damage calculation pipeline.
-
-    Accumulates values through the damage resolution stages.
-    """
-    attacker: Entity
-    defender: Entity
-    base_damage: float
-    pre_mitigation_damage: float = 0.0
-    mitigated_damage: float = 0.0
-    final_damage: float = 0.0
-    is_crit: bool = False
-    # New fields for Phase 2 evasion/block pipeline
-    is_glancing: bool = False
-    was_dodged: bool = False
-    was_blocked: bool = False
-    damage_blocked: float = 0.0
+from .hit_context import HitContext
+from .combat_math import (
+    evade_dodge_or_normal,
+    resolve_crit,
+    apply_pierce_to_armor,
+    calculate_pierce_damage_formula,
+    apply_glancing_damage,
+    apply_block_damage,
+    clamp_min_damage
+)
 
 
 class CombatEngine:
@@ -127,58 +116,76 @@ class CombatEngine:
                 "Hit resolution needs entity state for crit/evasion/block modifiers. "
                 "Example: engine.resolve_hit(attacker, defender, state_manager)"
             )
-        # Step 1: Initial Setup
-        ctx = HitContext(attacker=attacker, defender=defender, base_damage=attacker.final_stats.base_damage)
 
-        # Step 2: Evasion Check
-        was_dodged, was_glanced = self._perform_evasion_check(defender, state_manager)
-        if was_dodged:
+        # Step 1: Gather modified stats from StateManager
+        defender_evasion_chance = self._get_modified_chance(defender, state_manager, defender.final_stats.evasion_chance, 'evasion_chance')
+        defender_dodge_chance = self._get_modified_chance(defender, state_manager, defender.final_stats.dodge_chance, 'dodge_chance')
+        attacker_crit_chance = self._get_modified_chance(attacker, state_manager, attacker.final_stats.crit_chance, 'crit_chance')
+        defender_block_chance = self._get_modified_chance(defender, state_manager, defender.final_stats.block_chance, 'block_chance')
+
+        # Step 2: Initial Setup
+        base_damage_input = attacker.final_stats.base_damage
+        ctx = HitContext(
+            attacker=attacker,
+            defender=defender,
+            base_raw=base_damage_input,
+            base_resolved=int(base_damage_input)
+        )
+
+        # Step 3: Evasion Check - Call pure math function with pre-computed modifiers
+        evasion_result = evade_dodge_or_normal(self.rng, defender_dodge_chance, defender_evasion_chance)
+        if evasion_result == 'dodge':
             ctx.was_dodged = True
             ctx.final_damage = 0.0
-            return ctx  # Early exit for dodges
-
-        if was_glanced:
+            return ctx
+        elif evasion_result == 'evade':
             ctx.is_glancing = True
 
-        # Step 3: Critical Hit Check
-        if not ctx.is_glancing:  # Glancing blows cannot crit
-            crit_chance = self._get_modified_chance(attacker, state_manager, attacker.final_stats.crit_chance, 'crit_chance')
-            rng_value = self.rng.random() if self.rng else random.random()
-            if rng_value < crit_chance:
-                ctx.is_crit = True
+        # Step 4: Critical Hit Check - Call pure math function
+        is_crit, crit_mult = resolve_crit(self.rng, attacker_crit_chance, attacker.final_stats.crit_damage)
+        ctx.is_crit = is_crit and not ctx.is_glancing  # Glancing hits cannot crit
 
-        # Step 4: Pre-Mitigation Damage Calculation
-        ctx.pre_mitigation_damage = ctx.base_damage
+        # Step 5: Pre-Mitigation Damage Calculation
+        ctx.pre_mitigation_damage = ctx.base_damage * crit_mult
 
         # Apply Tier 2 crits (Enhanced) - affects pre-mitigation
         if ctx.is_crit and attacker.get_crit_tier() == 2:
             ctx.pre_mitigation_damage *= attacker.final_stats.crit_damage
 
-        # Step 5: Defense Mitigation (GDD formula)
-        pre_pierce_damage = ctx.pre_mitigation_damage - defender.final_stats.armor
-        pierced_damage = ctx.pre_mitigation_damage * attacker.final_stats.pierce_ratio
-        ctx.mitigated_damage = max(0, max(pre_pierce_damage, pierced_damage))
+        # Step 6: Defense Mitigation (GDD formula)
+        effective_armor = apply_pierce_to_armor(defender.final_stats.armor, attacker.final_stats.pierce_ratio)
+        pre_pierce_damage = ctx.pre_mitigation_damage  # damage - armor (handled in mitigation)
+        pierced_damage = ctx.pre_mitigation_damage     # Full pierce ignores armor
 
-        # Step 6: Post-Mitigation Modifiers
+        # Use pierce damage formula: max(0, max(pre_pierce_damage, pierced_damage))
+        ctx.mitigated_damage = calculate_pierce_damage_formula(
+            ctx.pre_mitigation_damage - defender.final_stats.armor,  # pre_pierce_damage
+            ctx.pre_mitigation_damage                               # pierced_damage
+        )
+
+        # Step 7: Post-Mitigation Modifiers
         ctx.final_damage = ctx.mitigated_damage
 
         # Apply Tier 3 crits (True) - full recalculation
         if ctx.is_crit and attacker.get_crit_tier() == 3:
             CombatEngine._apply_post_pierce_crit(ctx)
 
-        # Step 7: Glancing Penalty
+        # Step 8: Glancing Penalty - Call pure math function
         if ctx.is_glancing:
-            ctx.final_damage *= 0.5  # 50% reduction for glancing blows
+            ctx.final_damage = apply_glancing_damage(ctx.final_damage, 0.5)  # 50% reduction
 
-        # Step 8: Block Check
-        block_damage_before = ctx.final_damage
-        was_blocked = self._perform_block_check(defender, state_manager)
-        if was_blocked:
-            ctx.was_blocked = True
-            ctx.damage_blocked = min(ctx.final_damage, defender.final_stats.block_amount)
-            ctx.final_damage = max(1, ctx.final_damage - ctx.damage_blocked)  # Cannot block below 1
+        # Step 9: Block Check - Call pure math function
+        if defender_block_chance > 0 and attacker.final_stats.pierce_ratio < 1:
+            from .combat_math import calculate_skill_effect_proc  # Reuse existing function
+            was_blocked = calculate_skill_effect_proc(self.rng, defender_block_chance)
+            if was_blocked:
+                ctx.was_blocked = True
+                ctx.damage_blocked = min(ctx.final_damage, defender.final_stats.block_amount)
+                ctx.final_damage = apply_block_damage(ctx.final_damage, defender.final_stats.block_amount)
 
-        # Step 9: Finalization - damage ready
+        # Step 10: Final clamping
+        ctx.final_damage = clamp_min_damage(ctx.final_damage, 0.0)
+
         return ctx
 
     @staticmethod
@@ -441,18 +448,17 @@ class CombatEngine:
                                event_bus: EventBus, state_manager: StateManager):
         """Process skill triggers and active triggers for a hit context."""
 
-        # Process skill-specific triggers
+        # Process skill-specific triggers (pass RNG explicitly per PR6)
+        from .combat_math import calculate_skill_effect_proc
         for trigger in skill.triggers:
             if trigger.event == "OnHit" and hit_context.final_damage > 0:
-                rng_value = self.rng.random() if self.rng else random.random()
-                if rng_value < trigger.check.get("proc_rate", 1.0):
+                if calculate_skill_effect_proc(self.rng, trigger.check.get("proc_rate", 1.0)):
                     self._execute_trigger_result(trigger.result, attacker, defender, hit_context, event_bus, state_manager)
 
-        # Process active triggers from attacker affixes
+        # Process active triggers from attacker affixes (pass RNG explicitly per PR6)
         for trigger in attacker.active_triggers:
             if trigger.event == "OnHit" and hit_context.final_damage > 0:
-                rng_value = self.rng.random() if self.rng else random.random()
-                if rng_value < trigger.check.get("proc_rate", 1.0):
+                if calculate_skill_effect_proc(self.rng, trigger.check.get("proc_rate", 1.0)):
                     self._execute_trigger_result(trigger.result, attacker, defender, hit_context, event_bus, state_manager)
 
             elif trigger.event == "OnSkillUsed":

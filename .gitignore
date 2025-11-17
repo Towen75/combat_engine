@@ -30,6 +30,7 @@ ENV/
 .vscode/
 .idea/
 .clinerules/
+docs/meta_docs/
 *.swp
 *.swo
 

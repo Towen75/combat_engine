@@ -1,3 +1,7 @@
+# [](https://github.com/Towen75/combat_engine/compare/v2.0.0...v) (2025-11-17)
+
+
+
 # [](https://github.com/Towen75/combat_engine/compare/v1.0.0...v) (2025-11-16)
 
 

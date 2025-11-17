@@ -3,6 +3,7 @@
 import random
 from typing import Optional
 from src.models import Entity, EntityStats
+from src.state import StateManager
 
 
 def make_rng(seed: int = 42) -> random.Random:
@@ -28,6 +29,10 @@ def make_entity(
     crit_damage: float = 1.5,
     pierce_ratio: float = 0.1,
     max_health: float = 1000.0,
+    evasion_chance: float = 0.0,
+    dodge_chance: float = 0.0,
+    block_chance: float = 0.0,
+    block_amount: float = 0.0,
     rarity: str = "Common"
 ) -> Entity:
     """Create a test entity with common default values.
@@ -52,7 +57,11 @@ def make_entity(
         crit_chance=crit_chance,
         crit_damage=crit_damage,
         pierce_ratio=pierce_ratio,
-        max_health=max_health
+        max_health=max_health,
+        evasion_chance=evasion_chance,
+        dodge_chance=dodge_chance,
+        block_chance=block_chance,
+        block_amount=block_amount
     )
     return Entity(
         id=entity_id,
@@ -97,7 +106,11 @@ def make_attacker(
 def make_defender(
     armor: float = 50.0,
     max_health: float = 1000.0,
-    pierce_ratio: float = 0.05
+    pierce_ratio: float = 0.05,
+    evasion_chance: float = 0.0,
+    dodge_chance: float = 0.0,
+    block_chance: float = 0.0,
+    block_amount: float = 0.0
 ) -> Entity:
     """Create a test defender entity with defensive-focused stats.
 
@@ -155,3 +168,24 @@ def make_tank_defender() -> Entity:
         max_health=2000.0,
         rarity="Common"
     )
+
+
+def make_state_manager(attacker: Optional[Entity] = None, defender: Optional[Entity] = None) -> StateManager:
+    """Create a state manager pre-registered with test entities.
+
+    Args:
+        attacker: Optional attacker entity to register
+        defender: Optional defender entity to register
+
+    Returns:
+        Configured StateManager instance
+    """
+    state_manager = StateManager()
+
+    if attacker:
+        state_manager.register_entity(attacker)
+
+    if defender:
+        state_manager.register_entity(defender)
+
+    return state_manager

@@ -92,13 +92,16 @@ class DamageOnHitHandler(EffectHandler):
         """Set up event subscriptions for this effect."""
         self.event_bus.subscribe(OnHitEvent, self.handle_on_hit)
 
-    def handle_on_hit(self, event: OnHitEvent) -> None:
+    def handle_on_hit(self, event: OnHitEvent, rng=None) -> None:
         """Handle an OnHitEvent by potentially applying the configured effect.
 
         Args:
             event: The hit event that occurred
+            rng: RNG passed explicitly (per PR6 specification)
         """
-        rng_value = self.rng.random() if self.rng else random.random()
+        if rng is None:
+            rng = self.rng or random
+        rng_value = rng.random()
         if rng_value < self.config.proc_rate:
             # Display message if configured
             if self.config.display_message:

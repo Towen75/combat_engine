@@ -8,6 +8,7 @@ import json
 import logging
 import os
 from typing import Dict, Any, Optional
+from data.data_parser import parse_all_csvs
 
 logger = logging.getLogger(__name__)
 
@@ -34,23 +35,15 @@ class GameDataProvider:
             self._load_game_data()
 
     def _load_game_data(self) -> None:
-        """Load game data from data/game_data.json file."""
-        data_file = os.path.join(os.path.dirname(__file__), '..', 'data', 'game_data.json')
+        """Load game data directly from CSV files using schema validation."""
+        data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
 
         try:
-            with open(data_file, 'r', encoding='utf-8') as f:
-                self._data = json.load(f)
-            logger.info("GameDataProvider: Successfully loaded data from %s", data_file)
+            self._data = parse_all_csvs(data_dir)
+            logger.info("GameDataProvider: Successfully loaded data from CSV files")
 
-        except FileNotFoundError:
-            logger.error("GameDataProvider: Data file not found: %s", data_file)
-            logger.info("Please run src/data_parser.py to generate game_data.json")
-            self._data = {}
-        except json.JSONDecodeError as e:
-            logger.error("GameDataProvider: Invalid JSON in %s: %s", data_file, e)
-            self._data = {}
         except Exception as e:
-            logger.error("GameDataProvider: Unexpected error loading data: %s", e)
+            logger.error("GameDataProvider: Failed to load data from CSVs: %s", e)
             self._data = {}
 
     def get_data(self) -> Dict[str, Any]:
