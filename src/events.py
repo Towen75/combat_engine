@@ -24,6 +24,9 @@ class Event:
     """Base class for all combat events."""
     pass
 
+# ============================================================================
+# COMBAT EVENTS
+# ============================================================================
 
 @dataclass
 class OnHitEvent(Event):
@@ -79,6 +82,35 @@ class OnSkillUsedEvent(Event):
     skill_id: str
     skill_type: str
 
+# ============================================================================
+# LIFECYCLE EVENTS
+# ============================================================================
+
+@dataclass
+class EntitySpawnEvent(Event):
+    """Fired when an entity is first registered in the state manager."""
+    entity: "Entity"
+
+@dataclass
+class EntityActivateEvent(Event):
+    """Fired when an entity becomes active in combat (e.g. start of battle)."""
+    entity: "Entity"
+
+@dataclass
+class EntityDeathEvent(Event):
+    """Fired when an entity's health reaches zero."""
+    entity_id: str
+
+
+@dataclass
+class EntityDespawnEvent(Event):
+    """Fired when an entity is removed from the system."""
+    entity_id: str
+
+
+ # ============================================================================
+ # EFFECT EVENTS
+ # ============================================================================
 
 @dataclass
 class EffectApplied(Event):
@@ -102,6 +134,9 @@ class EffectTick(Event):
     damage_applied: float
     stacks: int = 1
 
+# ============================================================================
+# EVENT BUS
+# ============================================================================
 
 @dataclass
 class ListenerEntry:

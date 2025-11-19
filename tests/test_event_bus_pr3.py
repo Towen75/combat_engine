@@ -17,11 +17,13 @@ from src.events import EventBus, OnHitEvent, Event
 
 class TestEvent(Event):
     """Simple test event for testing."""
+    __test__ = False
     pass
 
 
 class TestEventTwo(Event):
     """Second test event type."""
+    __test__ = False
     pass
 
 

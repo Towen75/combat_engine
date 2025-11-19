@@ -94,7 +94,7 @@ class AffixDefinition:
     affix_id: str
     stat_affected: str
     mod_type: str
-    base_value: str
+    base_value: Any  # Changed to Any to support float from JSON or str from CSV
     description: str
     affix_pools: List[str] = field(default_factory=list)
     trigger_event: Optional[TriggerEvent] = None
@@ -113,7 +113,9 @@ class AffixDefinition:
             raise ValueError("stat_affected cannot be empty")
         
         # Validate dual_stat flag
-        has_semicolon = ";" in self.base_value
+        # Ensure base_value is treated as string for this check to avoid TypeError with floats
+        base_val_str = str(self.base_value)
+        has_semicolon = ";" in base_val_str
         if self.dual_stat != has_semicolon:
             # Allow exception for non-numeric base values that might not match this rule strictly
             # but warn if it looks like a stat value

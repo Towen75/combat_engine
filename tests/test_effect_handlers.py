@@ -1,7 +1,8 @@
 """Tests for effect_handlers.py - event-driven effect systems."""
 
 import pytest
-from unittest.mock import MagicMock, patch
+import logging
+from unittest.mock import MagicMock
 from src.models import DamageOnHitConfig
 from src.effect_handlers import DamageOnHitHandler, BleedHandler, PoisonHandler
 from src.events import EventBus, OnHitEvent
@@ -84,8 +85,10 @@ class TestDamageOnHitHandler:
         assert args[0][0] == OnHitEvent  # Event type
         assert args[0][1] == handler.handle_on_hit  # Handler method
 
-    def test_handle_on_hit_guaranteed_proc(self):
+    def test_handle_on_hit_guaranteed_proc(self, caplog):
         """Test handle_on_hit with guaranteed proc."""
+        caplog.set_level(logging.DEBUG)
+        
         config = DamageOnHitConfig(
             debuff_name="TestEffect",
             proc_rate=1.0,  # Guaranteed proc
@@ -109,12 +112,10 @@ class TestDamageOnHitHandler:
             is_crit=False
         )
 
-        # Capture print output for display message
-        with patch('builtins.print') as mock_print:
-            handler.handle_on_hit(event)
+        handler.handle_on_hit(event)
 
-        # Verify custom message was printed
-        mock_print.assert_called_once_with("    -> Custom message for TestDefender!")
+        # Verify log message was captured
+        assert "Effect proc: Custom message for TestDefender!" in caplog.text
 
         # Verify debuff was applied to state manager
         state_manager.apply_debuff.assert_called_once_with(
@@ -124,8 +125,10 @@ class TestDamageOnHitHandler:
             max_duration=5.0
         )
 
-    def test_handle_on_hit_no_proc(self):
+    def test_handle_on_hit_no_proc(self, caplog):
         """Test handle_on_hit with no proc (proc_rate = 0)."""
+        caplog.set_level(logging.DEBUG)
+        
         config = DamageOnHitConfig(
             debuff_name="NoProcEffect",
             proc_rate=0.0,  # Never procs
@@ -152,9 +155,12 @@ class TestDamageOnHitHandler:
 
         # Verify nothing was applied
         state_manager.apply_debuff.assert_not_called()
+        assert "Effect proc" not in caplog.text
 
-    def test_handle_on_hit_default_message(self):
+    def test_handle_on_hit_default_message(self, caplog):
         """Test handle_on_hit with default message when no custom message configured."""
+        caplog.set_level(logging.DEBUG)
+        
         config = DamageOnHitConfig(
             debuff_name="DefaultEffect",
             proc_rate=1.0,
@@ -178,18 +184,10 @@ class TestDamageOnHitHandler:
             is_crit=False
         )
 
-        # Test that proc occurred and debuff was applied (without testing print output)
-        # Import capture to redirect stdout for testing
-        import io
-        import sys
-        from contextlib import redirect_stdout
+        handler.handle_on_hit(event)
 
-        captured_output = io.StringIO()
-        with redirect_stdout(captured_output):
-            handler.handle_on_hit(event)
-
-        output = captured_output.getvalue()
-        assert "DefaultEffect proc'd on defender!" in output
+        # Verify log message
+        assert "Effect proc: DefaultEffect proc'd on defender!" in caplog.text
 
         # Verify debuff was applied
         state_manager.apply_debuff.assert_called_once_with(
@@ -213,8 +211,10 @@ class TestBleedHandlerLegacy:
         assert handler.proc_rate == 0.6
         event_bus.subscribe.assert_called_once_with(OnHitEvent, handler.handle_on_hit)
 
-    def test_bleed_handler_proc(self):
+    def test_bleed_handler_proc(self, caplog):
         """Test BleedHandler applying bleed effect."""
+        caplog.set_level(logging.DEBUG)
+        
         event_bus = MagicMock()
         state_manager = MagicMock()
 
@@ -225,10 +225,9 @@ class TestBleedHandlerLegacy:
 
         event = OnHitEvent(attacker=attacker, defender=defender, damage_dealt=10.0, is_crit=False)
 
-        with patch('builtins.print') as mock_print:
-            handler.handle_on_hit(event)
+        handler.handle_on_hit(event)
 
-        mock_print.assert_called_once_with("    -> Bleed proc'd on defender!")
+        assert "Effect proc: Bleed procd on defender" in caplog.text
 
         state_manager.apply_debuff.assert_called_once_with(
             entity_id=defender.id,
@@ -251,8 +250,10 @@ class TestPoisonHandlerLegacy:
         assert handler.proc_rate == 0.4
         event_bus.subscribe.assert_called_once_with(OnHitEvent, handler.handle_on_hit)
 
-    def test_poison_handler_proc(self):
+    def test_poison_handler_proc(self, caplog):
         """Test PoisonHandler applying poison effect."""
+        caplog.set_level(logging.DEBUG)
+        
         event_bus = MagicMock()
         state_manager = MagicMock()
 
@@ -263,10 +264,9 @@ class TestPoisonHandlerLegacy:
 
         event = OnHitEvent(attacker=attacker, defender=defender, damage_dealt=10.0, is_crit=False)
 
-        with patch('builtins.print') as mock_print:
-            handler.handle_on_hit(event)
+        handler.handle_on_hit(event)
 
-        mock_print.assert_called_once_with("    -> Poison proc'd on defender!")
+        assert "Effect proc: Poison procd on defender" in caplog.text
 
         state_manager.apply_debuff.assert_called_once_with(
             entity_id=defender.id,

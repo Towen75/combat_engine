@@ -5,7 +5,7 @@ from src.models import Entity, EntityStats
 from src.skills import Skill, Trigger
 from src.events import EventBus
 from src.state import StateManager
-from src.engine import CombatEngine
+from src.engine.core import CombatEngine
 from src.effect_handlers import BleedHandler
 from tests.fixtures import make_rng, make_attacker, make_defender
 
@@ -89,8 +89,11 @@ class TestSkillSystem:
 
         # Check that some bleeds were applied (with deterministic RNG, we expect specific outcomes)
         # The exact number depends on the RNG sequence, but we should have at least some bleeds
-        assert len(defender_state.active_debuffs) > 0
-        assert "Bleed" in defender_state.active_debuffs
+        # Check that some bleeds were applied (with deterministic RNG, we expect specific outcomes)
+        # The exact number depends on the RNG sequence, but we should have at least some bleeds
+        effects = state_manager.get_active_effects(defender.id)
+        assert len(effects) > 0
+        assert any(e.definition_id == "Bleed" for e in effects)
 
     def test_multi_hit_skill_per_hit_independence(self):
         """Test that each hit in a multi-hit skill is independent."""
@@ -105,7 +108,8 @@ class TestSkillSystem:
         state_manager.register_entity(defender)
 
         # Create engine
-        engine = CombatEngine()
+        from tests.fixtures import make_rng
+        engine = CombatEngine(rng=make_rng(42))
 
         # Create 2-hit skill
         skill = Skill(
@@ -162,9 +166,8 @@ class TestSkillSystem:
         assert defender_state.current_health == 1000.0 - 50.0  # 950.0
 
         # Check that bleed was applied with correct stacks
-        assert "Bleed" in defender_state.active_debuffs
-        bleed_debuff = defender_state.active_debuffs["Bleed"]
-        assert bleed_debuff.stacks == 2
+        # Check that bleed was applied with correct stacks
+        assert state_manager.get_effect_stacks(defender.id, "Bleed") == 2
 
     def test_multi_hit_skill_state_accumulation(self):
         """Test that multi-hit skills properly accumulate state changes."""
@@ -181,7 +184,8 @@ class TestSkillSystem:
         # NOTE: Not creating BleedHandler to avoid double application
 
         # Create engine
-        engine = CombatEngine()
+        from tests.fixtures import make_rng
+        engine = CombatEngine(rng=make_rng(42))
 
         # Create 4-hit skill where each hit applies 1 stack of bleed
         skill = Skill(
@@ -205,6 +209,5 @@ class TestSkillSystem:
         assert defender_state.current_health == 1000.0 - 100.0  # 900.0
 
         # Check stack accumulation (4 procs * 1 stack each = 4 total stacks)
-        assert "Bleed" in defender_state.active_debuffs
-        bleed_debuff = defender_state.active_debuffs["Bleed"]
-        assert bleed_debuff.stacks == 4
+        # Check stack accumulation (4 procs * 1 stack each = 4 total stacks)
+        assert state_manager.get_effect_stacks(defender.id, "Bleed") == 4

@@ -1,27 +1,32 @@
 """Integration test for PR6 - Combat Math Centralization."""
 
 from random import Random
-from src.combat_engine import CombatEngine, HitContext
-from src.models import Entity
+from src.engine.core import CombatEngine, HitContext
+from src.models import Entity, EntityStats
 from src.state import StateManager, EntityState
 
 
 def test_pr6_resolve_hit_integration():
     """Test that PR6 functions integrate correctly with resolve_hit."""
 
-    # Create test entities
-    attacker = Entity(id="test_attacker", name="Test Attacker")
-    attacker.final_stats.base_damage = 100
-    attacker.final_stats.crit_chance = 0.5
-    attacker.final_stats.crit_damage = 2.0
-    attacker.final_stats.pierce_ratio = 0.0
+    # Create test entities with base stats
+    attacker_stats = EntityStats(
+        base_damage=100,
+        crit_chance=0.5,
+        crit_damage=2.0,
+        pierce_ratio=0.01  # Minimum valid value
+    )
+    attacker = Entity(id="test_attacker", base_stats=attacker_stats, name="Test Attacker")
 
-    defender = Entity(id="test_defender", name="Test Defender")
-    defender.final_stats.armor = 50
-    defender.final_stats.evasion_chance = 0.0
-    defender.final_stats.dodge_chance = 0.0
-    defender.final_stats.block_chance = 0.0
-    defender.final_stats.block_amount = 20
+    defender_stats = EntityStats(
+        base_damage=50,
+        armor=50,
+        evasion_chance=0.0,
+        dodge_chance=0.0,
+        block_chance=0.0,
+        block_amount=20
+    )
+    defender = Entity(id="test_defender", base_stats=defender_stats, name="Test Defender")
 
     # Create deterministic RNG
     rng = Random(42)
@@ -41,7 +46,6 @@ def test_pr6_resolve_hit_integration():
     # Verify basic properties
     assert ctx.attacker == attacker
     assert ctx.defender == defender
-    assert ctx.base_damage == 100
     assert ctx.final_damage >= 0
 
     # Verify with seeded RNG we get deterministic results
@@ -50,7 +54,7 @@ def test_pr6_resolve_hit_integration():
     ctx2 = engine2.resolve_hit(attacker, defender, state_manager)
 
     assert ctx.final_damage == ctx2.final_damage
-    assert ctx.is_crit == ctx2.is_crit
+    assert ctx.was_crit == ctx2.was_crit
 
     print(f"✅ PR6 Integration Test Passed - Damage: {ctx.final_damage}")
 

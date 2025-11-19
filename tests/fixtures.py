@@ -118,6 +118,10 @@ def make_defender(
         armor: Armor value
         max_health: Health pool
         pierce_ratio: Armor pierce ratio (typically low for defenders)
+        evasion_chance: Evasion chance (0.0 to 1.0)
+        dodge_chance: Dodge chance (0.0 to 1.0)
+        block_chance: Block chance (0.0 to 1.0)
+        block_amount: Block damage reduction amount
 
     Returns:
         Configured defender Entity
@@ -131,6 +135,10 @@ def make_defender(
         crit_damage=1.2,   # Low crit damage
         pierce_ratio=pierce_ratio,
         max_health=max_health,
+        evasion_chance=evasion_chance,
+        dodge_chance=dodge_chance,
+        block_chance=block_chance,
+        block_amount=block_amount,
         rarity="Common"
     )
 

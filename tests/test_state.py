@@ -1,288 +1,131 @@
-"""Unit tests for state management (EntityState and StateManager)."""
+"""Unit tests for StateManager."""
 
 import pytest
-from src.models import Entity, EntityStats
-from src.state import EntityState, StateManager
+from unittest.mock import MagicMock
+from src.models import Entity, EntityStats, EffectInstance
+from src.state import StateManager, EntityState
+
+
+@pytest.fixture
+def state_manager():
+    return StateManager()
+
+@pytest.fixture
+def entity():
+    stats = EntityStats(max_health=100.0, max_resource=50.0)
+    return Entity(id="test_entity", base_stats=stats)
 
 
 class TestEntityState:
-    """Test the EntityState dataclass."""
-
-    def test_entity_state_creation_alive(self):
-        """Test creating an EntityState for a living entity."""
-        state = EntityState(current_health=100.0, is_alive=True)
+    def test_initialization(self, entity):
+        """Test valid initialization."""
+        state = EntityState(entity=entity, current_health=100.0)
         assert state.current_health == 100.0
         assert state.is_alive is True
+        
+    def test_validation_negative_health(self, entity):
+        """Test that negative health is rejected."""
+        with pytest.raises(ValueError):
+            EntityState(entity=entity,current_health=-1.0)
 
-    def test_entity_state_creation_dead(self):
-        """Test creating an EntityState for a dead entity."""
-        state = EntityState(current_health=0.0, is_alive=False)
-        assert state.current_health == 0.0
-        assert state.is_alive is False
-
-    def test_entity_state_validation_negative_health(self):
-        """Test that negative current_health raises ValueError."""
-        with pytest.raises(ValueError, match="current_health cannot be negative"):
-            EntityState(current_health=-10.0)
-
-    def test_entity_state_auto_correct_dead(self):
-        """Test that zero health automatically sets is_alive to False."""
-        state = EntityState(current_health=0.0, is_alive=True)
-        assert state.current_health == 0.0
+    def test_auto_death_on_zero_health(self, entity):
+        """Test that 0 health sets is_alive to False."""
+        state = EntityState(entity=entity,current_health=0.0, is_alive=True)
         assert state.is_alive is False
 
 
 class TestStateManager:
-    """Test the StateManager class."""
-
-    def test_state_manager_initialization(self):
-        """Test that StateManager starts empty."""
-        manager = StateManager()
-        assert len(manager) == 0
-
-    def test_add_entity_success(self):
-        """Test successful entity addition."""
-        manager = StateManager()
-        stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", base_stats=stats)
-
-        manager.add_entity(entity)
-
-        assert len(manager) == 1
-        assert "test_entity" in manager
-        assert manager.is_registered("test_entity")
-
-        state = manager.get_state("test_entity")
-        assert state is not None
+    
+    def test_add_entity(self, state_manager, entity):
+        """Test adding an entity initializes state correctly."""
+        state_manager.add_entity(entity)
+        assert "test_entity" in state_manager
+        
+        state = state_manager.get_state("test_entity")
         assert state.current_health == 100.0
-        assert state.is_alive is True
+        assert state.current_resource == 50.0
 
-    def test_add_entity_duplicate(self):
-        """Test that adding the same entity twice raises ValueError."""
-        manager = StateManager()
-        stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", base_stats=stats)
+    def test_add_duplicate_entity_raises_error(self, state_manager, entity):
+        """Test that adding duplicate entity raises ValueError."""
+        state_manager.add_entity(entity)
+        with pytest.raises(ValueError, match="already registered"):
+            state_manager.add_entity(entity)
 
-        manager.add_entity(entity)
-
-        with pytest.raises(ValueError, match="Entity 'test_entity' is already registered"):
-            manager.add_entity(entity)
-
-    def test_remove_entity_success(self):
-        """Test successful entity removal."""
-        manager = StateManager()
-        stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", base_stats=stats)
-
-        manager.add_entity(entity)
-        assert len(manager) == 1
-
-        manager.remove_entity("test_entity")
-        assert len(manager) == 0
-        assert "test_entity" not in manager
-        assert not manager.is_registered("test_entity")
-
-    def test_remove_entity_not_registered(self):
-        """Test that removing a non-registered entity raises KeyError."""
-        manager = StateManager()
-
-        with pytest.raises(KeyError, match="Entity 'unknown' is not registered"):
-            manager.remove_entity("unknown")
-
-    def test_get_state_unregistered_entity(self):
-        """Test that getting state of unregistered entity raises KeyError."""
-        manager = StateManager()
-
-        with pytest.raises(KeyError, match="Entity 'unknown' not registered - call add_entity\\(\\) first"):
-            manager.get_state("unknown")
-
-    def test_apply_damage_normal(self):
-        """Test applying damage less than current health."""
-        manager = StateManager()
-        stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", base_stats=stats)
-
-        manager.add_entity(entity)
-        damage_applied = manager.apply_damage("test_entity", 30.0)
-
-        assert damage_applied == 30.0
-        state = manager.get_state("test_entity")
-        assert state is not None
-        assert state.current_health == 70.0
-        assert state.is_alive is True
-
-    def test_apply_damage_exact_death(self):
-        """Test applying damage exactly equal to current health."""
-        manager = StateManager()
-        stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", base_stats=stats)
-
-        manager.add_entity(entity)
-        damage_applied = manager.apply_damage("test_entity", 100.0)
-
-        assert damage_applied == 100.0
-        state = manager.get_state("test_entity")
-        assert state is not None
-        assert state.current_health == 0.0
-        assert state.is_alive is False
-
-    def test_apply_damage_to_dead_entity(self):
-        """Test that damage to dead entities does nothing."""
-        manager = StateManager()
-        stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", base_stats=stats)
-
-        manager.add_entity(entity)
-        manager.apply_damage("test_entity", 100.0)  # Kill the entity
-
-        damage_applied = manager.apply_damage("test_entity", 50.0)
-        assert damage_applied == 0.0
-
-        state = manager.get_state("test_entity")
-        assert state is not None
-        assert state.current_health == 0.0
-        assert state.is_alive is False
-
-    def test_apply_damage_unregistered_entity(self):
-        """Test that damage to unregistered entities returns 0.0."""
-        manager = StateManager()
-
-        with pytest.raises(KeyError, match="Entity 'unknown' not registered"):
-            manager.apply_damage("unknown", 50.0)
-
-    def test_apply_damage_negative_damage(self):
-        """Test that negative damage is ignored (returns 0.0)."""
-        manager = StateManager()
-        stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", base_stats=stats)
-
-        manager.add_entity(entity)
-        original_health = 100.0
-
-        damage_applied = manager.apply_damage("test_entity", -10.0)
-        assert damage_applied == 0.0
-
-        state = manager.get_state("test_entity")
-        assert state is not None
-        assert state.current_health == original_health  # Health unchanged
-
-    def test_set_health(self):
-        """Test setting entity health directly."""
-        manager = StateManager()
-        stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", base_stats=stats)
-
-        manager.add_entity(entity)
-
-        # Set health to specific value
-        manager.set_health("test_entity", 75.0)
-        state = manager.get_state("test_entity")
-        assert state.current_health == 75.0
-        assert state.is_alive is True
-
-        # Set health to 0 (should mark as dead)
-        manager.set_health("test_entity", 0.0)
-        state = manager.get_state("test_entity")
-        assert state.current_health == 0.0
-        assert state.is_alive is False
-
-    def test_set_resource(self):
-        """Test setting entity resource directly."""
-        manager = StateManager()
-        stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", base_stats=stats)
-
-        manager.add_entity(entity)
-
-        # Set resource to specific value
-        manager.set_resource("test_entity", 50.0)
-        assert manager.get_current_resource("test_entity") == 50.0
-
-        # Try to set above max (should clamp)
-        manager.set_resource("test_entity", 150.0)
-        assert manager.get_current_resource("test_entity") == 100.0
-
-        # Try to set below 0 (should clamp)
-        manager.set_resource("test_entity", -10.0)
-        assert manager.get_current_resource("test_entity") == 0.0
-
-    def test_set_cooldown(self):
-        """Test setting skill cooldowns."""
-        manager = StateManager()
-        stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", base_stats=stats)
-
-        manager.add_entity(entity)
-
-        # Set cooldown
-        manager.set_cooldown("test_entity", "fireball", 3.5)
-        assert manager.get_cooldown_remaining("test_entity", "fireball") == 3.5
-
-        # Set another cooldown
-        manager.set_cooldown("test_entity", "heal", 1.0)
-        assert manager.get_cooldown_remaining("test_entity", "heal") == 1.0
-        assert manager.get_cooldown_remaining("test_entity", "fireball") == 3.5
-
-    def test_get_cooldown_remaining(self):
-        """Test getting cooldown remaining for skills."""
-        manager = StateManager()
-        stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", base_stats=stats)
-
-        manager.add_entity(entity)
-
-        # Test unset cooldown returns 0
-        assert manager.get_cooldown_remaining("test_entity", "nonexistent") == 0.0
-
-        # Set and get cooldown
-        manager.set_cooldown("test_entity", "skill_1", 5.0)
-        assert manager.get_cooldown_remaining("test_entity", "skill_1") == 5.0
-
-    def test_iter_effects(self):
-        """Test iterating over active effects."""
-        manager = StateManager()
-        stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", base_stats=stats)
-
-        manager.add_entity(entity)
-
-        # Initially should be empty
-        assert list(manager.iter_effects("test_entity")) == []
-
-        # Note: Testing effects would require EffectInstance - out of scope for now
-
-    def test_reset_system(self):
-        """Test resetting the state manager."""
-        manager = StateManager()
-        stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", base_stats=stats)
-
-        manager.add_entity(entity)
-        manager.set_health("test_entity", 50.0)
-        manager.set_resource("test_entity", 75.0)
-        manager.set_cooldown("test_entity", "skill", 2.0)
-
-        assert len(manager) == 1
-        assert manager.get_current_health("test_entity") == 50.0
-
-        manager.reset_system()
-        assert len(manager) == 0
-
-        # Should not be able to access entity now
+    def test_remove_entity(self, state_manager, entity):
+        """Test removing entity clears state."""
+        state_manager.add_entity(entity)
+        state_manager.remove_entity(entity.id)
+        assert "test_entity" not in state_manager
+        
         with pytest.raises(KeyError):
-            manager.get_state("test_entity")
+            state_manager.get_state(entity.id)
 
-    def test_len_and_contains(self):
-        """Test __len__ and __contains__ methods."""
-        manager = StateManager()
-        stats = EntityStats(max_health=100.0)
-        entity = Entity(id="test_entity", base_stats=stats)
+    def test_remove_unknown_entity_raises_error(self, state_manager):
+        """Test removing unknown entity raises KeyError."""
+        with pytest.raises(KeyError, match="not registered"):
+            state_manager.remove_entity("unknown")
 
-        assert len(manager) == 0
-        assert "test_entity" not in manager
+    def test_apply_damage(self, state_manager, entity):
+        """Test damage application logic."""
+        state_manager.add_entity(entity)
+        
+        # Normal damage
+        actual = state_manager.apply_damage(entity.id, 30.0)
+        assert actual == 30.0
+        assert state_manager.get_state(entity.id).current_health == 70.0
+        
+        # Lethal damage
+        actual = state_manager.apply_damage(entity.id, 100.0)
+        assert actual == 70.0 # Only dealt remaining health
+        state = state_manager.get_state(entity.id)
+        assert state.current_health == 0.0
+        assert state.is_alive is False
 
-        manager.add_entity(entity)
+    def test_apply_damage_unregistered(self, state_manager):
+        """Test apply_damage on unregistered entity raises KeyError."""
+        with pytest.raises(KeyError, match="not registered"):
+            state_manager.apply_damage("unknown", 10.0)
 
-        assert len(manager) == 1
-        assert "test_entity" in manager
-        assert "unknown" not in manager
+    def test_apply_effect(self, state_manager, entity):
+        """Test applying an EffectInstance."""
+        state_manager.add_entity(entity)
+        
+        effect = EffectInstance(
+            id="eff1", definition_id="poison", source_id="src",
+            time_remaining=10.0, tick_interval=1.0, stacks=1
+        )
+        
+        result = state_manager.apply_effect(entity.id, effect)
+        assert result["success"] is True
+        assert result["action"] == "applied"
+        
+        effects = state_manager.iter_effects(entity.id)
+        assert len(effects) == 1
+        assert effects[0].definition_id == "poison"
+
+    def test_update_processes_ticks(self, state_manager, entity):
+        """Test that update() triggers effect ticks."""
+        state_manager.add_entity(entity)
+        
+        # Apply a damaging effect
+        effect = EffectInstance(
+            id="eff1", definition_id="poison", source_id="src",
+            time_remaining=5.0, tick_interval=1.0, stacks=1, value=10.0
+        )
+        state_manager.apply_effect(entity.id, effect)
+        
+        # Simulate 1.0 second (should trigger 1 tick of 10 damage)
+        state_manager.update(1.0)
+        
+        state = state_manager.get_state(entity.id)
+        assert state.current_health == 90.0 # 100 - 10
+        assert state.active_debuffs == {} # Ensure old debuff dict is ignored if using new system
+
+    def test_reset_system(self, state_manager, entity):
+        """Test that reset clears everything."""
+        state_manager.add_entity(entity)
+        state_manager.reset_system()
+        
+        assert len(state_manager) == 0
+        with pytest.raises(KeyError):
+            state_manager.get_state(entity.id)

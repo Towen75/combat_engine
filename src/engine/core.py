@@ -4,8 +4,8 @@ import random
 from typing import Optional, List, Dict, Any
 from ..models import Entity, SkillUseResult, ApplyDamageAction, DispatchEventAction, ApplyEffectAction, Action
 from ..skills import Skill
-from ..events import EventBus, OnHitEvent, OnCritEvent
-from ..state import StateManager
+from ..events import EventBus, OnHitEvent, OnCritEvent, OnDodgeEvent, OnGlancingBlowEvent, OnBlockEvent, OnSkillUsedEvent
+from ..state import StateManager, Modifier
 from .hit_context import HitContext
 from ..combat_math import (
     evade_dodge_or_normal,
@@ -353,8 +353,7 @@ class CombatEngine:
         Returns:
             True if skill was successfully used, False if unable (cooldown/resource issues)
         """
-        from .events import OnDodgeEvent, OnBlockEvent, OnGlancingBlowEvent, OnSkillUsedEvent
-
+        
         # 0. Check resource availability
         attacker_state = state_manager.get_state(attacker.id)
         if not attacker_state:
@@ -387,7 +386,7 @@ class CombatEngine:
                 dodge_event = OnDodgeEvent(attacker=attacker, defender=defender)
                 event_bus.dispatch(dodge_event)
                 # Award evasion resource if applicable
-            continue  # No damage/debuffs on dodge
+                continue  # No damage/debuffs on dodge
 
             # Create the hit event first
             hit_event = OnHitEvent(
@@ -448,7 +447,6 @@ class CombatEngine:
         """Process skill triggers and active triggers for a hit context."""
 
         # Process skill-specific triggers (pass RNG explicitly per PR6)
-        from .combat_math import calculate_skill_effect_proc
         for trigger in skill.triggers:
             if trigger.event == "OnHit" and hit_context.final_damage > 0:
                 if calculate_skill_effect_proc(self.rng, trigger.check.get("proc_rate", 1.0)):
@@ -507,7 +505,6 @@ class CombatEngine:
             duration = result.get("duration", 5.0)
 
             # Create a crit chance modifier
-            from .state import Modifier
             modifier = Modifier(
                 value=bonus_value,
                 duration=duration,
@@ -529,7 +526,6 @@ class CombatEngine:
                 state_manager.apply_damage(source.id, reflected_damage)
 
                 # Create reflect damage event
-                from .events import OnHitEvent
                 reflect_event = OnHitEvent(
                     attacker=target,  # Defender is now attacker
                     defender=source, # Attacker becomes defender

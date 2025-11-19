@@ -24,8 +24,8 @@ class TestSkillUseResult:
         defender = make_entity("defender")
 
         # Create mock hit context and actions
-        from src.engine import HitContext
-        hit_ctx = HitContext(attacker=attacker, defender=defender, base_damage=50.0)
+        from src.engine.hit_context import HitContext
+        hit_ctx = HitContext(attacker=attacker, defender=defender, base_raw=50, base_resolved=50, final_damage=50.0)
 
         action1 = ApplyDamageAction(target_id=defender.id, damage=25.0, source="test")
         # Create minimal mock event - can be any object for testing
@@ -200,6 +200,7 @@ class TestItemSystem:
             affix_id="test_affix",
             stat_affected="base_damage",
             mod_type="flat",
+            affix_pools="damage",
             description="+10 Damage",
             base_value=10.0,
             value=12.5
@@ -213,7 +214,7 @@ class TestItemSystem:
     def test_item_creation(self):
         """Test creating Item."""
         affixes = [
-            RolledAffix("affix1", "base_damage", "flat", "+10 Damage", 10.0, 10.0)
+            RolledAffix("affix1", "base_damage", "flat", "damage", "+10 Damage", 10.0, 10.0)
         ]
 
         item = Item(
@@ -238,7 +239,8 @@ class TestRarityMapping:
 
     def test_all_rarities_have_mappings(self):
         """Ensure all standard rarities are mapped."""
-        expected_rarities = {"Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"}
+        from src.data.typed_models import Rarity
+        expected_rarities = {Rarity.COMMON, Rarity.UNCOMMON, Rarity.RARE, Rarity.EPIC, Rarity.LEGENDARY, Rarity.MYTHIC}
 
         assert set(RARITY_TO_CRIT_TIER.keys()) == expected_rarities
 
