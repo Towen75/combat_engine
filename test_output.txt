@@ -1,0 +1,143 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.0, pluggy-1.6.0
+rootdir: G:\Godot Projects\combat_engine
+configfile: pyproject.toml
+plugins: cov-7.0.0
+collected 1 item
+
+tests\test_batch_determinism.py F                                        [100%]
+
+================================== FAILURES ===================================
+______________ TestBatchDeterminism.test_batch_determinism_small ______________
+
+self = <test_batch_determinism.TestBatchDeterminism object at 0x000001D117A23F80>
+warrior = Entity(id='warrior', name='Warrior')
+mage = Entity(id='mage', name='Mage')
+
+    def test_batch_determinism_small(self, warrior, mage):
+        """Test that small batches produce identical results with same seed."""
+        runner = SimulationBatchRunner(batch_id="test_batch")
+    
+        # Run batch with seed=42, 10 iterations
+>       result1 = runner.run_batch(warrior, mage, iterations=10, base_seed=42, max_duration=10.0)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_batch_determinism.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.batch_simulation.batch_runner.SimulationBatchRunner object at 0x000001D117A23740>
+attacker_template = Entity(id='warrior', name='Warrior')
+defender_template = Entity(id='mage', name='Mage'), iterations = 10
+base_seed = 42, max_duration = 10.0
+
+    def run_batch(
+        self,
+        attacker_template: Entity,
+        defender_template: Entity,
+        iterations: int,
+        base_seed: int,
+        max_duration: float = 30.0
+    ) -> BatchResult:
+        """Run a batch of combat simulations with deterministic seeding.
+    
+        Each iteration uses seed = base_seed + i for reproducibility.
+    
+        Args:
+            attacker_template: Template entity for the attacker
+            defender_template: Template entity for the defender
+            iterations: Number of simulations to run
+            base_seed: Base random seed for deterministic results
+            max_duration: Maximum duration per simulation in seconds
+    
+        Returns:
+            BatchResult with aggregated statistics and per-fight details
+        """
+        # Initialize aggregators
+        dps_aggregator = DpsAggregator()
+        win_rate_aggregator = WinRateAggregator()
+    
+        # Result tracking
+        result = BatchResult(
+            batch_id=self.batch_id,
+            iterations=iterations,
+            base_seed=base_seed
+        )
+    
+        for i in range(iterations):
+            # 1. Create deterministic seed for this specific run
+            run_seed = base_seed + i
+            rng = random.Random(run_seed)
+    
+            # 2. Inject RNG into all components (PR-P1S2 compliance)
+            combat_engine = CombatEngine(rng=rng)
+            state_manager = StateManager()
+            event_bus = EventBus()
+    
+            # 3. Create fresh entity instances for this simulation
+            # Use the template's base_stats to create new entity objects
+            attacker = Entity(
+                id=f"{attacker_template.id}_sim{i}",
+                base_stats=attacker_template.base_stats,
+                name=attacker_template.name,
+                rarity=attacker_template.rarity.value if hasattr(attacker_template.rarity, 'value') else str(attacker_template.rarity)
+            )
+            defender = Entity(
+                id=f"{defender_template.id}_sim{i}",
+                base_stats=defender_template.base_stats,
+                name=defender_template.name,
+                rarity=defender_template.rarity.value if hasattr(defender_template.rarity, 'value') else str(defender_template.rarity)
+            )
+    
+            # Copy equipment if present
+            if hasattr(attacker_template, 'equipment') and attacker_template.equipment:
+                attacker.equipment = attacker_template.equipment.copy()
+            if hasattr(defender_template, 'equipment') and defender_template.equipment:
+                defender.equipment = defender_template.equipment.copy()
+    
+            # 4. Run simulation
+            runner = sim_module.SimulationRunner(combat_engine, state_manager, event_bus)
+            runner.add_entity(attacker)
+            runner.add_entity(defender)
+    
+            # Track DPS for this fight
+            dps_aggregator.start_fight(timestamp=0.0)
+    
+            # Subscribe to hit events for DPS tracking
+            def track_hit(event):
+                if hasattr(event, 'timestamp') and hasattr(event, 'damage'):
+                    dps_aggregator.add_hit(event.damage, event.timestamp)
+    
+>           event_bus.subscribe("OnHitEvent", track_hit)
+
+src\batch_simulation\batch_runner.py:150: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <src.events.EventBus object at 0x000001D117A44DD0>
+event_type = 'OnHitEvent'
+listener = <function SimulationBatchRunner.run_batch.<locals>.track_hit at 0x000001D117A2A160>
+priority = 0, name = ''
+
+    def subscribe(self, event_type: type, listener: Callable, priority: int = 0, name: str = ""):
+        """Register a listener for the given event type.
+    
+        Args:
+            event_type: The event class to listen for
+            listener: Function to call when event is dispatched
+            priority: Higher values executed first (default: 0)
+            name: Optional name for debugging (default: "")
+        """
+        entry = ListenerEntry(listener=listener, priority=priority, name=name)
+        self.listeners[event_type].append(entry)
+    
+        # Keep listeners sorted by priority (highest first)
+        self.listeners[event_type].sort(key=lambda e: e.priority, reverse=True)
+    
+        logger.debug("Subscribed listener %s for %s (priority: %d)",
+>                   name or str(listener), event_type.__name__, priority)
+                                           ^^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'str' object has no attribute '__name__'. Did you mean: '__ne__'?
+
+src\events.py:188: AttributeError
+=========================== short test summary info ===========================
+FAILED tests/test_batch_determinism.py::TestBatchDeterminism::test_batch_determinism_small
+============================== 1 failed in 0.18s ==============================

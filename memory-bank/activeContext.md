@@ -2,17 +2,32 @@
 
 ## Current Work Focus
 
-### Primary Active Task: PR-P2S4 - Entity Lifecycle Management
+### Primary Active Task: PR-P2S5 - Simulation Batching
 
-**Status**: Ready for Implementation
+**Status**: Ready for Planning
 **Files in Active Development**:
-- `src/state.py` (Lifecycle management logic)
-- `src/events.py` (New lifecycle events)
-- `tests/test_lifecycle.py` (New test file)
+- `src/simulation.py` (BatchRunner class)
+- `src/engine/` (New telemetry/telemetry collection system)
+- `tests/test_batch_runner.py` (New batch test suite)
 
-**Rationale**: With Phase 1 (Foundation) complete, we need to handle the creation and destruction of entities properly. Currently, entities can "die" (health <= 0), but their event listeners remain active, leading to zombie processes and memory leaks in long simulations.
+**Rationale**: With entity lifecycle management complete, we need advanced simulation tools for statistical analysis and automated balance validation. Thousands of deterministic simulations enable comprehensive balance testing and performance optimization.
 
 ## Recent Changes
+
+### Version 2.3.0 (2025-11-19)
+- **PR-P2S4 Complete**: Entity Lifecycle Management implemented
+  - Added `EntitySpawnEvent`, `EntityDeathEvent`, `EntityDespawnEvent` for proper lifecycle tracking
+  - StateManager automatically triggers Death events on entity health depletion
+  - EventBus cleanup prevents memory leaks from dead entity listeners
+  - Comprehensive lifecycle test coverage with `test_lifecycle.py`
+- **StateManager Refactoring**: Major architectural improvements for entity management
+  - Enhanced state reset and initialization hooks
+  - Memory leak prevention for dead entity references
+  - Improved EventBus integration for lifecycle events
+- **Event System Enhancement**: New lifecycle events enable complex game mechanics
+  - OnSpawn/OnDeath/OnDespawn event chain for entity state transitions
+  - Automatic event listener cleanup prevents zombie processes
+  - Deterministic lifecycle behavior for testing and simulation
 
 ### Version 2.2.1 (2025-11-19)
 - **Phase 1 Complete**: All foundational stability PRs (P1S1, P1S2, P1S3) are merged and verified.
@@ -40,16 +55,18 @@
 
 ## Next Steps Priority Queue
 
-### Immediate Next (PR-P1S3 Completion)
+### Immediate Next (Phase 2 Continuation)
 
-1. **PR-P2S4 Implementation**: Entity Lifecycle
-   - Define `EntitySpawnEvent`, `EntityDeathEvent`, `EntityDespawnEvent`.
-   - Update `StateManager` to trigger Death events automatically on 0 HP.
-   - Implement `cleanup_entity` method to unsubscribe listeners.
-   
-2. **PR-P2S5 Implementation**: Simulation Batching
-   - Create `BatchRunner` class.
-   - Implement deterministic seed increments for batch runs.
+1. **PR-P2S5 Implementation**: Simulation Batching (ACTIVE)
+   - Create `BatchRunner` class for thousands of automated simulations
+   - Implement deterministic seed increments for batch runs
+   - Add telemetry collection system for statistical analysis
+   - Build balance recommendation system based on simulation results
+
+2. **Phase 3 Preparation**: Godot Port Planning
+   - Analyze Python architecture for GDScript compatibility
+   - Plan incremental translation strategy
+   - Identify core components for initial port
 
 ## Active Decisions and Considerations
 

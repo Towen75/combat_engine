@@ -326,11 +326,11 @@ class SimulationRunner:
                             attacker=entity,
                             defender=target,
                             damage_dealt=damage,
-                            is_crit=hit_context.is_crit
+                            is_crit=hit_context.was_crit
                         )
                         self.event_bus.dispatch(hit_event)
 
-                        if hit_context.is_crit:
+                        if hit_context.was_crit:
                             crit_event = OnCritEvent(hit_event=hit_event)
                             self.event_bus.dispatch(crit_event)
 

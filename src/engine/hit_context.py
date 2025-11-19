@@ -35,6 +35,10 @@ class HitContext:
     # Optional RNG debugging (disabled by default for performance)
     rng_seed: Optional[int] = None
 
+    # Batch tracking (PR-P2S5)
+    simulation_id: Optional[int] = None  # Unique ID for this simulation run
+    batch_id: Optional[str] = None       # Batch identifier for grouping
+
     @property
     def attacker_id(self) -> str:
         """Get attacker entity ID for serialization."""
@@ -63,4 +67,6 @@ class HitContext:
             "damage_pre_mitigation": self.damage_pre_mitigation,
             "damage_post_armor": self.damage_post_armor,
             "damage_blocked": self.damage_blocked,
+            "simulation_id": self.simulation_id,
+            "batch_id": self.batch_id,
         }

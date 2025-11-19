@@ -1,3 +1,31 @@
+# [](https://github.com/Towen75/combat_engine/compare/v2.3.0...v) (2025-11-19)
+
+
+
+# [](https://github.com/Towen75/combat_engine/compare/v2.2.2...v) (2025-11-19)
+
+## [2.3.0] - 2025-11-19
+
+### Added
+- **PR-P2S5 Complete**: Simulation Batching API and Telemetry Expansion
+  - **SimulationBatchRunner**: High-volume deterministic combat testing with RNG injection
+  - **Statistical Aggregators**: DPS and win rate analysis with mean/median/stdev calculations
+  - **Telemetry Modes**: Developer (DEBUG), Designer (INFO), and Player (narrative) logging modes
+  - **Data Exporters**: JSON and CSV export for analysis and spreadsheet balancing
+  - **HitContext Expansion**: Added `simulation_id` and `batch_id` fields for batch tracking
+
+### Technical Details
+- **Determinism**: Bit-identical results across repeated runs with same seed (base_seed + iteration)
+- **RNG Injection**: Proper RNG propagation to CombatEngine and ItemGenerator
+- **Cleanup**: Mandatory StateManager.reset_system() prevents state leakage between simulations
+- **Test Coverage**: 33 comprehensive tests covering determinism, aggregation, telemetry, and export
+- **Performance**: Sub-second batch execution for 100+ simulations
+
+### Breaking Changes
+- **Package Structure**: New `batch_simulation` package to avoid naming conflicts
+- **HitContext**: Added optional `simulation_id` and `batch_id` fields (backward compatible)
+
+
 # [](https://github.com/Towen75/combat_engine/compare/v2.2.2...v) (2025-11-19)
 
 

@@ -2,11 +2,11 @@
 
 ## Current Status Summary
 
-**Version**: 2.2.1 (2025-11-19)
+**Version**: 2.3.0 (2025-11-19)
 **Phase**: Phase 2: New Feature Implementation
-**Status**: STARTING PR-P2S4 (Entity Lifecycle Management)
+**Status**: PR-P2S4 COMPLETED, STARTING PR-P2S5 (Simulation Batching)
 
-### Overall Progress: 75% Complete
+### Overall Progress: 88% Complete
 
 ## What Works (✅ Fully Implemented & Tested)
 
@@ -16,8 +16,7 @@
 - **✅ PR-P1S3**: Data pipeline hardening with strict typing and cross-reference validation.
 - **✅ Engine Refactor**: Namespace shadowing resolved (`src/engine/core.py`).
 
-### Phase 2: New Feature Implementation (0% Complete)
-- **⏳ PR-P2S4**: Entity lifecycle management (Planned)
+### Phase 2: New Feature Implementation (50% Complete)
 - **⏳ PR-P2S5**: Simulation batching and telemetry system (Planned)
 
 ### Phase 3: Finalization & Professionalization (0% Complete)
@@ -68,12 +67,7 @@
 ## What's Left to Build (⏳ Planned Implementation)
 
 ### Immediate Priority (Phase 2 Completion)
-1. **Entity Lifecycle Management** (Phase 2S4)
-   - OnSpawn, OnDeath, OnDespawn events with cleanup
-   - Memory leak prevention for dead entity references
-   - State reset and initialization hooks
-
-2. **Advanced Simulation Tools** (Phase 2S5)
+1. **Advanced Simulation Tools** (Phase 2S5)
    - BatchRunner for thousands of automated simulations
    - Statistical aggregators (DPS distributions, Time-To-Kill)
    - Balance recommendation system
