@@ -4,7 +4,7 @@ Validates DPS and win rate aggregation with known data.
 """
 
 import pytest
-from src.batch_simulation.aggregators import DpsAggregator, WinRateAggregator
+from src.simulation.aggregators import DpsAggregator, WinRateAggregator
 
 
 class TestDpsAggregator:

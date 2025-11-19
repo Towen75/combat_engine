@@ -2,12 +2,12 @@
 
 import random
 from typing import Optional, List, Dict, Any
-from ..models import Entity, SkillUseResult, ApplyDamageAction, DispatchEventAction, ApplyEffectAction, Action
-from ..skills import Skill
-from ..events import EventBus, OnHitEvent, OnCritEvent, OnDodgeEvent, OnGlancingBlowEvent, OnBlockEvent, OnSkillUsedEvent
-from ..state import StateManager, Modifier
+from src.core.models import Entity, SkillUseResult, ApplyDamageAction, DispatchEventAction, ApplyEffectAction, Action
+from src.core.skills import Skill
+from src.core.events import EventBus, OnHitEvent, OnCritEvent, OnDodgeEvent, OnGlancingBlowEvent, OnBlockEvent, OnSkillUsedEvent
+from src.core.state import StateManager, Modifier
 from .hit_context import HitContext
-from ..combat_math import (
+from src.combat.combat_math import (
     evade_dodge_or_normal,
     resolve_crit,
     apply_pierce_to_armor,

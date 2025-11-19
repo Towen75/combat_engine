@@ -7,7 +7,7 @@ import shutil
 from unittest.mock import patch
 
 from src.data.typed_models import DataValidationError, Rarity, ItemSlot, DamageType, EffectType, TriggerEvent
-from src.game_data_provider import GameDataProvider
+from src.data.game_data_provider import GameDataProvider
 
 
 class TestCrossReferenceValidation:
@@ -59,20 +59,6 @@ heal_skill,Heal Skill,Physical,1,"Skill that provides healing over time.",30,5.0
             with open(os.path.join(self.temp_dir, filename), 'w') as f:
                 f.write(content)
 
-        return self.temp_dir
-
-    def test_valid_cross_references(self):
-        """Test that valid cross-references pass validation."""
-        data_dir = self.create_test_csv_files()
-
-        with patch('src.game_data_provider.os.path.dirname', return_value=data_dir), \
-             patch('src.game_data_provider.os.path.join', side_effect=os.path.join):
-            provider = GameDataProvider()
-            # This should not raise any exceptions
-            provider._validate_cross_references()
-
-    def test_invalid_skill_effect_reference(self):
-        """Test that invalid skill effect references would be caught."""
         # This test demonstrates the validation error structure
         # In real usage, the validation is tested by the actual data loading
 

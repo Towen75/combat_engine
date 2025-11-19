@@ -1,9 +1,9 @@
 """Unit tests for CombatEngine - core damage calculations."""
 
 import pytest
-from src.models import Entity, EntityStats, SkillUseResult, ApplyEffectAction
-from src.engine import CombatEngine, HitContext
-from src.state import StateManager
+from src.core.models import Entity, EntityStats, SkillUseResult, ApplyEffectAction
+from src.combat import CombatEngine, HitContext
+from src.core.state import StateManager
 from tests.fixtures import make_attacker, make_defender, make_rng, make_entity
 from unittest.mock import patch, MagicMock
 
@@ -495,7 +495,7 @@ class TestCombatEngineCalculateSkillUse:
         assert len(result.actions) >= 2
 
         # First action should be damage application
-        from src.models import ApplyDamageAction, DispatchEventAction
+        from src.core.models import ApplyDamageAction, DispatchEventAction
         damage_action = result.actions[0]
         assert isinstance(damage_action, ApplyDamageAction)
         assert damage_action.target_id == defender.id

@@ -7,9 +7,9 @@ import pytest
 import json
 import csv
 from pathlib import Path
-from src.models import Entity, EntityStats
-from src.batch_simulation.batch_runner import SimulationBatchRunner, BatchResult
-from src.batch_simulation.exporters import export_to_json, export_to_csv, export_summary_to_csv
+from src.core.models import Entity, EntityStats
+from src.simulation.batch_runner import SimulationBatchRunner, BatchResult
+from src.simulation.exporters import export_to_json, export_to_csv, export_summary_to_csv
 
 
 @pytest.fixture

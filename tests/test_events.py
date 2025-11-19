@@ -1,8 +1,8 @@
 """Unit tests for the event system."""
 
 import pytest
-from src.events import Event, OnHitEvent, OnCritEvent, EventBus
-from src.models import Entity, EntityStats
+from src.core.events import Event, OnHitEvent, OnCritEvent, EventBus
+from src.core.models import Entity, EntityStats
 
 
 class TestEventClasses:

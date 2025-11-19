@@ -8,11 +8,11 @@ import random
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .models import SkillUseResult
-    from .state import StateManager
-    from .events import EventBus
+    from src.core.models import SkillUseResult
+    from src.core.state import StateManager
+    from src.core.events import EventBus
 
-from .models import ApplyDamageAction, DispatchEventAction, ApplyEffectAction, EffectInstance
+from src.core.models import ApplyDamageAction, DispatchEventAction, ApplyEffectAction, EffectInstance
 
 
 class CombatOrchestrator:

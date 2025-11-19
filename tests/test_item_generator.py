@@ -2,8 +2,8 @@ import unittest
 import json
 import random
 import pytest
-from src.item_generator import ItemGenerator
-from src.models import Item, RolledAffix
+from src.utils.item_generator import ItemGenerator
+from src.core.models import Item, RolledAffix
 from src.data.typed_models import AffixDefinition, QualityTier
 
 class TestItemGenerator(unittest.TestCase):

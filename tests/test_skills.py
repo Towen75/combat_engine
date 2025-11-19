@@ -1,12 +1,12 @@
 """Unit tests for skill system - multi-hit skills and triggers."""
 
 import pytest
-from src.models import Entity, EntityStats
-from src.skills import Skill, Trigger
-from src.events import EventBus
-from src.state import StateManager
-from src.engine.core import CombatEngine
-from src.effect_handlers import BleedHandler
+from src.core.models import Entity, EntityStats
+from src.core.skills import Skill, Trigger
+from src.core.events import EventBus
+from src.core.state import StateManager
+from src.combat.engine import CombatEngine
+from src.handlers.effect_handlers import BleedHandler
 from tests.fixtures import make_rng, make_attacker, make_defender
 
 

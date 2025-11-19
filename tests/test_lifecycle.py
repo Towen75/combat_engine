@@ -2,9 +2,9 @@
 
 import pytest
 from unittest.mock import MagicMock
-from src.models import Entity, EntityStats
-from src.state import StateManager
-from src.events import EventBus, EntitySpawnEvent, EntityDeathEvent, EntityDespawnEvent, EntityActivateEvent
+from src.core.models import Entity, EntityStats
+from src.core.state import StateManager
+from src.core.events import EventBus, EntitySpawnEvent, EntityDeathEvent, EntityDespawnEvent, EntityActivateEvent
 
 class TestEntityLifecycle:
     

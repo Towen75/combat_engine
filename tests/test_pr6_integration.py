@@ -1,9 +1,9 @@
 """Integration test for PR6 - Combat Math Centralization."""
 
 from random import Random
-from src.engine.core import CombatEngine, HitContext
-from src.models import Entity, EntityStats
-from src.state import StateManager, EntityState
+from src.combat.engine import CombatEngine, HitContext
+from src.core.models import Entity, EntityStats
+from src.core.state import StateManager, EntityState
 
 
 def test_pr6_resolve_hit_integration():

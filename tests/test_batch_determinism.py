@@ -4,8 +4,8 @@ Validates that batch simulations produce identical results when run with the sam
 """
 
 import pytest
-from src.models import Entity, EntityStats
-from src.batch_simulation.batch_runner import SimulationBatchRunner
+from src.core.models import Entity, EntityStats
+from src.simulation.batch_runner import SimulationBatchRunner
 
 
 @pytest.fixture

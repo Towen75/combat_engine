@@ -7,7 +7,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 
-from src.item_generator import ItemGenerator
+from src.utils.item_generator import ItemGenerator
 
 
 def main():

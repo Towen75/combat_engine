@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
-from ..models import Entity
+from src.core.models import Entity
 
 
 @dataclass

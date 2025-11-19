@@ -20,12 +20,11 @@ ignore_missing_imports = true
 # Module-specific overrides for gradual adoption
 [[tool.mypy.overrides]]
 module = [
-    "src.combat_math",
-    "src.combat_orchestrator",
-    "src.effect_handlers",
-    "src.events",
-    "src.item_generator",
-    "src.simulation",
+    "src.combat.*",
+    "src.core.*",
+    "src.handlers.*",
+    "src.simulation.*",
+    "src.utils.*",
     "tests.*"
 ]
 ignore_errors = true  # These will be migrated incrementally
@@ -33,16 +32,6 @@ ignore_errors = true  # These will be migrated incrementally
 # Core data models should be strictly typed
 [[tool.mypy.overrides]]
 module = "src.data.*"
-ignore_errors = false
-
-# The main game data provider should be strictly typed
-[[tool.mypy.overrides]]
-module = "src.game_data_provider"
-ignore_errors = false
-
-# Combat engine (main entry point)
-[[tool.mypy.overrides]]
-module = "src.engine"
 ignore_errors = false
 
 [tool.black]
@@ -53,6 +42,15 @@ target-version = ['py311']
 profile = "black"
 line_length = 120
 multi_line_output = 3
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP"]
+ignore = ["E501"]  # Line too long (handled by black)
+
 
 [tool.pytest.ini_options]
 minversion = "6.0"

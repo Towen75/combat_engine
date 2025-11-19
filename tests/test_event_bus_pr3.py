@@ -12,7 +12,7 @@ Tests the production-ready features added in PR3:
 import logging
 import pytest
 from unittest.mock import MagicMock
-from src.events import EventBus, OnHitEvent, Event
+from src.core.events import EventBus, OnHitEvent, Event
 
 
 class TestEvent(Event):

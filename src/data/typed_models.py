@@ -234,7 +234,7 @@ class DataValidationError(ValueError):
 
 def validate_entity_stats_are_valid(stats_list: List[str]) -> None:
     """Validate that all stat names are valid EntityStats attributes."""
-    from ..models import EntityStats
+    from src.core.models import EntityStats
     valid_stats = set(vars(EntityStats(0, 1)).keys())
     for stat_name in stats_list:
         if stat_name and stat_name not in valid_stats:

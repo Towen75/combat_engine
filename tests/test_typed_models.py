@@ -10,7 +10,7 @@ from src.data.typed_models import (
     DataValidationError,
     validate_entity_stats_are_valid
 )
-from src.models import EntityStats
+from src.core.models import EntityStats
 
 class TestEnumNormalization:
     """Test the enum normalization and mapping logic."""

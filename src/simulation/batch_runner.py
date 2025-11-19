@@ -7,10 +7,10 @@ with deterministic seeding and comprehensive result collection.
 import random
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Any
-from ..models import Entity
-from ..state import StateManager
-from ..events import EventBus, OnHitEvent
-from ..engine import CombatEngine
+from src.core.models import Entity
+from src.core.state import StateManager
+from src.core.events import EventBus, OnHitEvent
+from src.combat.engine import CombatEngine
 from .. import simulation as sim_module
 from .aggregators import DpsAggregator, WinRateAggregator
 

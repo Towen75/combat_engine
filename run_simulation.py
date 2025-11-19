@@ -11,13 +11,13 @@ import logging
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 
-from src.models import Entity, EntityStats
-from src.state import StateManager
-from src.events import EventBus
-from src.engine import CombatEngine
-from src.effect_handlers import BleedHandler, PoisonHandler
-from src.simulation import SimulationRunner, ReportGenerator
-from src.item_generator import ItemGenerator
+from src.core.models import Entity, EntityStats
+from src.core.state import StateManager
+from src.core.events import EventBus
+from src.combat import CombatEngine
+from src.handlers.effect_handlers import BleedHandler, PoisonHandler
+from src.simulation.combat_simulation import SimulationRunner, ReportGenerator
+from src.utils.item_generator import ItemGenerator
 
 
 def create_sample_entities() -> list[Entity]:

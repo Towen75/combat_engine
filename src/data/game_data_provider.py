@@ -7,8 +7,8 @@ Includes cross-reference validation for data integrity.
 import logging
 import os
 from typing import Dict, Any, Optional, List
-from .data.data_parser import parse_all_csvs
-from .data.typed_models import (
+from .data_parser import parse_all_csvs
+from .typed_models import (
     DataValidationError,
     AffixDefinition,
     ItemTemplate,
@@ -58,7 +58,7 @@ class GameDataProvider:
 
     def _load_and_validate_data(self) -> None:
         """Load, hydrate, and validate game data from CSV files."""
-        data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
+        data_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'data')
 
         try:
             # Stage 1: Parse raw CSV data with schema validation
@@ -166,7 +166,7 @@ class GameDataProvider:
         validate_entity_stats_are_valid(all_stat_names)
 
         # 4. Validate quality tiers -> Rarity: rarity columns should match Rarity enum
-        from .data.typed_models import Rarity
+        from .typed_models import Rarity
         valid_rarities = [r.value for r in Rarity]
         for tier in self.quality_tiers:
             for rarity in valid_rarities:

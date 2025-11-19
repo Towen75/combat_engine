@@ -3,9 +3,9 @@
 import random
 import logging
 from abc import ABC, abstractmethod
-from .events import EventBus, OnHitEvent
-from .state import StateManager
-from .models import DamageOnHitConfig
+from src.core.events import EventBus, OnHitEvent
+from src.core.state import StateManager
+from src.core.models import DamageOnHitConfig
 
 logger = logging.getLogger(__name__)
 

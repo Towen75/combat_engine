@@ -2,9 +2,9 @@
 
 import pytest
 from unittest.mock import MagicMock, patch
-from src.models import SkillUseResult, ApplyDamageAction, DispatchEventAction, Entity, EntityStats
-from src.events import OnHitEvent
-from src.combat_orchestrator import CombatOrchestrator, execute_skill_use
+from src.core.models import SkillUseResult, ApplyDamageAction, DispatchEventAction, Entity, EntityStats
+from src.core.events import OnHitEvent
+from src.combat.orchestrator import CombatOrchestrator, execute_skill_use
 from tests.fixtures import make_entity
 
 

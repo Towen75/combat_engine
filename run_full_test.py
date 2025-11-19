@@ -3,4 +3,4 @@ import logging
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 
-from src.models import Entity, EntityStats, RolledAffix, Item
+from src.core.models import Entity, EntityStats, RolledAffix, Item

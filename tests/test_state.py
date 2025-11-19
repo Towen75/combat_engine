@@ -2,8 +2,8 @@
 
 import pytest
 from unittest.mock import MagicMock
-from src.models import Entity, EntityStats, EffectInstance
-from src.state import StateManager, EntityState
+from src.core.models import Entity, EntityStats, EffectInstance
+from src.core.state import StateManager, EntityState
 
 
 @pytest.fixture

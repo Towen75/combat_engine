@@ -5,7 +5,7 @@ Validates logging modes and custom formatters.
 
 import pytest
 import logging
-from src.batch_simulation.telemetry import (
+from src.simulation.telemetry import (
     configure_telemetry_mode,
     DeveloperFormatter,
     DesignerFormatter,

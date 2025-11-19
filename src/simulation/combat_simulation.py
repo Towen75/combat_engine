@@ -11,11 +11,11 @@ from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from collections import defaultdict
 
 if TYPE_CHECKING:
-    from .models import Entity
-    from .events import OnHitEvent, DamageTickEvent
+    from src.core.models import Entity
+    from src.core.events import OnHitEvent, DamageTickEvent
 
 # Import for runtime use
-from .events import OnHitEvent, DamageTickEvent
+from src.core.events import OnHitEvent, DamageTickEvent
 
 
 @dataclass
@@ -321,7 +321,7 @@ class SimulationRunner:
                         self.state_manager.apply_damage(target.id, damage)
 
                         # Dispatch events
-                        from .events import OnHitEvent, OnCritEvent
+                        from src.core.events import OnHitEvent, OnCritEvent
                         hit_event = OnHitEvent(
                             attacker=entity,
                             defender=target,

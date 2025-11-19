@@ -1,9 +1,9 @@
 """Tests for HitContext telemetry dataclass."""
 
 import pytest
-from src.engine.hit_context import HitContext
-from src.engine.core import CombatEngine
-from src.models import Entity, EntityStats
+from src.combat.hit_context import HitContext
+from src.combat.engine import CombatEngine
+from src.core.models import Entity, EntityStats
 from tests.fixtures import make_attacker, make_defender, make_rng, make_state_manager
 
 
@@ -101,6 +101,8 @@ class TestHitContextBasics:
             "damage_pre_mitigation": 0.0,
             "damage_post_armor": 0.0,
             "damage_blocked": 25.0,
+            "batch_id": None,
+            "simulation_id": None,
         }
 
         # Verify it doesn't contain Entity objects

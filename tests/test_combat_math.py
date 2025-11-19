@@ -2,7 +2,7 @@
 
 import pytest
 from random import Random
-from src.combat_math import (
+from src.combat.combat_math import (
     roll_chance,
     resolve_crit,
     evade_dodge_or_normal,

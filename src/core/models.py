@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from .events import Event, EffectApplied, EffectExpired
     from .skills import Trigger
 
-from .data.typed_models import Rarity
+from src.data.typed_models import Rarity
 
 # Rarity to critical hit tier mapping
 RARITY_TO_CRIT_TIER = {

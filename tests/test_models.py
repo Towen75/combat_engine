@@ -1,7 +1,7 @@
 """Tests for models.py - data structures and entity management."""
 
 import pytest
-from src.models import (
+from src.core.models import (
     Entity, EntityStats, Item, RolledAffix,
     SkillUseResult, Action, ApplyDamageAction, DispatchEventAction, ApplyEffectAction,
     RARITY_TO_CRIT_TIER
@@ -24,12 +24,12 @@ class TestSkillUseResult:
         defender = make_entity("defender")
 
         # Create mock hit context and actions
-        from src.engine.hit_context import HitContext
+        from src.combat.hit_context import HitContext
         hit_ctx = HitContext(attacker=attacker, defender=defender, base_raw=50, base_resolved=50, final_damage=50.0)
 
         action1 = ApplyDamageAction(target_id=defender.id, damage=25.0, source="test")
         # Create minimal mock event - can be any object for testing
-        from src.events import Event
+        from src.core.events import Event
         action2 = DispatchEventAction(event=Event())  # Mock event
 
         result = SkillUseResult(hit_results=[hit_ctx], actions=[action1, action2])
@@ -60,7 +60,7 @@ class TestActions:
 
     def test_dispatch_event_action_creation(self):
         """Test creating DispatchEventAction."""
-        from src.events import Event
+        from src.core.events import Event
         mock_event = Event()  # Create actual Event instance
         action = DispatchEventAction(event=mock_event)
 

@@ -1,4 +1,20 @@
-# [](https://github.com/Towen75/combat_engine/compare/v2.3.0...v) (2025-11-19)
+# [2.5.0](https://github.com/Towen75/combat_engine/compare/v2.4.0...v2.5.0) (2025-11-19)
+
+### Added
+- **Major Code Restructuring**: Consolidation of batch simulation functionality into unified simulation package
+  - **Package Consolidation**: Merged `batch_simulation` module into `simulation/` package for better organization
+  - **Improved Architecture**: Streamlined imports and eliminated package naming conflicts
+  - **Maintained Functionality**: All batch processing, aggregation, telemetry, and export capabilities preserved
+
+### Technical Details
+- **Code Organization**: Unified simulation API with cleaner package structure
+- **Backward Compatibility**: All existing simulation and batch runner functionality maintained
+- **Testing Integrity**: 276 tests passing with complete functional coverage
+- **Performance**: Maintained high-throughput simulation capabilities (6993 events/sec)
+
+### Breaking Changes
+- **Package Structure**: `src/batch_simulation/` module consolidated into `src/simulation/`
+- **Import Paths**: Updated imports to reflect new module organization
 
 
 

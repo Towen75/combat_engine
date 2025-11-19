@@ -3,10 +3,10 @@
 import pytest
 import logging
 from unittest.mock import MagicMock
-from src.models import DamageOnHitConfig
-from src.effect_handlers import DamageOnHitHandler, BleedHandler, PoisonHandler
-from src.events import EventBus, OnHitEvent
-from src.state import StateManager
+from src.core.models import DamageOnHitConfig
+from src.handlers.effect_handlers import DamageOnHitHandler, BleedHandler, PoisonHandler
+from src.core.events import EventBus, OnHitEvent
+from src.core.state import StateManager
 from tests.fixtures import make_entity, make_rng
 
 

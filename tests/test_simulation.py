@@ -1,9 +1,9 @@
 """Unit tests for simulation and time-based systems (DoT ticks, etc.)."""
 
 import pytest
-from src.models import Entity, EntityStats
-from src.events import EventBus
-from src.state import StateManager
+from src.core.models import Entity, EntityStats
+from src.core.events import EventBus
+from src.core.state import StateManager
 from tests.fixtures import make_defender
 
 
@@ -250,7 +250,7 @@ class TestDoTSystem:
         received_events = []
         def event_handler(event):
             received_events.append(event)
-        from src.events import EffectTick
+        from src.core.events import EffectTick
         event_bus.subscribe(EffectTick, event_handler)
 
         # Apply Bleed

@@ -1,8 +1,8 @@
 import random
 import uuid
 from typing import Dict, List, Union, Optional
-from src.models import Item, RolledAffix
-from src.game_data_provider import GameDataProvider
+from src.core.models import Item, RolledAffix
+from src.data.game_data_provider import GameDataProvider
 from src.data.typed_models import (
     AffixDefinition, ItemTemplate, QualityTier,
     hydrate_affix_definition, hydrate_item_template, hydrate_quality_tier

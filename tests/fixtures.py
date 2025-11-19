@@ -2,8 +2,8 @@
 
 import random
 from typing import Optional
-from src.models import Entity, EntityStats
-from src.state import StateManager
+from src.core.models import Entity, EntityStats
+from src.core.state import StateManager
 
 
 def make_rng(seed: int = 42) -> random.Random:

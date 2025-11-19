@@ -1,6 +1,6 @@
 import pytest
 import random
-from src.item_generator import ItemGenerator
+from src.utils.item_generator import ItemGenerator
 from src.data.typed_models import AffixDefinition
 
 class TestItemGeneratorStrict:
