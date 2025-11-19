@@ -52,7 +52,7 @@ def apply_block_damage(damage: float, block_amount: float) -> float:
 def apply_glancing_damage(damage: float, glancing_multiplier: float) -> float:
     """Apply glancing blow damage reduction."""
     if glancing_multiplier <= 0:
-        return damage
+        return 0  # 0% damage on glancing blow means 0 damage total
     return damage * glancing_multiplier
 
 

@@ -7,6 +7,10 @@ and generates detailed reports for balance analysis.
 
 import random
 import json
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+
 from src.models import Entity, EntityStats
 from src.state import StateManager
 from src.events import EventBus

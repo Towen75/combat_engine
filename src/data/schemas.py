@@ -64,21 +64,7 @@ def flexible_float_validator(value: str) -> str:
         raise ValueError(f"Invalid float value: '{value}'")
 
 
-def flexible_float_or_bool_validator(value: str):
-    """Validate float values or boolean strings for scaling power."""
-    if not value or value.strip() == "":
-        return 0.0  # Allow empty values, default to 0.0
 
-    value = value.strip()
-    # Allow boolean strings
-    if value.upper() in ("TRUE", "FALSE"):
-        return value.upper() == "TRUE"
-
-    # Allow float values
-    try:
-        return float(value)
-    except ValueError:
-        raise ValueError(f"Invalid float or boolean value: '{value}'")
 
 
 def flexible_damage_validator(value: str) -> float:
@@ -156,8 +142,8 @@ AFFIX_SCHEMA = {
         "trigger_result": str_validator,
         "trigger_duration": lambda x: non_negative_float_validator(x) if x and x.strip() else 0.0,
         "stacks_max": lambda x: int_validator(x) if x and x.strip() else 1,
-        "dual_stat": str_validator,
-        "scaling_power": flexible_float_or_bool_validator,
+        "dual_stat": lambda x: x.upper() == "TRUE" if x and x.strip() else False,
+        "scaling_power": lambda x: x.upper() == "TRUE" if x and x.strip() else False,
         "complex_effect": str_validator,
     },
 }

@@ -2,6 +2,10 @@
 """Phase 3 Integration Test - Items, Skills, and Equipment."""
 
 import random
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+
 from src.models import Entity, EntityStats, RolledAffix, Item
 from src.skills import Skill, Trigger
 from src.events import EventBus

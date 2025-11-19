@@ -16,6 +16,10 @@ Expected output for the test scenario:
 - Defender health: 1000 → 988
 """
 
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+
 from src.models import Entity, EntityStats
 from src.state import StateManager
 from src.engine import CombatEngine

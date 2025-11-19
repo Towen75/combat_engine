@@ -3,6 +3,10 @@
 
 import json
 import random
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+
 from src.item_generator import ItemGenerator
 
 

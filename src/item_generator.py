@@ -10,13 +10,14 @@ class ItemGenerator:
     Uses a two-step quality roll system: first tier based on rarity, then percentage within tier.
     """
 
-    def __init__(self, game_data: dict = None):
+    def __init__(self, game_data: dict = None, rng=None):
         """
         Initialize with parsed game data.
 
         Args:
             game_data: Optional dictionary from game_data.json with affixes, items, quality_tiers.
                       If None, data will be loaded from GameDataProvider.
+            rng: Optional RNG instance for deterministic generation. Falls back to random module if None.
         """
         if game_data is not None:
             # Legacy support - use provided data
@@ -29,6 +30,8 @@ class ItemGenerator:
             self.affix_defs = provider.get_affixes()
             self.item_templates = provider.get_items()
             self.quality_tiers = provider.get_quality_tiers()
+
+        self.rng = rng if rng is not None else random
 
     def generate(self, base_item_id: str) -> Item:
         """
@@ -128,19 +131,46 @@ class ItemGenerator:
         """
         Calculates the final value of an affix based on its base value and sub-quality roll.
         Each affix gets its own quality roll up to the item's maximum quality.
+        Handles dual-stat affixes by rolling two separate values.
 
         Args:
             affix_id: ID of the affix to roll
             max_quality: Maximum quality percentage allowed for this item (0-100)
 
         Returns:
-            RolledAffix: Rolled affix with calculated value
+            RolledAffix: Rolled affix with calculated value(s)
         """
         affix_def = self.affix_defs[affix_id]
         base_value = affix_def['base_value']
 
+        # Check for dual-stat affixes (base_value contains ';')
+        if isinstance(base_value, str) and ';' in base_value:
+            # Dual-stat affix: parse both values and roll separately
+            parts = base_value.split(';')
+            if len(parts) == 2:
+                primary_base = float(parts[0])
+                secondary_base = float(parts[1])
+
+                # Each stat gets its own sub-quality roll
+                primary_roll = self.rng.randint(0, max_quality) if self.rng else random.randint(0, max_quality)
+                secondary_roll = self.rng.randint(0, max_quality) if self.rng else random.randint(0, max_quality)
+
+                primary_final = primary_base * (primary_roll / 100.0)
+                secondary_final = secondary_base * (secondary_roll / 100.0)
+
+                return RolledAffix(
+                    affix_id=affix_id,
+                    stat_affected=affix_def['stat_affected'],
+                    mod_type=affix_def['mod_type'],
+                    description=affix_def['description'],
+                    base_value=base_value,
+                    value=round(primary_final, 4),
+                    dual_value=round(secondary_final, 4)
+                )
+
+        # Single-stat affix (original logic)
         # Each affix gets a sub-quality roll from 0 to item's max quality
-        sub_quality_roll = random.randint(0, max_quality)
+        sub_quality_roll = self.rng.randint(0, max_quality) if self.rng else random.randint(0, max_quality)
         final_value = base_value * (sub_quality_roll / 100.0)
 
         return RolledAffix(

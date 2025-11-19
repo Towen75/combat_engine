@@ -1,9 +1,9 @@
 effect_id,name,type,description,max_stacks,tick_rate,damage_per_tick,stat_multiplier,stat_add,visual_effect,duration
 bleed,Bleed,DoT,Deals physical damage over time.,10,1,8,0,0,red_blood_splt,10
 freeze,Frozen,stun,"Frozen solid, preventing all movement and actions.",1,0,0,0,0,ice_crystals,4
-burn,Burn,DoT,Deals Fire daamge each second.,8,2,4,0,0,fire_burn,8
-poison,Posion,DoT,Deals posion damage and reduces healing received,12,1.5,6,0,0,posion_cloud,12
-shadow_dot,Shadow Corruption,debuff,Corrupting shadow energy that saps life.,15,2,12,0,0,dark_smoke,10
+burn,Burn,DoT,Deals Fire damage each second.,8,2,4,0,0,fire_burn,8
+poison,Poison,DoT,Deals poison damage and reduces healing received,12,1.5,6,0,0,posion_cloud,12
+shadow_dot,Shadow Corruption,DoT,Corrupting shadow energy that saps life.,15,2,12,0,0,dark_smoke,10
 stun,Stunned,stun,"Stunned and incapacitated, unable to act.",1,0,0,0,0,yellow_stun_stars,3
 crit_bonus_drain,Focused Rage,buff,Increased critical strike chance.,1,0,0,0,25,golden_buff_particles,5
 evasion_penalty,Entropy Penalty,debuff,Reduced evasion after dodge (temporary).,1,0,0,0.1,0,gray_particles,2
@@ -28,4 +28,9 @@ rage,Rage,Buff,Grants 20% increased damage but take 10% more.,1,0,0,1.2,0,rage_f
 stoneform,Stoneform,Buff,Increases armor by 50.,1,0,0,1.0,50,stone_shield,10
 haste,Haste,Buff,Increases attack speed by 20%. ,1,0,0,1.2,0,wind_lines,6
 echo_mark,Echo Mark,Special,Stores 30% of damage taken and releases it after expiry.,1,0,0,0,0,echo_glow,5
-
+slow,Slow,Debuff,Reduces movement and attack speed.,1,0,0,0.7,0,ice_puddle,4
+berserk,Berserk,Buff,Greatly increases damage but reduces armor.,1,0,0,1.5,-50,red_eyes,6
+pulse,Pulse,Debuff,Periodic damage pulse.,1,1.0,5,0,0,pulse_wave,5
+reflective_shield,Reflective Shield,Buff,Reflects damage.,1,0,0,0,0,mirror_shield,5
+poison_dmg,Poison Damage,DoT,Pure poison damage.,5,1.0,5,0,0,green_drip,5
+burn_dmg,Burn Damage,DoT,Pure fire damage.,5,1.0,5,0,0,fire_drip,5

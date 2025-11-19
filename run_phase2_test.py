@@ -2,6 +2,10 @@
 """Phase 2 Integration Test - Critical Hits, Events, and DoTs."""
 
 import random
+import logging
+
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+
 from src.models import Entity, EntityStats
 from src.events import EventBus
 from src.state import StateManager

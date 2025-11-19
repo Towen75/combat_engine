@@ -107,12 +107,10 @@ class DamageOnHitHandler(EffectHandler):
             if self.config.display_message:
                 target_name = getattr(event.defender, 'name', event.defender.id)
                 message = self.config.display_message.format(target=target_name)
-                print("    -> " + message)
                 logger.debug("Effect proc: %s", message)
             else:
                 # Default message format
                 message = f"{self.config.debuff_name} proc'd on {event.defender.id}!"
-                print("    -> " + message)
                 logger.debug("Effect proc: %s", message)
 
             self.state_manager.apply_debuff(
@@ -153,7 +151,6 @@ class BleedHandler(EffectHandler):
         rng_value = self.rng.random() if self.rng else random.random()
         if rng_value < self.proc_rate:
             logger.debug("Effect proc: Bleed procd on %s", event.defender.id)
-            print("    -> Bleed proc'd on defender!")
             self.state_manager.apply_debuff(
                 entity_id=event.defender.id,
                 debuff_name="Bleed",
@@ -192,7 +189,6 @@ class PoisonHandler(EffectHandler):
         rng_value = self.rng.random() if self.rng else random.random()
         if rng_value < self.proc_rate:
             logger.debug("Effect proc: Poison procd on %s", event.defender.id)
-            print("    -> Poison proc'd on defender!")
             self.state_manager.apply_debuff(
                 entity_id=event.defender.id,
                 debuff_name="Poison",

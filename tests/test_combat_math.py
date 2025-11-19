@@ -119,10 +119,7 @@ class TestApplyGlancingDamage:
 
     def test_zero_multiplier_no_damage(self):
         """Zero multiplier should result in no damage (0% of original)."""
-        # Note: This tests incorrect logic - zero multiplier should be zero, not full damage
-        # But current implementation treats <= 0 as "use full damage"
-        # This is arguably wrong design - 0% glancing should be 0 damage
-        assert apply_glancing_damage(100, 0.0) == 100.0  # Match current (questionable) logic
+        assert apply_glancing_damage(100, 0.0) == 0  # 0% glancing means 0 damage
 
 
 class TestApplyPierceToArmor:

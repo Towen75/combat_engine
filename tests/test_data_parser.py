@@ -346,20 +346,20 @@ class TestSchemaValidationIntegration:
 
         # Test case similar to actual data: dual stat affix
         row_data = {
-            "affix_id": "swiftslayer",
-            "stat_affected": "attack_speed;cooldown_reduction",
-            "mod_type": "multiplier;flat",
-            "affix_pools": "weapon_pool",
-            "base_value": "0.25;0.08",
-            "description": "{value}% Attack Speed & {dual_value}% CD Reduction",
-            "dual_stat": "cooldown_reduction",
-            "stacks_max": "",
-            "proc_rate": "",
-            "trigger_duration": "",
-            "scaling_power": "",
-            "trigger_event": "",
-            "trigger_result": "",
-            "complex_effect": ""
+"affix_id": "swiftslayer",
+"stat_affected": "attack_speed;cooldown_reduction",
+"mod_type": "multiplier;flat",
+"affix_pools": "weapon_pool",
+"base_value": "0.25;0.08",
+"description": "{value}% Attack Speed & {dual_value}% CD Reduction",
+"dual_stat": "TRUE",
+"stacks_max": "",
+"proc_rate": "",
+"trigger_duration": "",
+"scaling_power": "",
+"trigger_event": "",
+"trigger_result": "",
+"complex_effect": ""
         }
 
         # Validate all columns
@@ -371,7 +371,7 @@ class TestSchemaValidationIntegration:
         # Check results
         assert validated["affix_id"] == "swiftslayer"
         assert validated["stat_affected"] == "attack_speed;cooldown_reduction"
-        assert validated["dual_stat"] == "cooldown_reduction"
+        assert validated["dual_stat"] == True  # "TRUE" in CSV becomes boolean True
         assert validated["stacks_max"] == 1  # Default value
         assert validated["proc_rate"] == 0.0  # Default value
         assert validated["scaling_power"] == 0.0  # Default value

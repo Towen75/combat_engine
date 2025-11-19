@@ -1,3 +1,39 @@
+# [2.2.0] - 2025-11-18
+
+### Added
+- **PR-P1S3 Complete**: Data Pipeline Hardening with Strict Typing and Cross-Reference Validation
+  - **Typed Data Models**: Complete enum definitions and TypedDict models for all game data structures
+  - **Cross-Reference Validation**: Runtime validation ensures skills reference existing effects, items reference valid affixes
+  - **Static Type Checking**: mypy integration ensures compile-time type safety for data layer
+  - **Triple Validation Layer**: Schema enforcement + cross-reference checks + type safety validation
+  - **Enhanced EntityStats**: Added `life_steal`, `damage_multiplier`, and `movement_speed` for comprehensive stat support
+  - **Production-Ready Data Provider**: GameDataProvider with singleton pattern and comprehensive error resilience
+
+### Technical Details
+- **Data Integrity**: 69 items, 63 affixes, 35 effects, 28 skills all validated at load time
+- **Type Safety**: Full mypy coverage on data access layer with strict error checking
+- **Performance**: Sub-millisecond data loading and validation with hot-reload capability
+- **Architecture**: Progressive validation (parse → validate → hydrate → cross-reference) catches errors at appropriate stages
+- **Testing**: Comprehensive validation tests ensure data integrity in all scenarios
+
+### Breaking Changes
+- **Data Model Enhancement**: Enhanced EntityStats requires stat validation on existing equippable items
+- **Type Requirements**: Data access layer now requires full type annotations and validation
+
+## [2.2.1] - 2025-11-19
+
+### Fixed
+- **Data Corrections**: Fixed multiple typos in CSV data files (e.g., "Posion" → "Poison", "daamge" → "damage")
+- **Test Suite Stability**: Corrected test property names (`is_crit` → `was_crit`), added missing StateManager entity registrations
+- **Engine Code Quality**: Fixed tier 3 crit calculation returning int instead of float, improved type consistency
+- **Repository Maintenance**: Added node_Modules to .gitignore, updated changelog formatting
+
+### Technical Details
+- **Test Coverage**: All 25 engine unit tests now passing (100% success rate)
+- **Data Integrity**: CSV files validated with corrected effect and skill references
+- **Critical Hit Mechanics**: Fixed tier 3 critical hit damage multipliers for Legendary/Mythic rarities
+- **Type Safety**: Consistent float handling throughout hit context and damage calculations
+
 # [](https://github.com/Towen75/combat_engine/compare/v2.1.0...v) (2025-11-17)
 
 

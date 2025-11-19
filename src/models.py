@@ -8,14 +8,16 @@ if TYPE_CHECKING:
     from .events import Event, EffectApplied, EffectExpired
     from .skills import Trigger
 
+from .data.typed_models import Rarity
+
 # Rarity to critical hit tier mapping
 RARITY_TO_CRIT_TIER = {
-    "Common": 1,
-    "Uncommon": 1,
-    "Rare": 2,
-    "Epic": 2,
-    "Legendary": 3,
-    "Mythic": 3
+    Rarity.COMMON: 1,
+    Rarity.UNCOMMON: 1,
+    Rarity.RARE: 2,
+    Rarity.EPIC: 2,
+    Rarity.LEGENDARY: 3,
+    Rarity.MYTHIC: 3
 }
 
 
@@ -32,11 +34,17 @@ class EntityStats:
     crit_chance: float = 0.05
     crit_damage: float = 1.5
     pierce_ratio: float = 0.01  # GDD 2.1: Min value is 0.01
+    damage_multiplier: float = 1.0  # Global damage multiplier
 
     # Defensive Stats (GDD 5.0)
     max_health: float = 100.0
     armor: float = 10.0
     resistances: float = 0.0
+    
+    # Utility / Sustain Stats
+    life_steal: float = 0.0
+    movement_speed: float = 1.0
+    damage_over_time: float = 1.0  # Multiplier for DoT damage
 
     # New Evasion System Stats (IP 2.1)
     evasion_chance: float = 0.0  # Max 0.75
@@ -54,7 +62,7 @@ class EntityStats:
     # Cooldown Reduction Stat (IP 2.3)
     cooldown_reduction: float = 0.0
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Validate stats after initialization."""
         if self.base_damage < 0:
             raise ValueError("base_damage must be non-negative")
@@ -109,13 +117,15 @@ class Entity:
         if not id:
             raise ValueError("Entity id cannot be empty")
 
-        if rarity not in RARITY_TO_CRIT_TIER:
-            raise ValueError(f"Invalid rarity: {rarity}. Must be one of {list(RARITY_TO_CRIT_TIER.keys())}")
+        try:
+            self.rarity = Rarity(rarity)
+        except ValueError:
+            valid_rarities = [r.value for r in Rarity]
+            raise ValueError(f"Invalid rarity: {rarity}. Must be one of {valid_rarities}")
 
         self.id = id
         self.base_stats = base_stats
         self.name = name or id
-        self.rarity = rarity
         self.equipment: Dict[str, Item] = {}
         self.active_triggers: List["Trigger"] = []  # For affix reactive effects
         self.final_stats = self.calculate_final_stats()
@@ -187,9 +197,9 @@ class Entity:
                 mod_types = affix.mod_type.split(';') if affix.dual_stat else [affix.mod_type]
                 values = [affix.value]
 
-                # For dual-stat, get the second value from the dual_value method
-                if affix.dual_stat:
-                    values.append(affix.get_dual_value())
+                # For dual-stat, get the second value from the dual_value field
+                if affix.dual_stat and affix.dual_value is not None:
+                    values.append(affix.dual_value)
 
                 # Apply scaling power multiplier if this is a scaling affix
                 scaling_multiplier = 1.0
@@ -227,8 +237,8 @@ class Entity:
                         result_dict["apply_debuff"] = affix.trigger_result
 
                     # Add common trigger metadata
-                    result_dict["duration"] = affix.trigger_duration or 10.0
-                    result_dict["stacks_max"] = affix.stacks_max or 99
+                    result_dict["duration"] = float(affix.trigger_duration or 10.0)
+                    result_dict["stacks_max"] = int(affix.stacks_max or 99)
 
                     trigger = Trigger(
                         event=affix.trigger_event,
@@ -244,8 +254,8 @@ class Entity:
                 stats_affected = affix.stat_affected.split(';') if affix.dual_stat else [affix.stat_affected]
                 values = [affix.value]
 
-                if affix.dual_stat:
-                    values.append(affix.get_dual_value())
+                if affix.dual_stat and affix.dual_value is not None:
+                    values.append(affix.dual_value)
 
                 # Apply scaling power multiplier if this is a scaling affix
                 scaling_multiplier = 1.0
@@ -298,6 +308,7 @@ class RolledAffix:
     description: str
     base_value: Any  # Can be float or string for dual values like "0.5;0.3"
     value: float
+    dual_value: Optional[float] = None        # Second stat value for dual-stat affixes
     trigger_event: Optional[str] = None        # e.g., "OnHit"
     proc_rate: Optional[float] = None          # e.g., 0.25
     trigger_result: Optional[str] = None       # e.g., "apply_bleed"
@@ -413,6 +424,7 @@ class ApplyEffectAction(Action):
     effect_name: str
     stacks_to_add: int = 1
     source: str = "skill"  # For tracking effect source
+    proc_rate: float = 1.0  # Probability of this effect applying (0.0 to 1.0)
 
 
 @dataclass

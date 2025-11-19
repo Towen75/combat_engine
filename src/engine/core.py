@@ -2,16 +2,17 @@
 
 import random
 from typing import Optional, List, Dict, Any
-from .models import Entity, SkillUseResult, ApplyDamageAction, DispatchEventAction, ApplyEffectAction, Action
-from .skills import Skill
-from .events import EventBus, OnHitEvent, OnCritEvent
-from .state import StateManager
+from ..models import Entity, SkillUseResult, ApplyDamageAction, DispatchEventAction, ApplyEffectAction, Action
+from ..skills import Skill
+from ..events import EventBus, OnHitEvent, OnCritEvent
+from ..state import StateManager
 from .hit_context import HitContext
-from .combat_math import (
+from ..combat_math import (
     evade_dodge_or_normal,
     resolve_crit,
     apply_pierce_to_armor,
     calculate_pierce_damage_formula,
+    calculate_skill_effect_proc,
     apply_glancing_damage,
     apply_block_damage,
     clamp_min_damage
@@ -129,54 +130,53 @@ class CombatEngine:
             attacker=attacker,
             defender=defender,
             base_raw=base_damage_input,
-            base_resolved=int(base_damage_input)
+            base_resolved=int(base_damage_input),
+            final_damage=base_damage_input
         )
 
         # Step 3: Evasion Check - Call pure math function with pre-computed modifiers
         evasion_result = evade_dodge_or_normal(self.rng, defender_dodge_chance, defender_evasion_chance)
         if evasion_result == 'dodge':
             ctx.was_dodged = True
-            ctx.final_damage = 0.0
+            ctx.final_damage = 0
             return ctx
         elif evasion_result == 'evade':
-            ctx.is_glancing = True
+            ctx.was_glancing = True
 
         # Step 4: Critical Hit Check - Call pure math function
-        is_crit, crit_mult = resolve_crit(self.rng, attacker_crit_chance, attacker.final_stats.crit_damage)
-        ctx.is_crit = is_crit and not ctx.is_glancing  # Glancing hits cannot crit
+        is_crit, _ = resolve_crit(self.rng, attacker_crit_chance, attacker.final_stats.crit_damage)
+        ctx.was_crit = is_crit and not ctx.was_glancing  # Glancing hits cannot crit
 
         # Step 5: Pre-Mitigation Damage Calculation
-        ctx.pre_mitigation_damage = ctx.base_damage * crit_mult
+        ctx.damage_pre_mitigation = base_damage_input
 
         # Apply Tier 2 crits (Enhanced) - affects pre-mitigation
-        if ctx.is_crit and attacker.get_crit_tier() == 2:
-            ctx.pre_mitigation_damage *= attacker.final_stats.crit_damage
+        if ctx.was_crit and attacker.get_crit_tier() >= 2:
+            ctx.damage_pre_mitigation *= attacker.final_stats.crit_damage
 
         # Step 6: Defense Mitigation (GDD formula)
-        effective_armor = apply_pierce_to_armor(defender.final_stats.armor, attacker.final_stats.pierce_ratio)
-        pre_pierce_damage = ctx.pre_mitigation_damage  # damage - armor (handled in mitigation)
-        pierced_damage = ctx.pre_mitigation_damage     # Full pierce ignores armor
+        pre_pierce_damage = ctx.damage_pre_mitigation - defender.final_stats.armor
+        pierced_damage = ctx.damage_pre_mitigation * attacker.final_stats.pierce_ratio
 
         # Use pierce damage formula: max(0, max(pre_pierce_damage, pierced_damage))
-        ctx.mitigated_damage = calculate_pierce_damage_formula(
-            ctx.pre_mitigation_damage - defender.final_stats.armor,  # pre_pierce_damage
-            ctx.pre_mitigation_damage                               # pierced_damage
+        ctx.damage_post_armor = calculate_pierce_damage_formula(
+            pre_pierce_damage,
+            pierced_damage
         )
 
         # Step 7: Post-Mitigation Modifiers
-        ctx.final_damage = ctx.mitigated_damage
+        ctx.final_damage = ctx.damage_post_armor
 
         # Apply Tier 3 crits (True) - full recalculation
-        if ctx.is_crit and attacker.get_crit_tier() == 3:
+        if ctx.was_crit and attacker.get_crit_tier() == 3:
             CombatEngine._apply_post_pierce_crit(ctx)
 
         # Step 8: Glancing Penalty - Call pure math function
-        if ctx.is_glancing:
+        if ctx.was_glancing:
             ctx.final_damage = apply_glancing_damage(ctx.final_damage, 0.5)  # 50% reduction
 
         # Step 9: Block Check - Call pure math function
         if defender_block_chance > 0 and attacker.final_stats.pierce_ratio < 1:
-            from .combat_math import calculate_skill_effect_proc  # Reuse existing function
             was_blocked = calculate_skill_effect_proc(self.rng, defender_block_chance)
             if was_blocked:
                 ctx.was_blocked = True
@@ -260,7 +260,7 @@ class CombatEngine:
         crit_tier = ctx.attacker.get_crit_tier()
 
         if crit_tier == 2:  # Enhanced Crit
-            ctx.pre_mitigation_damage *= ctx.attacker.final_stats.crit_damage
+            ctx.damage_pre_mitigation *= ctx.attacker.final_stats.crit_damage
 
     @staticmethod
     def _apply_post_pierce_crit(ctx: HitContext):
@@ -272,7 +272,7 @@ class CombatEngine:
 
         if crit_tier == 3:  # True Crit
             # Re-calculate mitigated damage using crit-boosted pre_mitigation_damage
-            crit_pre_mit_damage = ctx.base_damage * ctx.attacker.final_stats.crit_damage
+            crit_pre_mit_damage = ctx.base_resolved * ctx.attacker.final_stats.crit_damage
             pre_pierce_damage = crit_pre_mit_damage - ctx.defender.final_stats.armor
             pierced_damage = crit_pre_mit_damage * ctx.attacker.final_stats.pierce_ratio
 
@@ -313,11 +313,11 @@ class CombatEngine:
                 attacker=attacker,
                 defender=defender,
                 damage_dealt=damage,
-                is_crit=hit_context.is_crit
+                is_crit=hit_context.was_crit
             )
             actions.append(DispatchEventAction(event=hit_event))
 
-            if hit_context.is_crit:
+            if hit_context.was_crit:
                 crit_event = OnCritEvent(hit_event=hit_event)
                 actions.append(DispatchEventAction(event=crit_event))
 
@@ -387,18 +387,17 @@ class CombatEngine:
                 dodge_event = OnDodgeEvent(attacker=attacker, defender=defender)
                 event_bus.dispatch(dodge_event)
                 # Award evasion resource if applicable
-                state_manager.add_resource(attacker.id, attacker.final_stats.resource_on_kill)  # Attacker evaded, treat as "kill"?
-                continue  # No damage/debuffs on dodge
+            continue  # No damage/debuffs on dodge
 
             # Create the hit event first
             hit_event = OnHitEvent(
                 attacker=attacker,
                 defender=defender,
                 damage_dealt=hit_context.final_damage,
-                is_crit=hit_context.is_crit
+                is_crit=hit_context.was_crit
             )
 
-            if hit_context.is_glancing:
+            if hit_context.was_glancing:
                 # OnGlancingBlowEvent for glancing hits
                 event_bus.dispatch(hit_event)
                 glancing_event = OnGlancingBlowEvent(hit_event=hit_event)
@@ -410,7 +409,7 @@ class CombatEngine:
                 block_event = OnBlockEvent(
                     attacker=attacker,
                     defender=defender,
-                    damage_before_block=hit_context.mitigated_damage + (hit_context.final_damage * 2 if hit_context.is_glancing else hit_context.final_damage),  # Pre-block damage
+                    damage_before_block=hit_context.damage_post_armor + (hit_context.final_damage * 2 if hit_context.was_glancing else hit_context.final_damage),  # Pre-block damage
                     damage_blocked=hit_context.damage_blocked,
                     hit_context=hit_context
                 )
@@ -431,7 +430,7 @@ class CombatEngine:
                     state_manager.add_resource(attacker.id, attacker.final_stats.resource_on_kill)
 
             # Dispatch crit event if critical
-            if hit_context.is_crit:
+            if hit_context.was_crit:
                 crit_event = OnCritEvent(hit_event=hit_event)
                 event_bus.dispatch(crit_event)
 

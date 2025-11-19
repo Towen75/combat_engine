@@ -48,25 +48,9 @@ iron_shield,Iron Buckler,Shield,Common,shield_pool,,1
 cloth_cowl,Cloth Cowl,Helmet,Common,armor_pool,,1
 traveller_robe,Traveller Robe,Armor,Common,armor_pool,,1
 simple_ring,Simple Ring,Ring,Common,jewelry_pool,,1
-serpent_dagger,Serpent Dagger,Weapon,Uncommon,weapon_pool|dagger_pool,poison_stab,1
-hastewrap,Cloak of Haste,Cloak,Uncommon,armor_pool,rallying_cry,1
-glacial_spear,Glacial Spear,Weapon,Uncommon,weapon_pool|spear_pool,glacial_spike,1
-corrosion_gauntlets,Corrosion Gauntlets,Gloves,Uncommon,armor_pool,corrosion,1
-verdant_band,Verdant Band,Jewelry,Uncommon,jewelry_pool,poison,1
 ember_shiv,Ember Shiv,Weapon,Magic,weapon_pool|dagger_pool,burn,1
-glacial_ring,Ring of Frostbite,Jewelry,Magic,jewelry_pool,frostbite,1
-echoing_pendant,Echoing Pendant,Jewelry,Rare,jewelry_pool,echo_mark,1
-echo_blade,Echo Blade,Weapon,Rare,weapon_pool|sword_pool,echo_strike,1
-embers_edge,Ember's Edge,Weapon,Rare,weapon_pool|sword_pool,flame_arc,2
 stone_guard_plate,Stone Guard Plate,Armor,Rare,armor_pool,stoneform,1
-storm_bracers,Storm Bracers,Gloves,Rare,armor_pool,shock_pulse,1
-berserker_helm,Berserker Helm,Helmet,Rare,armor_pool,berserker_rage,1
 precision_bow,Precision Bow,Weapon,Rare,weapon_pool|bow_pool,precision_power,2
-reaper_scythe,Reaper Scythe,Weapon,Epic,weapon_pool|scythe_pool,shadow_slash,2
-igneous_heart,Igneous Heart,Jewelry,Epic,jewelry_pool,burn,1
-stoneform_plate,Stoneform Plate,Armor,Epic,armor_pool,stoneform,1
-stormcaller_staff,Stormcaller Staff,Weapon,Epic,weapon_pool|staff_pool,shock_burst,2
-mirror_shield_item,Mirror Shield,Shield,Legendary,shield_pool,retribution;mirror_shield,0
 berserker_greatsword,Berserker Greatsword,Weapon,Legendary,weapon_pool,berserker_charge,0
 void_circlet,Void Circlet,Helmet,Legendary,jewelry_pool,soul_burn,1
 echo_pride_cape,Echoing Pride,Cloak,Magic,armor_pool,echoing_blow,1

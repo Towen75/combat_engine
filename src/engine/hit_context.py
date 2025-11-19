@@ -19,7 +19,7 @@ class HitContext:
     # Core damage values
     base_raw: Any        # Original damage input (int, tuple, etc.)
     base_resolved: int   # Final resolved base damage value
-    final_damage: int    # Final damage after all calculations
+    final_damage: float    # Final damage after all calculations
 
     # Combat outcome flags (Phase 2 mechanics)
     was_crit: bool = False

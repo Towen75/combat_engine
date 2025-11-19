@@ -1,30 +1,29 @@
 skill_id,name,damage_type,hits,description,resource_cost,cooldown,trigger_event,proc_rate,trigger_result,trigger_duration,stacks_max
 basic_slash,Basic Slash,Physical,1,Basic physical attack that deals moderate damage.,0,1.0,,0.0,,0.0,0
-bleed_strike,Bleed Strike,Physical,1,Slash that causes bleeding DoT on critical hits.,15,3.0,OnCrit,0.8,apply_bleed,8.0,3
+bleed_strike,Bleed Strike,Physical,1,Slash that causes bleeding DoT on critical hits.,15,3.0,OnCrit,0.8,bleed,8.0,3
 focused_strike,Focused Strike,Physical,1,Charge up for 100% crit chance but 50% damage.,20,5.0,OnHit,1.0,self_damage:0.5,0.0,0
 rapid_fire,Rapid Fire,Physical,3,Burst of three quick attacks.,25,4.0,,0.0,,0.0,0
 chain_lightning,Chain Lightning,Magic,1,Lightning that jumps to nearby enemies.,30,6.0,OnHit,1.0,chain_damage:0.6,0.0,0
-frost_nova,Frost Nova,Magic,1,Ice explosion that freezes enemies in area.,35,8.0,OnHit,0.9,apply_freeze,3.0,1
+frost_nova,Frost Nova,Magic,1,Ice explosion that freezes enemies in area.,35,8.0,OnHit,0.9,freeze,3.0,1
 berserker_rage,Berserker Rage,Physical,1,Powerful rage-fueled attack with lifesteal.,40,7.0,OnHit,1.0,heal_self:0.2,0.0,0
-shadow_bolt,Shadow Bolt,Shadow,1,A dark bolt that deals shadow damage over time.,25,3.0,OnHit,0.7,apply_shadow_dot,10.0,5
-holy_shield,Holy Shield,Divine,1,Divine protection that blocks all damage for 3 seconds.,50,12.0,OnSkillUsed,1.0,apply_divine_shield,3.0,1
-venom_strike,Venom Strike,Physical,1,Poisonous strike that spreads venom on crit.,20,4.0,OnCrit,0.6,apply_venom_dot,12.0,4
+shadow_bolt,Shadow Bolt,Shadow,1,A dark bolt that deals shadow damage over time.,25,3.0,OnHit,0.7,shadow_dot,10.0,5
+holy_shield,Holy Shield,Divine,1,Divine protection that blocks all damage for 3 seconds.,50,12.0,OnSkillUsed,1.0,divine_shield,3.0,1
+venom_strike,Venom Strike,Physical,1,Poisonous strike that spreads venom on crit.,20,4.0,OnCrit,0.6,poison,12.0,4
 whirlwind,Whirlwind,Physical,5,Cleave all nearby enemies with spinning attack.,45,9.0,,0.0,,0.0,0
-teleport_strike,Teleport Strike,Physical,1,Teleport behind enemy for guaranteed hit.,30,5.0,OnHit,1.0,stun_target,2.0,1
-flame_burst,Flame Burst,Fire,1,Explosive fire damage that burns enemies.,25,4.0,OnHit,0.8,apply_burn_dot,6.0,3
-thunder_clap,Thunder Clap,Magic,1,Shockwave that stuns multiple targets.,35,7.0,OnHit,0.9,apply_stun,1.5,1
+teleport_strike,Teleport Strike,Physical,1,Teleport behind enemy for guaranteed hit.,30,5.0,OnHit,1.0,stun,2.0,1
+flame_burst,Flame Burst,Fire,1,Explosive fire damage that burns enemies.,25,4.0,OnHit,0.8,burn,6.0,3
+thunder_clap,Thunder Clap,Magic,1,Shockwave that stuns multiple targets.,35,7.0,OnHit,0.9,stun,1.5,1
 vampiric_touch,Vampiric Touch,Shadow,1,Drain life from enemy over time.,40,8.0,OnHit,1.0,drain_life:0.05,8.0,1
 divine_blessing,Divine Blessing,Divine,1,Grant protection and healing to allies.,60,15.0,OnSkillUsed,1.0,bless_allies:0.3,10.0,1
-whirlwind,Whirlwind Strike,physical,3,Spin attack hitting all nearby enemies.,20,6.0,OnHit,0.35,apply_effect:bleed,6,3
-focus_shot,Focus Shot,piercing,1,Well-aimed shot that deals high damage.,15,4.0,OnCrit,1.0,apply_effect:focus,8,1
-shadow_slash,Shadow Slash,shadow,2,A quick two-hit shadow strike.,10,3.0,OnHit,0.25,apply_effect:soul_burn,10,5
-poison_stab,Poison Stab,poison,1,A precise stab that poisons the target.,8,2.5,OnHit,0.40,apply_effect:poison,6,5
-flame_arc,Flame Arc,fire,1,A wide fire arc that scorches all enemies in front.,18,5.0,OnHit,0.30,apply_effect:burn,5,3
-glacial_spike,Glacial Spike,cold,1,Launch a frozen spike that slows enemies.,16,4.0,OnHit,0.25,apply_effect:frostbite,6,3
-corrosive_wave,Corrosive Wave,acid,1,Unleashes a wave of acid that corrodes armor.,22,8.0,OnHit,0.35,apply_effect:corrosion,8,5
-echo_strike,Echo Strike,physical,1,A heavy blow that leaves the target marked for echo burst.,20,10.0,OnHit,0.50,apply_effect:echo_mark,5,1
-rallying_cry,Rallying Cry,light,0,A powerful shout empowering the caster.,0,12.0,OnUse,1.0,apply_effect:haste,6,1
-stone_guard,Stone Guard,earth,0,Reinforce yourself with protective stone.,0,14.0,OnUse,1.0,apply_effect:stoneform,10,1
-berserker_charge,Berserker Charge,physical,1,A furious charge that empowers further attacks.,25,16.0,OnHit,1.0,apply_effect:rage,6,1
-shock_burst,Shock Burst,lightning,1,High-voltage burst that destabilizes and shocks enemies.,18,7.0,OnHit,0.30,apply_effect:shock_pulse,5,3
-
+whirlwind_strike,Whirlwind Strike,Physical,3,Spin attack hitting all nearby enemies.,20,6.0,OnHit,0.35,bleed,6,3
+focus_shot,Focus Shot,piercing,1,Well-aimed shot that deals high damage.,15,4.0,OnCrit,1.0,focus,8,1
+shadow_slash,Shadow Slash,Shadow,2,A quick two-hit shadow strike.,10,3.0,OnHit,0.25,soul_burn,10,5
+poison_stab,Poison Stab,Poison,1,A precise stab that poisons the target.,8,2.5,OnHit,0.40,poison,6,5
+flame_arc,Flame Arc,Fire,1,A wide fire arc that scorches all enemies in front.,18,5.0,OnHit,0.30,burn,5,3
+glacial_spike,Glacial Spike,Cold,1,Launch a frozen spike that slows enemies.,16,4.0,OnHit,0.25,frostbite,6,3
+corrosive_wave,Corrosive Wave,acid,1,Unleashes a wave of acid that corrodes armor.,22,8.0,OnHit,0.35,corrosion,8,5
+echo_strike,Echo Strike,Physical,1,A heavy blow that leaves the target marked for echo burst.,20,10.0,OnHit,0.50,echo_mark,5,1
+rallying_cry,Rallying Cry,Light,0,A powerful shout empowering the caster.,0,12.0,OnUse,1.0,haste,6,1
+stone_guard,Stone Guard,earth,0,Reinforce yourself with protective stone.,0,14.0,OnUse,1.0,stoneform,10,1
+berserker_charge,Berserker Charge,Physical,1,A furious charge that empowers further attacks.,25,16.0,OnHit,1.0,rage,6,1
+shock_burst,Shock Burst,Lightning,1,High-voltage burst that destabilizes and shocks enemies.,18,7.0,OnHit,0.30,shock_pulse,5,3

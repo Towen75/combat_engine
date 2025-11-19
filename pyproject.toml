@@ -1,0 +1,82 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_ignores = true
+strict = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_no_return = true
+warn_unreachable = true
+ignore_missing_imports = true
+
+# Module-specific overrides for gradual adoption
+[[tool.mypy.overrides]]
+module = [
+    "src.combat_math",
+    "src.combat_orchestrator",
+    "src.effect_handlers",
+    "src.events",
+    "src.item_generator",
+    "src.simulation",
+    "tests.*"
+]
+ignore_errors = true  # These will be migrated incrementally
+
+# Core data models should be strictly typed
+[[tool.mypy.overrides]]
+module = "src.data.*"
+ignore_errors = false
+
+# The main game data provider should be strictly typed
+[[tool.mypy.overrides]]
+module = "src.game_data_provider"
+ignore_errors = false
+
+# Combat engine (main entry point)
+[[tool.mypy.overrides]]
+module = "src.engine"
+ignore_errors = false
+
+[tool.black]
+line-length = 120
+target-version = ['py311']
+
+[tool.isort]
+profile = "black"
+line_length = 120
+multi_line_output = 3
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests"
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests"
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "src/__init__.py",
+    "tests/*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:"
+]

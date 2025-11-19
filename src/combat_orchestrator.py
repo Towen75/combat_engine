@@ -74,20 +74,11 @@ class CombatOrchestrator:
         Args:
             action: The ApplyEffectAction to execute
         """
-        # For effects that have proc rates (like skill triggers), check randomness here
-        # This is where we handle the stochastic aspects of triggers
+        # Check proc rate if less than 1.0
         should_apply = True
-
-        # If the action has a proc rate, check it
-        # TODO: This logic needs to be made more generic - currently assumes skill triggers
-        # For now, assume the source contains "_trigger" to indicate probabilistic effects
-        if "_trigger" in action.source:
-            # This is a skill trigger effect - check if it procs
-            # For now, we assume a default proc rate - this should be made configurable
+        if action.proc_rate < 1.0:
             rng_value = self.rng.random() if self.rng else random.random()
-            # Default proc rate - should be made configurable per trigger
-            proc_rate = 0.5  # TODO: Make this configurable
-            should_apply = rng_value < proc_rate
+            should_apply = rng_value < action.proc_rate
 
         if should_apply:
             # PR8c: Updated to use modern StateManager API instead of legacy compatibility method
