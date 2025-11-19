@@ -1,6 +1,7 @@
 import unittest
 import json
 import random
+import pytest
 from src.item_generator import ItemGenerator
 from src.models import Item, RolledAffix
 
@@ -117,6 +118,41 @@ class TestItemGenerator(unittest.TestCase):
         self.assertTrue(len(item.affixes) >= 1)  # At least crit_dmg implicit
         has_crit_dmg = any(affix.affix_id == 'crit_dmg' for affix in item.affixes)
         self.assertTrue(has_crit_dmg)
+    
+    def test_roll_dual_stat_affix(self):
+        """Test rolling an affix with two values (primary and dual)."""
+        # Mock the data for a dual stat affix
+        self.gen.affix_defs['test_dual'] = {
+            'affix_id': 'test_dual',
+            'stat_affected': 'stat1;stat2',
+            'mod_type': 'flat;multiplier',
+            'base_value': '100.0;0.5', # 100 flat, 50% mult
+            'description': 'Test Dual',
+            'affix_pools': ['test_pool']
+        }
+        
+        # Use seeded RNG for deterministic rolling
+        # Seed 42 usually rolls mid-high values
+        self.gen.rng = random.Random(42)
+        
+        # Roll with 100% max quality potential
+        rolled = self.gen._roll_one_affix('test_dual', 100)
+        
+        assert rolled.affix_id == 'test_dual'
+        assert rolled.value > 0
+        assert rolled.dual_value is not None
+        assert rolled.dual_value > 0
+        
+        # Ensure they rolled somewhat independently (not identical % of base)
+        # With seed 42: 
+        # random.randint(0, 100) -> 81 (Primary)
+        # random.randint(0, 100) -> 14 (Secondary)
+        
+        expected_primary = 100.0 * (81 / 100.0) # 81.0
+        expected_secondary = 0.5 * (14 / 100.0) # 0.07
+        
+        assert rolled.value == pytest.approx(81.0)
+        assert rolled.dual_value == pytest.approx(0.07)
 
 
 if __name__ == '__main__':

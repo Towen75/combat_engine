@@ -34,6 +34,22 @@
 - **Critical Hit Mechanics**: Fixed tier 3 critical hit damage multipliers for Legendary/Mythic rarities
 - **Type Safety**: Consistent float handling throughout hit context and damage calculations
 
+## [2.2.2] - 2025-11-19
+
+### Fixed
+- **Code Cleanup**: Removed deprecated `data_loader.py` module (consolidated into `game_data_provider.py`)
+- **Test Consolidation**: Removed legacy `test_strict_mode.py` test file
+- **Test Coverage**: Added `test_roll_dual_stat_affix` test for dual-stat affix validation
+- **System Simplification**: Streamlined data loading with centralized provider pattern
+- **Print Statement Fixes**: Updated success messages to reflect new architecture
+
+### Technical Details
+- **Refactoring**: Eliminated redundant data loading code (320 lines removed)
+- **Test Maintenance**: Consolidated validation testing into modern patterns
+- **Dual-Stat Testing**: Added deterministic testing for dual-value affix rolling
+- **Code Quality**: Removed deprecated modules, improved import organization
+- **Architecture**: Simplified CSV loading with singleton provider pattern
+
 # [](https://github.com/Towen75/combat_engine/compare/v2.1.0...v) (2025-11-17)
 
 

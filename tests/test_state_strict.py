@@ -1,70 +1,43 @@
-#!/usr/bin/env python3
 """
-Test strict mode enforcement and legacy compatibility for PR8c migration.
+Unit tests for StateManager strict mode and legacy compatibility.
+Converted from test_strict_mode.py to standard pytest format.
 """
 
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
-
-from models import Entity, EntityStats
-from state import StateManager
+import pytest
+from src.models import Entity, EntityStats
+from src.state import StateManager
 
 
 def test_strict_mode_keyerror_unregistered_access():
     """Test that strict mode raises KeyError for unregistered entities."""
-    print("Testing strict mode KeyError behavior...")
-
     manager = StateManager(strict_mode=True)
 
     # Test apply_damage to unregistered entity
-    try:
+    with pytest.raises(KeyError, match="not registered"):
         manager.apply_damage("unknown", 50.0)
-        assert False, "Should have raised KeyError for unregistered entity"
-    except KeyError as e:
-        assert "not registered" in str(e)
-
-    # Test apply_effect to unregistered entity - this requires mocking to avoid imports
-    # We'll test the core strict_mode check
 
     # Test get_state on unregistered entity
-    try:
+    with pytest.raises(KeyError, match="not registered"):
         manager.get_state("unknown")
-        assert False, "Should have raised KeyError for unregistered entity"
-    except KeyError as e:
-        assert "not registered" in str(e)
 
     # Test set_health on unregistered entity
-    try:
+    with pytest.raises(KeyError, match="not registered"):
         manager.set_health("unknown", 50.0)
-        assert False, "Should have raised KeyError for unregistered entity"
-    except KeyError as e:
-        assert "not registered" in str(e)
-
-    print("✅ Strict mode enforcement verified")
 
 
 def test_strict_mode_disabled_behavior():
     """Test behavior when strict mode is disabled."""
-    print("Testing non-strict mode behavior...")
-
     manager = StateManager(strict_mode=False)
 
-    # In non-strict mode, get_state still requires registration
-    # because all methods call get_state()
-    try:
+    # Even in non-strict mode, operations that rely on entity state 
+    # (like apply_damage) must raise KeyError if the entity doesn't exist
+    # to prevent silent failures or data corruption.
+    with pytest.raises(KeyError, match="not registered"):
         manager.apply_damage("unknown", 50.0)
-        assert False, "Should have raised KeyError even in non-strict mode"
-    except KeyError as e:
-        assert "not registered" in str(e)
-
-    print("✅ Non-strict mode behaves correctly (all modes require registration)")
 
 
 def test_legacy_compatibility_methods():
     """Test that legacy compatibility methods work through new API."""
-    print("Testing legacy compatibility methods...")
-
     manager = StateManager()
 
     # Create a test entity
@@ -90,13 +63,9 @@ def test_legacy_compatibility_methods():
     assert isinstance(all_states, dict)
     assert len(all_states) == 0  # No entities
 
-    print("✅ Legacy compatibility methods working")
-
 
 def test_legacy_methods_with_strict_mode():
     """Test legacy methods work correctly in strict mode."""
-    print("Testing legacy methods with strict mode enabled...")
-
     manager = StateManager(strict_mode=True)
 
     stats = EntityStats(max_health=100.0)
@@ -113,13 +82,9 @@ def test_legacy_methods_with_strict_mode():
     manager.unregister_entity("test_entity")
     assert not manager.is_registered("test_entity")
 
-    print("✅ Legacy methods work with strict mode")
-
 
 def test_state_management_edge_cases():
     """Test edge cases in state management."""
-    print("Testing state management edge cases...")
-
     manager = StateManager()
 
     # Create entity
@@ -132,23 +97,20 @@ def test_state_management_edge_cases():
     assert manager.get_current_health("test_entity") == 0.0
     assert not manager.get_is_alive("test_entity")
 
-    # Recreate entity for next test
-    manager.add_entity(entity)
+    # Reset for next test
+    manager.set_health("test_entity", 100.0)
+    assert manager.get_is_alive("test_entity")
 
     # Test resource clamping
-    manager.set_resource("test_entity", 150.0)  # Above max
+    manager.set_resource("test_entity", 150.0)  # Above max (100)
     assert manager.get_current_resource("test_entity") == 100.0
 
     manager.set_resource("test_entity", -10.0)  # Below 0
     assert manager.get_current_resource("test_entity") == 0.0
 
-    print("✅ Edge case handling verified")
-
 
 def test_manager_creation_and_len():
     """Test basic StateManager creation and length tracking."""
-    print("Testing StateManager creation and length...")
-
     manager = StateManager()
     assert len(manager) == 0
     assert "unknown" not in manager
@@ -161,18 +123,3 @@ def test_manager_creation_and_len():
     assert len(manager) == 1
     assert "test_entity" in manager
     assert "unknown" not in manager
-
-    print("✅ StateManager basics verified")
-
-
-if __name__ == "__main__":
-    print("=== PR8c Strict Mode Verification Tests ===\n")
-
-    test_strict_mode_keyerror_unregistered_access()
-    test_strict_mode_disabled_behavior()
-    test_legacy_compatibility_methods()
-    test_legacy_methods_with_strict_mode()
-    test_state_management_edge_cases()
-    test_manager_creation_and_len()
-
-    print("\n🎉 All PR8c verification tests passed!")

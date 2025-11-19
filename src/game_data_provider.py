@@ -233,6 +233,50 @@ class GameDataProvider:
             raise RuntimeError("GameDataProvider has not been initialized yet")
         return self.skills
 
+    def get_data_stats(self) -> Dict[str, int]:
+        """Get statistics about loaded data.
+
+        Returns:
+            Dictionary with counts of loaded data types.
+        """
+        if not self._is_initialized:
+            return {'affixes': 0, 'skills': 0, 'effects': 0, 'items': 0}
+        return {
+            'affixes': len(self.affixes),
+            'skills': len(self.skills),
+            'effects': len(self.effects),
+            'items': len(self.items)
+        }
+
+    def find_affixes_by_pool(self, pool_name: str) -> List[AffixDefinition]:
+        """Find affixes that can appear in a given affix pool.
+
+        Args:
+            pool_name: The name of the affix pool to search for.
+
+        Returns:
+            List of matching AffixDefinition objects.
+        """
+        if not self._is_initialized:
+            return []
+        return [affix for affix in self.affixes.values()
+                if pool_name in affix.affix_pools]
+
+    def find_skills_by_type(self, skill_type: str) -> List[SkillDefinition]:
+        """Find skills by damage type (Physical, Magic, etc.).
+
+        Args:
+            skill_type: The damage type string to search for (case-insensitive).
+
+        Returns:
+            List of matching SkillDefinition objects.
+        """
+        if not self._is_initialized:
+            return []
+        skill_type_lower = skill_type.lower()
+        return [skill for skill in self.skills.values()
+                if skill.damage_type.value.lower() == skill_type_lower]
+
     def reload_data(self) -> bool:
         """Reload game data from disk.
 
