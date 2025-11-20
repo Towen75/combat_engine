@@ -517,19 +517,27 @@ class CombatEngine:
                     source_state.roll_modifiers['crit_chance'] = []
                 source_state.roll_modifiers['crit_chance'].append(modifier)
 
-        if "reflect_damage" in result:
-            # Thornmail effect - reflect damage back to attacker
-            reflect_ratio = result["reflect_damage"]
-            reflected_damage = hit_context.final_damage * reflect_ratio
 
-            if reflected_damage > 0:
-                state_manager.apply_damage(source.id, reflected_damage)
 
-                # Create reflect damage event
-                reflect_event = OnHitEvent(
-                    attacker=target,  # Defender is now attacker
-                    defender=source, # Attacker becomes defender
-                    damage_dealt=int(reflected_damage),
-                    is_crit=False
-                )
-                event_bus.dispatch(reflect_event)
+    def process_attack(self, attacker: Entity, defender: Entity, event_bus: EventBus, state_manager: StateManager) -> bool:
+        """Process a basic attack as a skill use.
+
+        Convenience method for standard attacks.
+
+        Args:
+            attacker: The entity attacking
+            defender: The entity defending
+            event_bus: Event bus
+            state_manager: State manager
+
+        Returns:
+            True if attack was successful
+        """
+        # Create a default basic attack skill
+        basic_attack = Skill(
+            id="basic_attack",
+            name="Basic Attack",
+            hits=1,
+            triggers=[]
+        )
+        return self.process_skill_use(attacker, defender, basic_attack, event_bus, state_manager)

@@ -1,3 +1,25 @@
+# [](https://github.com/Towen75/combat_engine/compare/v2.5.0...v) (2025-11-20)
+
+
+
+# [2.6.0](https://github.com/Towen75/combat_engine/compare/v2.5.0...v2.6.0) (2025-11-20)
+
+### Added
+- **PR-P3S8 Complete**: Final Documentation and Project Polish
+  - **Architectural Documentation**: Comprehensive guides for all major systems
+    - `docs/architecture.md`: Complete architectural overview with package structure and patterns
+    - `docs/damage_pipeline.md`: Detailed 9-step combat calculation walkthrough with examples
+    - `docs/state_and_lifecycle.md`: StateManager and entity lifecycle documentation
+    - `docs/data_pipeline.md`: CSV to runtime data flow and validation pipeline
+  - **Contributor Guide**: Professional `CONTRIBUTING.md` with development setup and standards
+  - **Enhanced README**: Updated with links to architectural docs and improved structure
+
+### Technical Details
+- **Documentation Completeness**: All major systems now have comprehensive architectural guides
+- **Code-Level Docs**: Verified existing docstring coverage across all modules
+- **Developer Experience**: CONTRIBUTING.md enables independent developer onboarding
+- **Knowledge Transfer**: Complete architectural knowledge documented for future maintainers
+
 # [2.5.0](https://github.com/Towen75/combat_engine/compare/v2.4.0...v2.5.0) (2025-11-19)
 
 ### Added

@@ -27,6 +27,15 @@ The Combat Engine implements a complete RPG combat system with:
 - **Deterministic**: Reproducible results for testing and balance
 - **Modular**: Independent systems for easy maintenance and extension
 
+### Documentation
+
+📚 **Comprehensive architectural documentation available:**
+
+- **[Architecture Overview](docs/architecture.md)**: Core patterns, module structure, and system integration
+- **[Damage Pipeline](docs/damage_pipeline.md)**: Complete 9-step hit resolution walkthrough
+- **[State & Lifecycle](docs/state_and_lifecycle.md)**: StateManager and entity lifecycle management
+- **[Data Pipeline](docs/data_pipeline.md)**: CSV to runtime data flow and validation
+
 ## Testing & Determinism
 
 ### RNG Policy
@@ -189,22 +198,30 @@ engine.process_skill_use(attacker, defender, skill, event_bus, state_manager)
 
 ## Contributing
 
-### Code Standards
-- Type hints required for all public functions
-- Comprehensive docstrings
-- Unit tests for all new functionality
-- RNG injection for any random behavior
+We welcome contributions! Please see **[CONTRIBUTING.md](CONTRIBUTING.md)** for:
 
-### Testing Requirements
-- All tests must pass with `python -m pytest`
-- New features require corresponding tests
-- Deterministic RNG usage in tests
-- Integration tests for complex interactions
+- Development environment setup
+- Running tests and code quality checks
+- Code standards and architectural patterns
+- Adding new content (skills, items, effects)
+- Pull request process
 
-### Documentation
-- Update memory bank for significant changes
-- Keep API examples current
-- Document any new RNG usage patterns
+**Quick Start for Contributors:**
+
+```bash
+# 1. Clone and setup
+git clone <repository-url>
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+pip install -r requirements.txt
+
+# 2. Run tests
+python -m pytest
+
+# 3. Make changes and test
+# ... your changes ...
+python -m pytest  # Ensure all tests pass
+```
 
 ## License
 
