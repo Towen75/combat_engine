@@ -29,6 +29,7 @@ class BatchResult:
     winners: List[str] = field(default_factory=list)
     remaining_hps: List[float] = field(default_factory=list)
     durations: List[float] = field(default_factory=list)
+    dps: List[float] = field(default_factory=list)
     
     # Aggregated statistics
     dps_stats: Dict[str, float] = field(default_factory=dict)
@@ -47,6 +48,7 @@ class BatchResult:
             "winners": self.winners,
             "remaining_hps": self.remaining_hps,
             "durations": self.durations,
+            "dps": self.dps,
             "dps_stats": self.dps_stats,
             "win_rate_stats": self.win_rate_stats,
         }
@@ -139,14 +141,29 @@ class SimulationBatchRunner:
             runner.add_entity(attacker)
             runner.add_entity(defender)
             
-            # Track DPS for this fight
+            # --- DPS Tracking Setup ---
             dps_aggregator.start_fight(timestamp=0.0)
+            
+            # Capture damage events locally
+            fight_total_damage = 0.0
+            
+            def capture_damage(event: OnHitEvent):
+                nonlocal fight_total_damage
+                fight_total_damage += event.damage_dealt
+
+            event_bus.subscribe(OnHitEvent, capture_damage)
+            # --------------------------
             
             # Run the simulation
             runner.run_simulation(max_duration)
             
-            # End DPS tracking
+            # --- DPS Calculation ---
+            # Feed total damage and actual duration to aggregator
+            actual_duration = runner.simulation_time
+            if actual_duration > 0:
+                dps_aggregator.add_hit(fight_total_damage, actual_duration)
             fight_dps = dps_aggregator.end_fight()
+            # -----------------------
             
             # 5. Collect results
             # Determine winner (entity with health > 0)
@@ -183,6 +200,7 @@ class SimulationBatchRunner:
             result.winners.append(winner_id)
             result.remaining_hps.append(remaining_hp)
             result.durations.append(max_duration)  # Use actual duration if available
+            result.dps.append(fight_dps)
             
             win_rate_aggregator.record_outcome(winner_id, loser_id, remaining_hp)
             

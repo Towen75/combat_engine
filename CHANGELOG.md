@@ -1,4 +1,6 @@
-# [](https://github.com/Towen75/combat_engine/compare/v2.5.0...v) (2025-11-20)
+# [](https://github.com/Towen75/combat_engine/compare/v2.6.0...v) (2025-11-21)
+
+
 
 
 
@@ -40,9 +42,7 @@
 
 
 
-# [](https://github.com/Towen75/combat_engine/compare/v2.2.2...v) (2025-11-19)
-
-## [2.3.0] - 2025-11-19
+# [2.3.0](https://github.com/Towen75/combat_engine/compare/v2.2.2...v2.3.0) (2025-11-19)
 
 ### Added
 - **PR-P2S5 Complete**: Simulation Batching API and Telemetry Expansion
@@ -64,11 +64,7 @@
 - **HitContext**: Added optional `simulation_id` and `batch_id` fields (backward compatible)
 
 
-# [](https://github.com/Towen75/combat_engine/compare/v2.2.2...v) (2025-11-19)
-
-
-
-# [2.2.0] - 2025-11-18
+# [2.2.0](https://github.com/Towen75/combat_engine/compare/v2.1.0...v2.2.0) (2025-11-18)
 
 ### Added
 - **PR-P1S3 Complete**: Data Pipeline Hardening with Strict Typing and Cross-Reference Validation
@@ -120,19 +116,8 @@
 - **Code Quality**: Removed deprecated modules, improved import organization
 - **Architecture**: Simplified CSV loading with singleton provider pattern
 
-# [](https://github.com/Towen75/combat_engine/compare/v2.1.0...v) (2025-11-17)
 
-
-
-# [](https://github.com/Towen75/combat_engine/compare/v2.0.0...v) (2025-11-17)
-
-
-
-# [](https://github.com/Towen75/combat_engine/compare/v1.0.0...v) (2025-11-16)
-
-
-
-## [1.0.0] - 2025-11-15
+## [1.0.0](https://github.com/Towen75/combat_engine/compare/v0.7.0...v1.0.0) (2025-11-15)
 
 ### Added
 - **COMPLETE GDD v4.0 Combat Engine Implementation**: Full system delivery exceeding original IP scope
