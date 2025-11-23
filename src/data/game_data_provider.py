@@ -1,11 +1,13 @@
-"""Game Data Provider - Centralized access to typed game data.
+"""Game Data Provider - Explicit dependency injection instead of singleton.
 
-Provides a singleton interface for accessing strongly-typed game data loaded from CSV files.
+Provides access to typed game data loaded from CSV files.
 Includes cross-reference validation for data integrity.
+NO LONGER A SINGLETON - instantiate explicitly at application boundaries.
 """
 
 import logging
 import os
+from pathlib import Path
 from typing import Dict, Any, Optional, List
 from .data_parser import parse_all_csvs
 from .typed_models import (
@@ -27,42 +29,50 @@ logger = logging.getLogger(__name__)
 
 
 class GameDataProvider:
-    """Singleton provider for strongly-typed game data loaded from CSV files.
+    """Provider for strongly-typed game data loaded from CSV files.
 
-    Manages loading, hydration, and cross-reference validation of game data.
-    Uses singleton pattern to ensure data is loaded once and shared across the application.
+    No longer a singleton - instantiate explicitly at application startup
+    and pass as dependency to consumers. This establishes clear data ownership.
     """
 
-    _instance: Optional["GameDataProvider"] = None
+    def __init__(self, data_dir: Optional[Path] = None) -> None:
+        """Initialize provider with explicit data directory.
 
-    # Typed data storage - replaces loose Dict[str, Any] with strongly-typed dataclasses
-    affixes: Dict[str, AffixDefinition]
-    items: Dict[str, ItemTemplate]
-    quality_tiers: List[QualityTier]
-    effects: Dict[str, EffectDefinition]
-    skills: Dict[str, SkillDefinition]
+        Args:
+            data_dir: Path to data directory. If None, uses CWD-relative 'data' dir
+                      or COMBAT_ENGINE_DATA_DIR environment variable.
 
-    # Initialization flag to track if data has been loaded
-    _is_initialized: bool = False
+        Raises:
+            FileNotFoundError: If data directory doesn't exist
+        """
+        # Robust cross-platform path resolution
+        if data_dir:
+            self.data_dir = data_dir
+        else:
+            # Use cwd-relative path, fallback to env var for advanced configs
+            self.data_dir = Path(os.getenv('COMBAT_ENGINE_DATA_DIR', 'data'))
 
-    def __new__(cls):
-        """Singleton pattern - return existing instance or create new one."""
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
+        # Validate path exists before proceeding
+        if not self.data_dir.exists():
+            raise FileNotFoundError(f"Data directory not found: {self.data_dir}")
 
-    def __init__(self) -> None:
-        """Initialize the provider. Only loads data on first instantiation due to singleton."""
-        if not self._is_initialized:
-            self._load_and_validate_data()
+        # Typed data storage - replaces loose Dict[str, Any] with strongly-typed dataclasses
+        self.affixes: Dict[str, AffixDefinition] = {}
+        self.items: Dict[str, ItemTemplate] = {}
+        self.quality_tiers: List[QualityTier] = []
+        self.effects: Dict[str, EffectDefinition] = {}
+        self.skills: Dict[str, SkillDefinition] = {}
+
+        self._is_initialized: bool = False
+
+        self._load_and_validate_data()
 
     def _load_and_validate_data(self) -> None:
         """Load, hydrate, and validate game data from CSV files."""
-        data_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'data')
-
         try:
             # Stage 1: Parse raw CSV data with schema validation
-            raw_data = parse_all_csvs(data_dir)
+            raw_data = parse_all_csvs(str(self.data_dir))
+            logger.info(f"GameDataProvider: Loading data from {self.data_dir}")
             logger.info("GameDataProvider: Successfully parsed raw CSV data")
 
             # Stage 2: Hydrate raw dictionaries into strongly-typed dataclasses
@@ -315,49 +325,3 @@ class GameDataProvider:
             True if data is loaded and validated, False otherwise
         """
         return self._is_initialized
-
-
-# Convenience functions for typed data access
-def get_affixes() -> Dict[str, AffixDefinition]:
-    """Convenience function to get affixes data.
-
-    Returns:
-        Dictionary of affix definitions
-    """
-    return GameDataProvider().get_affixes()
-
-
-def get_items() -> Dict[str, ItemTemplate]:
-    """Convenience function to get items data.
-
-    Returns:
-        Dictionary of item templates
-    """
-    return GameDataProvider().get_items()
-
-
-def get_quality_tiers() -> List[QualityTier]:
-    """Convenience function to get quality tiers data.
-
-    Returns:
-        List of quality tier objects
-    """
-    return GameDataProvider().get_quality_tiers()
-
-
-def get_effects() -> Dict[str, EffectDefinition]:
-    """Convenience function to get effects data.
-
-    Returns:
-        Dictionary of effect definitions
-    """
-    return GameDataProvider().get_effects()
-
-
-def get_skills() -> Dict[str, SkillDefinition]:
-    """Convenience function to get skills data.
-
-    Returns:
-        Dictionary of skill definitions
-    """
-    return GameDataProvider().get_skills()

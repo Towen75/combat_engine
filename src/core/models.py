@@ -226,12 +226,15 @@ class Entity:
             (self.base_stats.pierce_ratio * 1000)
         ) / 100.0  # Normalize to reasonable scale
 
+        # OPTIMIZATION: Calculate scaling factor ONCE per entity update, not per affix
+        scaling_factor_base = math.log(power_level + 1) * 0.1
+
         # 1. Apply all MULTIPLIER affixes first
         for item in self.equipment.values():
             for affix in item.affixes:
-                # Handle dual-stat affixes (applies to multiple stats)
-                stats_affected = affix.stat_affected.split(';') if affix.dual_stat else [affix.stat_affected]
-                mod_types = affix.mod_type.split(';') if affix.dual_stat else [affix.mod_type]
+                # PERFORMANCE: Use pre-parsed cached lists to avoid string splitting in hot path
+                stats_affected = getattr(affix, '_stat_list', affix.stat_affected.split(';'))
+                mod_types = getattr(affix, '_mod_type_list', affix.mod_type.split(';'))
                 values = [affix.value]
 
                 # For dual-stat, get the second value from the dual_value field
@@ -241,7 +244,7 @@ class Entity:
                 # Apply scaling power multiplier if this is a scaling affix
                 scaling_multiplier = 1.0
                 if affix.scaling_power:
-                    scaling_multiplier = 1.0 + math.log(power_level + 1) * 0.1  # Gentle scaling curve
+                    scaling_multiplier = 1.0 + scaling_factor_base  # Use pre-calculated factor
 
                 for i, stat_name in enumerate(stats_affected):
                     if not stat_name or stat_name not in valid_stat_names:
@@ -287,8 +290,9 @@ class Entity:
         # 2. Apply all FLAT affixes second
         for item in self.equipment.values():
             for affix in item.affixes:
-                # Handle dual-stat affixes for flat bonuses
-                stats_affected = affix.stat_affected.split(';') if affix.dual_stat else [affix.stat_affected]
+                # PERFORMANCE: Use pre-parsed cached lists to avoid string splitting in hot path
+                stats_affected = getattr(affix, '_stat_list', affix.stat_affected.split(';'))
+                mod_types = getattr(affix, '_mod_type_list', affix.mod_type.split(';'))
                 values = [affix.value]
 
                 if affix.dual_stat and affix.dual_value is not None:
@@ -297,7 +301,7 @@ class Entity:
                 # Apply scaling power multiplier if this is a scaling affix
                 scaling_multiplier = 1.0
                 if affix.scaling_power:
-                    scaling_multiplier = 1.0 + math.log(power_level + 1) * 0.1
+                    scaling_multiplier = scaling_factor_base  # Use pre-calculated factor
 
                 for i, stat_name in enumerate(stats_affected):
                     if not stat_name or stat_name not in valid_stat_names:
@@ -355,6 +359,15 @@ class RolledAffix:
     dual_stat: Optional[str] = None            # e.g., "crit_damage"
     scaling_power: bool = False                # True for scaling affixes
     complex_effect: Optional[str] = None       # e.g., "special_skill"
+
+    # Performance optimization: Pre-parsed lists for hot-path access
+    _stat_list: List[str] = field(default_factory=list, init=False)
+    _mod_type_list: List[str] = field(default_factory=list, init=False)
+
+    def __post_init__(self):
+        """Pre-parse dual-stat data for performance."""
+        self._stat_list = [s.strip() for s in self.stat_affected.split(';') if s.strip()]
+        self._mod_type_list = [s.strip() for s in self.mod_type.split(';') if s.strip()]
 
     def get_dual_mod_type(self) -> str:
         """Get the modification type for the dual stat if applicable."""

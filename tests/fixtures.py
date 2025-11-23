@@ -1,9 +1,19 @@
 """Test fixtures and helper functions for Combat Engine tests."""
 
+import pytest
+from pathlib import Path
 from typing import Optional
 from src.core.models import Entity, EntityStats
 from src.core.state import StateManager
 from src.core.rng import RNG
+from src.data.game_data_provider import GameDataProvider
+
+
+@pytest.fixture(scope="session")
+def game_data_provider():
+    """Provides GameDataProvider for tests."""
+    data_dir = Path(__file__).parent.parent / 'data'
+    return GameDataProvider(data_dir)
 
 
 def make_rng(seed: int = 42) -> RNG:

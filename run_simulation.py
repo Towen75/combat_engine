@@ -7,6 +7,7 @@ and generates detailed reports for balance analysis.
 
 import json
 import logging
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -19,6 +20,7 @@ from src.combat import CombatEngine
 from src.handlers.effect_handlers import BleedHandler, PoisonHandler
 from src.simulation.combat_simulation import SimulationRunner, ReportGenerator
 from src.utils.item_generator import ItemGenerator
+from src.data.game_data_provider import GameDataProvider
 
 
 def create_sample_entities() -> list[Entity]:
@@ -265,14 +267,13 @@ def main():
     # Save report
     save_report_to_file(report, args.output)
 
-    # Item generation demo
+    # Item generation demo using provider
     logger.info("\n--- Item Generation Demo ---")
     try:
-        with open('data/game_data.json', 'r') as f:
-            game_data = json.load(f)
-        # Use seeded RNG for deterministic item generation
+        # Load data once at startup
+        provider = GameDataProvider()
         item_rng = RNG(args.seed + 1000)  # Different seed for items
-        item_gen = ItemGenerator(game_data, rng=item_rng)
+        item_gen = ItemGenerator(provider=provider, rng=item_rng)
 
         # Generate a few random items
         for base_id in ['base_iron_axe', 'base_gold_ring', 'base_leather_chest']:

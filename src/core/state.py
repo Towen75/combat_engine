@@ -254,7 +254,7 @@ class StateManager:
         bus = self.event_bus or event_bus
 
         # 1. Update Entities (Cooldowns)
-        for state in self.states.values():
+        for state in list(self.states.values()):
             if not state.is_alive:
                 continue
             

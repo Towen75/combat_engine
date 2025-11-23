@@ -1,4 +1,5 @@
 import uuid
+import warnings
 from typing import Dict, List, Union, Optional
 from src.core.models import Item, RolledAffix
 from src.core.rng import RNG
@@ -14,17 +15,24 @@ class ItemGenerator:
     Fully integrated with Typed Models (PR-P1S3).
     """
 
-    def __init__(self, game_data: Optional[dict] = None, rng: Optional[RNG] = None):
+    def __init__(self, game_data: Optional[dict] = None,
+                 provider: Optional[GameDataProvider] = None, rng: Optional[RNG] = None):
         """
         Initialize generator.
-        
+
         Args:
-            game_data: Optional raw dict (legacy/testing). Will be hydrated to Objects.
+            game_data: Raw dict data (for backwards compatibility, deprecated)
+            provider: GameDataProvider instance (preferred new way)
             rng: Optional RNG instance for deterministic generation.
                  If None, creates a new unseeded RNG.
         """
-        if game_data is not None:
-            # Legacy/Test mode: Hydrate raw dicts into Typed Objects immediately
+        if provider:
+            # New preferred way: Use provided GameDataProvider instance
+            self.affix_defs = provider.get_affixes()
+            self.item_templates = provider.get_items()
+            self.quality_tiers = provider.get_quality_tiers()
+        elif game_data is not None:
+            # Legacy support: Hydrate raw dicts into Typed Objects (backwards compatibility)
             self.affix_defs: Dict[str, AffixDefinition] = {
                 k: hydrate_affix_definition(v) for k, v in game_data['affixes'].items()
             }
@@ -35,7 +43,7 @@ class ItemGenerator:
                 hydrate_quality_tier(q) for q in game_data['quality_tiers']
             ]
         else:
-            # Production mode: Use Singleton Provider (already Objects)
+            # Emergency fallback: Create provider automatically (maintained for existing code)
             provider = GameDataProvider()
             self.affix_defs = provider.get_affixes()
             self.item_templates = provider.get_items()
@@ -145,7 +153,7 @@ class ItemGenerator:
                     value=round(primary_final, 4),
                     dual_value=round(secondary_final, 4),
                     affix_pools="|".join(affix_def.affix_pools), # Convert list back to str for model
-                    dual_stat=affix_def.dual_stat,
+                    dual_stat=str(affix_def.dual_stat) if affix_def.dual_stat else None,
                     trigger_event=affix_def.trigger_event.value if affix_def.trigger_event else None,
                     proc_rate=affix_def.proc_rate,
                     trigger_result=affix_def.trigger_result

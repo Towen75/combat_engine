@@ -266,7 +266,15 @@ def render_arena():
         bus.subscribe(EntityDeathEvent, log_handler)
         
         # 3. Execute Action
-        rng = RNG()  # Use unseeded RNG for dashboard interactivity
+        # Use Global Seed + Turn Counter for deterministic progression
+        base_seed = st.session_state.get("rng_seed", 42)
+        turn_offset = st.session_state.turn_counter
+
+        # Create seeded RNG using hash of (base_seed, turn_offset) to ensure proper separation
+        import hashlib
+        seed_hash = hashlib.md5(f"{base_seed}_{turn_offset}".encode()).hexdigest()
+        rng_seed = int(seed_hash[:16], 16)  # Use first 16 hex chars as int
+        rng = RNG(seed=rng_seed)
         engine = CombatEngine(rng=rng)
         
         if selected_action == "Basic Attack":

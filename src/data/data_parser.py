@@ -2,7 +2,8 @@ import csv
 import json
 import os
 import logging
-from typing import Dict, Any, List
+from pathlib import Path
+from typing import Dict, Any, List, Union
 from .schemas import get_schema_validator
 
 logger = logging.getLogger(__name__)
@@ -48,18 +49,21 @@ def parse_csv(filepath: str, schema: Dict[str, Any]) -> List[Dict[str, Any]]:
         return rows
 
 
-def parse_all_csvs(base_path: str = "data") -> Dict[str, Any]:
+def parse_all_csvs(base_path: Union[str, Path] = "data") -> Dict[str, Any]:
     """Parse all CSV files in the data directory using schema validation.
 
     Args:
-        base_path: Path to the data directory
+        base_path: Path to the data directory (string or Path object)
 
     Returns:
         Dictionary with all parsed CSV data organized by type
     """
-    # Convert relative path to absolute
-    if not os.path.isabs(base_path):
-        base_path = os.path.join(os.path.dirname(__file__), "..", "..", base_path)
+    # Convert to Path object and resolve to absolute path
+    data_dir = Path(base_path)
+    if not data_dir.is_absolute():
+        # If relative, resolve relative to project root (not this file)
+        project_root = Path(__file__).resolve().parent.parent.parent
+        data_dir = project_root / data_dir
 
     csv_files = [
         ("affixes.csv", "affixes"),
@@ -78,14 +82,15 @@ def parse_all_csvs(base_path: str = "data") -> Dict[str, Any]:
     }
 
     for filename, data_key in csv_files:
-        filepath = os.path.join(base_path, filename)
-        if not os.path.exists(filepath):
-            logger.warning(f"CSV file not found: {filepath}, skipping")
+        filepath = data_dir / filename
+        filepath_str = str(filepath)
+        if not os.path.exists(filepath_str):
+            logger.warning(f"CSV file not found: {filepath_str}, skipping")
             continue
 
         try:
-            schema = get_schema_validator(filepath)
-            rows = parse_csv(filepath, schema)
+            schema = get_schema_validator(filepath_str)
+            rows = parse_csv(filepath_str, schema)
 
             if data_key == "quality_tiers":
                 # Special validation for quality tiers: min_range < max_range

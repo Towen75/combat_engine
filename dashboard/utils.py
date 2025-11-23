@@ -13,11 +13,16 @@ from src.data.game_data_provider import GameDataProvider
 @st.cache_resource
 def get_game_data_provider():
     """
-    Returns a singleton instance of GameDataProvider.
-    Cached by Streamlit so we don't reload CSVs on every interaction.
+    Creates cached GameDataProvider for dashboard session.
+
+    Returns:
+        GameDataProvider instance or None if loading fails
     """
-    provider = GameDataProvider()
-    return provider
+    try:
+        return GameDataProvider()
+    except Exception as e:
+        st.error(f"Failed to load game data: {e}")
+        return None
 
 def load_css():
     """

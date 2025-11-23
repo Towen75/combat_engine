@@ -1,5 +1,6 @@
 import streamlit as st
 import textwrap
+import zlib
 from src.data.typed_models import ItemSlot, Rarity
 from src.core.rng import RNG
 
@@ -105,9 +106,10 @@ def render_item_card(item_data, affix_provider=None, seed=None):
     border_color = RARITY_COLORS.get(rarity_str, "#FFFFFF")
     icon = SLOT_ICONS.get(slot_str, "📦")
 
-    # Create a deterministic seed for the RNG wrapper
-    seed_str = name + str(item_data.get("num_random_affixes", 0)) + str(seed)
-    rng = RNG(seed=hash(seed_str) % (2**32))  # Ensure positive 32-bit seed
+    # Create a stable, deterministic seed for the RNG wrapper
+    seed_str = f"{name}_{item_data.get('num_random_affixes', 0)}_{seed}"
+    stable_seed = zlib.adler32(seed_str.encode('utf-8'))
+    rng = RNG(seed=stable_seed)
     
     # --- Determine Quality ---
     sim_quality_val = rng.randint(1, 100)
