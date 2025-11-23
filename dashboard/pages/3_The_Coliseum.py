@@ -12,7 +12,10 @@ if str(PROJECT_ROOT) not in sys.path:
 from src.simulation.batch_runner import SimulationBatchRunner
 from src.core.models import Entity, EntityStats
 from src.core.state import StateManager
-from dashboard.utils import get_game_data_provider
+from dashboard.utils import get_game_data_provider, load_css
+
+# Apply black and gold styling
+load_css()
 
 def render_coliseum():
     st.title("🏛️ THE COLISEUM")

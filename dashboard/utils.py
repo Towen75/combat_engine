@@ -78,6 +78,56 @@ def load_css():
             font-weight: 700;
         }
         
+        /* Plain Text - Make it gold/visible but be very specific to avoid layout issues */
+        .stMarkdown p:not([style*="color"]),
+        .stMarkdown span:not([style*="color"]) {
+            color: #e8d4a0;
+        }
+        
+        /* Captions */
+        .caption, [data-testid="stCaptionContainer"], .stCaptionContainer {
+            color: #c9aa71 !important;
+        }
+        
+        /* Markdown text - but not if it has inline styles */
+        .stMarkdown:not([style*="color"]) {
+            color: #e8d4a0;
+        }
+        
+        /* Labels for inputs */
+        label:not([style*="color"]) {
+            color: #d4af37 !important;
+            font-weight: 600;
+        }
+        
+        /* Selectbox/Dropdown text - make it white for visibility */
+        .stSelectbox > div > div > div,
+        .stSelectbox label,
+        .stSelectbox [data-baseweb="select"] > div {
+            color: #ffffff !important;
+        }
+        
+        /* Selectbox background and border */
+        .stSelectbox [data-baseweb="select"] {
+            background-color: #2c2c35 !important;
+            border-color: #4a4a55 !important;
+        }
+        
+        /* Dropdown options */
+        [data-baseweb="menu"] li {
+            color: #1a1a1f !important;
+        }
+        
+        /* Table text */
+        table:not([style*="color"]) {
+            color: #e8d4a0;
+        }
+        
+        /* Data editor text */
+        [data-testid="stDataFrame"] {
+            color: #e8d4a0;
+        }
+        
         /* Buttons */
         .stButton > button {
             background: linear-gradient(135deg, #2c2c35 0%, #1a1a20 100%);
@@ -104,13 +154,19 @@ def load_css():
         /* Primary Button */
         .stButton > button[kind="primary"] {
             background: linear-gradient(135deg, #d4af37 0%, #b8941f 100%);
-            color: #1a1a1f;
+            color: #1a1a1f !important;
             border-color: #f0d98d;
         }
         
         .stButton > button[kind="primary"]:hover {
             background: linear-gradient(135deg, #f0d98d 0%, #d4af37 100%);
+            color: #1a1a1f !important;
             box-shadow: 0 8px 16px rgba(212, 175, 55, 0.6);
+        }
+        
+        /* Ensure button text is always readable */
+        .stButton > button * {
+            color: inherit !important;
         }
         
         /* Input Fields */
@@ -132,7 +188,7 @@ def load_css():
         
         /* Radio Buttons */
         .stRadio > label {
-            color: #d4af37;
+            color: #d4af37 !important;
             font-weight: 600;
             font-size: 1.1rem;
         }
@@ -142,6 +198,24 @@ def load_css():
             padding: 0.8rem;
             border-radius: 8px;
             border: 1px solid #4a4a55;
+        }
+        
+        /* Radio button option labels - CRITICAL for visibility */
+        .stRadio label span,
+        .stRadio [role="radiogroup"] label,
+        .stRadio [role="radiogroup"] div,
+        [data-baseweb="radio"] label,
+        [data-baseweb="radio"] > div {
+            color: #ffffff !important;
+        }
+        
+        /* Selectbox selected value text */
+        .stSelectbox [data-baseweb="select"] input,
+        .stSelectbox [data-baseweb="select"] > div > div,
+        .stSelectbox [data-baseweb="select"] span,
+        [data-baseweb="select"] input,
+        [data-baseweb="select"] span {
+            color: #ffffff !important;
         }
         
         /* Dataframe/Tables */

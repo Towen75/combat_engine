@@ -2,29 +2,35 @@
 """Demo script to generate and display a random procedural item."""
 
 import json
-import random
 import logging
+import argparse
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 
+from src.core.rng import RNG
 from src.utils.item_generator import ItemGenerator
 
 
 def main():
     """Generate and display a random item."""
+    parser = argparse.ArgumentParser(description='Generate a random procedural item')
+    parser.add_argument('--seed', type=int, default=None, help='Random seed for deterministic generation')
+    args = parser.parse_args()
+    
     try:
         # Load game data
         with open('data/game_data.json', 'r', encoding='utf-8') as f:
             game_data = json.load(f)
 
-        # Initialize generator
-        item_gen = ItemGenerator(game_data)
+        # Initialize RNG and generator
+        rng = RNG(args.seed) if args.seed is not None else RNG()
+        item_gen = ItemGenerator(game_data, rng=rng)
 
         # Get available base items
         base_items = list(game_data['items'].keys())
 
         # Pick a random base item
-        base_id = random.choice(base_items)
+        base_id = rng.choice(base_items)
 
         # Generate the item
         item = item_gen.generate(base_id)

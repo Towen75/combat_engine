@@ -13,12 +13,12 @@ class TestCombatEngineResolveHit:
 
     def test_resolve_hit_requires_state_manager(self):
         """Verify resolve_hit raises ValueError if state_manager is None."""
-        engine = CombatEngine()
-        
+        engine = CombatEngine(rng=make_rng())
+
         # Use the fixtures imported at the top
         attacker = make_attacker()
         defender = make_defender()
-        
+
         # Verify the API guard works
         with pytest.raises(ValueError, match="requires state_manager parameter"):
             engine.resolve_hit(attacker, defender, None)

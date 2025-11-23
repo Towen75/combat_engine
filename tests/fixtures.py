@@ -1,23 +1,21 @@
 """Test fixtures and helper functions for Combat Engine tests."""
 
-import random
 from typing import Optional
 from src.core.models import Entity, EntityStats
 from src.core.state import StateManager
+from src.core.rng import RNG
 
 
-def make_rng(seed: int = 42) -> random.Random:
+def make_rng(seed: int = 42) -> RNG:
     """Create a deterministic random number generator for testing.
 
     Args:
         seed: Random seed for reproducible results
 
     Returns:
-        Configured Random instance
+        Configured RNG instance
     """
-    rng = random.Random()
-    rng.seed(seed)
-    return rng
+    return RNG(seed)
 
 
 def make_entity(

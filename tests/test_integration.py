@@ -6,7 +6,7 @@ Verifies the interaction of Combat, Items, Skills, and Effects in a deterministi
 """
 
 import pytest
-import random
+from src.core.rng import RNG
 import logging
 from src.core.models import Entity, EntityStats, RolledAffix, Item
 from src.core.state import StateManager
@@ -37,7 +37,7 @@ def test_full_combat_scenario():
     """
     # 1. Setup Deterministic RNG
     seed = 42
-    rng = random.Random(seed)
+    rng = RNG(seed)
     
     # 2. Initialize Core Systems
     event_bus = EventBus()

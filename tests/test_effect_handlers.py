@@ -59,7 +59,7 @@ class TestDamageOnHitHandler:
         event_bus = MagicMock()
         state_manager = MagicMock()
 
-        handler = DamageOnHitHandler(config, event_bus, state_manager)
+        handler = DamageOnHitHandler(config, event_bus, state_manager, rng=make_rng())
 
         assert handler.config == config
         assert handler.event_bus == event_bus
@@ -77,7 +77,7 @@ class TestDamageOnHitHandler:
         event_bus = MagicMock()
         state_manager = MagicMock()
 
-        handler = DamageOnHitHandler(config, event_bus, state_manager)
+        handler = DamageOnHitHandler(config, event_bus, state_manager, rng=make_rng())
 
         # Verify subscription was called
         event_bus.subscribe.assert_called_once()

@@ -1,7 +1,7 @@
-import random
 import uuid
 from typing import Dict, List, Union, Optional
 from src.core.models import Item, RolledAffix
+from src.core.rng import RNG
 from src.data.game_data_provider import GameDataProvider
 from src.data.typed_models import (
     AffixDefinition, ItemTemplate, QualityTier,
@@ -14,13 +14,14 @@ class ItemGenerator:
     Fully integrated with Typed Models (PR-P1S3).
     """
 
-    def __init__(self, game_data: Optional[dict] = None, rng: Optional[random.Random] = None):
+    def __init__(self, game_data: Optional[dict] = None, rng: Optional[RNG] = None):
         """
         Initialize generator.
         
         Args:
             game_data: Optional raw dict (legacy/testing). Will be hydrated to Objects.
-            rng: Optional Random instance for deterministic generation.
+            rng: Optional RNG instance for deterministic generation.
+                 If None, creates a new unseeded RNG.
         """
         if game_data is not None:
             # Legacy/Test mode: Hydrate raw dicts into Typed Objects immediately
@@ -40,7 +41,8 @@ class ItemGenerator:
             self.item_templates = provider.get_items()
             self.quality_tiers = provider.get_quality_tiers()
 
-        self.rng = rng if rng is not None else random.Random()
+        # Create RNG instance if not provided
+        self.rng = rng if rng is not None else RNG()
 
     def generate(self, base_item_id: str) -> Item:
         template = self.item_templates[base_item_id]

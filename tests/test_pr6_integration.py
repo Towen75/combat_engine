@@ -1,6 +1,6 @@
 """Integration test for PR6 - Combat Math Centralization."""
 
-from random import Random
+from src.core.rng import RNG
 from src.combat.engine import CombatEngine, HitContext
 from src.core.models import Entity, EntityStats
 from src.core.state import StateManager, EntityState
@@ -29,7 +29,7 @@ def test_pr6_resolve_hit_integration():
     defender = Entity(id="test_defender", base_stats=defender_stats, name="Test Defender")
 
     # Create deterministic RNG
-    rng = Random(42)
+    rng = RNG(42)
     engine = CombatEngine(rng=rng)
 
     # Create state manager
@@ -49,14 +49,12 @@ def test_pr6_resolve_hit_integration():
     assert ctx.final_damage >= 0
 
     # Verify with seeded RNG we get deterministic results
-    rng2 = Random(42)
+    rng2 = RNG(42)
     engine2 = CombatEngine(rng=rng2)
     ctx2 = engine2.resolve_hit(attacker, defender, state_manager)
 
     assert ctx.final_damage == ctx2.final_damage
     assert ctx.was_crit == ctx2.was_crit
-
-    print(f"✅ PR6 Integration Test Passed - Damage: {ctx.final_damage}")
 
 
 if __name__ == "__main__":

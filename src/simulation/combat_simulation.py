@@ -5,10 +5,10 @@ validating balance and performance.
 """
 
 import time
-import random
 from dataclasses import dataclass, field
 from typing import List, Dict, Any, Optional, TYPE_CHECKING
 from collections import defaultdict
+from src.core.rng import RNG
 
 if TYPE_CHECKING:
     from src.core.models import Entity
@@ -203,18 +203,25 @@ class SimulationRunner:
     Manages the simulation loop, entity attacks, and effect processing.
     """
 
-    def __init__(self, combat_engine, state_manager, event_bus, logger: Optional[CombatLogger] = None):
+    def __init__(self, combat_engine, state_manager, event_bus, rng: RNG, logger: Optional[CombatLogger] = None):
         """Initialize the simulation runner.
 
         Args:
             combat_engine: The combat engine for damage calculations
             state_manager: The state manager for entity states
             event_bus: The event bus for dispatching events
+            rng: RNG for random target selection and other behaviors.
+                 Must not be None - all randomness must be explicit.
             logger: Optional combat logger for recording events
+        
+        Raises:
+            AssertionError: If rng is None
         """
+        assert rng is not None, "RNG must be injected into SimulationRunner - no global randomness allowed"
         self.combat_engine = combat_engine
         self.state_manager = state_manager
         self.event_bus = event_bus
+        self.rng = rng
         self.logger = logger or CombatLogger()
 
         # Simulation state
@@ -285,7 +292,7 @@ class SimulationRunner:
             entity for entity in self.entities
             if entity.id != attacker_id and self.state_manager.get_state(entity.id).is_alive
         ]
-        return random.choice(living_entities) if living_entities else None
+        return self.rng.choice(living_entities) if living_entities else None
 
     def update(self, delta_time: float, force_update: bool = False) -> None:
         """Update the simulation by the given time delta.

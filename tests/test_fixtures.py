@@ -1,6 +1,5 @@
 """Unit tests for test fixtures and helper functions."""
 
-import random
 from tests.fixtures import make_rng, make_entity, make_attacker, make_defender, make_glass_cannon_attacker, make_tank_defender
 
 

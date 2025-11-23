@@ -2,9 +2,12 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 import os
-from utils import get_game_data_provider
+from utils import get_game_data_provider, load_css
 from components.forge_editors import render_skills_editor, render_affixes_editor, render_effects_editor
 from components.item_card import render_item_card  # Import the new component
+
+# Apply black and gold styling
+load_css()
 
 def render_forge():
     st.title("🔨 THE FORGE")

@@ -1,11 +1,11 @@
 """Core combat engine - damage calculation and hit resolution."""
 
-import random
 from typing import Optional, List, Dict, Any
 from src.core.models import Entity, SkillUseResult, ApplyDamageAction, DispatchEventAction, ApplyEffectAction, Action
 from src.core.skills import Skill
 from src.core.events import EventBus, OnHitEvent, OnCritEvent, OnDodgeEvent, OnGlancingBlowEvent, OnBlockEvent, OnSkillUsedEvent
 from src.core.state import StateManager, Modifier
+from src.core.rng import RNG
 from .hit_context import HitContext
 from src.combat.combat_math import (
     evade_dodge_or_normal,
@@ -26,13 +26,17 @@ class CombatEngine:
     providing pure functions for hit resolution and damage calculation.
     """
 
-    def __init__(self, rng=None):
-        """Initialize CombatEngine with optional RNG for deterministic testing.
+    def __init__(self, rng: RNG):
+        """Initialize CombatEngine with RNG for deterministic testing.
 
         Args:
-            rng: Random number generator for reproducible results. If None,
-                 uses random.random() without seeding.
+            rng: Random number generator for reproducible results.
+                 Must not be None - all randomness must be explicit.
+        
+        Raises:
+            AssertionError: If rng is None
         """
+        assert rng is not None, "RNG must be injected into CombatEngine - no global randomness allowed"
         self.rng = rng
 
     def _get_modified_chance(self, entity: Entity, state_manager: StateManager, base_chance: float, roll_type: str) -> float:
@@ -70,14 +74,14 @@ class CombatEngine:
         """
         # Roll against modified evasion chance
         evasion_chance = self._get_modified_chance(defender, state_manager, defender.final_stats.evasion_chance, 'evasion_chance')
-        rng_value = self.rng.random() if self.rng else random.random()
+        rng_value = self.rng.random()
 
         if rng_value >= evasion_chance:
             return False, False  # Normal hit
 
         # If evaded, roll for dodge vs glance
         dodge_chance = self._get_modified_chance(defender, state_manager, defender.final_stats.dodge_chance, 'dodge_chance')
-        rng_value = self.rng.random() if self.rng else random.random()
+        rng_value = self.rng.random()
 
         # Actual dodge chance is the modified dodge chance
         # If dodge roll < modified dodge chance, it's a full dodge
@@ -97,7 +101,7 @@ class CombatEngine:
             True if the attack was blocked
         """
         block_chance = self._get_modified_chance(defender, state_manager, defender.final_stats.block_chance, 'block_chance')
-        rng_value = self.rng.random() if self.rng else random.random()
+        rng_value = self.rng.random()
         return rng_value < block_chance
 
     def resolve_hit(self, attacker: Entity, defender: Entity, state_manager: "StateManager") -> "HitContext":
@@ -460,7 +464,7 @@ class CombatEngine:
 
             elif trigger.event == "OnSkillUsed":
                 # Special case for OnSkillUsed triggers (like Focused Rage)
-                rng_value = self.rng.random() if self.rng else random.random()
+                rng_value = self.rng.random()
                 if rng_value < trigger.check.get("proc_rate", 1.0):
                     self._execute_trigger_result(trigger.result, attacker, defender, hit_context, event_bus, state_manager)
 
@@ -469,7 +473,7 @@ class CombatEngine:
         if defender_state and defender_state.is_alive:
             for trigger in defender.active_triggers:
                 if trigger.event == "OnBlock" and hit_context.was_blocked:
-                    rng_value = self.rng.random() if self.rng else random.random()
+                    rng_value = self.rng.random()
                     if rng_value < trigger.check.get("proc_rate", 1.0):
                         self._execute_trigger_result(trigger.result, defender, attacker, hit_context, event_bus, state_manager)
 

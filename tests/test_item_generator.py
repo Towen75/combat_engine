@@ -1,6 +1,6 @@
 import unittest
 import json
-import random
+from src.core.rng import RNG
 import pytest
 from src.utils.item_generator import ItemGenerator
 from src.core.models import Item, RolledAffix
@@ -70,7 +70,7 @@ class TestItemGenerator(unittest.TestCase):
 
     def test_roll_one_affix_full_quality(self):
         """Test rolling affix with 100% max quality."""
-        random.seed(42)
+        RNG(42)
         affix = self.gen._roll_one_affix('flat_dmg', 100)
         
         self.assertIsInstance(affix, RolledAffix)
@@ -82,7 +82,7 @@ class TestItemGenerator(unittest.TestCase):
 
     def test_roll_one_affix_half_quality(self):
         """Test rolling affix with 50% max quality."""
-        random.seed(42)
+        RNG(42)
         affix = self.gen._roll_one_affix('flat_dmg', 50)
         
         self.assertIsInstance(affix, RolledAffix)
@@ -126,7 +126,7 @@ class TestItemGenerator(unittest.TestCase):
         self.gen.affix_defs['test_dual'] = mock_affix
         
         # Seed RNG
-        self.gen.rng = random.Random(42)
+        self.gen.rng = RNG(42)
         
         # Roll
         rolled = self.gen._roll_one_affix('test_dual', 100)

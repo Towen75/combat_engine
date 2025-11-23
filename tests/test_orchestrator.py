@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 from src.core.models import SkillUseResult, ApplyDamageAction, DispatchEventAction, Entity, EntityStats
 from src.core.events import OnHitEvent
 from src.combat.orchestrator import CombatOrchestrator, execute_skill_use
-from tests.fixtures import make_entity
+from tests.fixtures import make_entity, make_rng
 
 
 class TestCombatOrchestrator:
@@ -17,7 +17,8 @@ class TestCombatOrchestrator:
         state_manager = MagicMock()
         event_bus = MagicMock()
 
-        orchestrator = CombatOrchestrator(state_manager, event_bus)
+        from tests.fixtures import make_rng
+        orchestrator = CombatOrchestrator(state_manager, event_bus, rng=make_rng())
 
         # Create a fake SkillUseResult with damage action
         attacker = make_entity("attacker")
@@ -45,7 +46,7 @@ class TestCombatOrchestrator:
         state_manager = MagicMock()
         event_bus = MagicMock()
 
-        orchestrator = CombatOrchestrator(state_manager, event_bus)
+        orchestrator = CombatOrchestrator(state_manager, event_bus, rng=make_rng())
 
         # Create a fake SkillUseResult with event action
         attacker = make_entity("attacker")
@@ -79,7 +80,7 @@ class TestCombatOrchestrator:
         state_manager = MagicMock()
         event_bus = MagicMock()
 
-        orchestrator = CombatOrchestrator(state_manager, event_bus)
+        orchestrator = CombatOrchestrator(state_manager, event_bus, rng=make_rng())
 
         # Create multiple actions
         attacker = make_entity("attacker")
@@ -109,7 +110,7 @@ class TestCombatOrchestrator:
         state_manager = MagicMock()
         event_bus = MagicMock()
 
-        orchestrator = CombatOrchestrator(state_manager, event_bus)
+        orchestrator = CombatOrchestrator(state_manager, event_bus, rng=make_rng())
 
         # Create a custom unknown action
         class UnknownAction:
@@ -151,7 +152,7 @@ class TestCombatOrchestrator:
         state_manager = MagicMock()
         event_bus = MagicMock()
 
-        orchestrator = CombatOrchestrator(state_manager, event_bus)
+        orchestrator = CombatOrchestrator(state_manager, event_bus, rng=make_rng())
 
         result = SkillUseResult(hit_results=[], actions=[])
 
@@ -195,8 +196,8 @@ class TestExecuteSkillUseConvenienceFunction:
         damage_action = ApplyDamageAction(target_id=defender.id, damage=10.0, source="no_rng_test")
         result = SkillUseResult(hit_results=[], actions=[damage_action])
 
-        # Execute without rng parameter
-        execute_skill_use(result, state_manager, event_bus)
+        # Execute without rng parameter - but it seems to require rng now
+        execute_skill_use(result, state_manager, event_bus, make_rng())
 
         # Should still work (orchestrator will create its own RNG)
         state_manager.apply_damage.assert_called_once_with(defender.id, 10.0)

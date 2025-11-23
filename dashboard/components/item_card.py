@@ -1,7 +1,7 @@
 import streamlit as st
-import random
 import textwrap
 from src.data.typed_models import ItemSlot, Rarity
+from src.core.rng import RNG
 
 # ... [Colors and Icon Maps remain the same] ...
 RARITY_COLORS = {
@@ -105,7 +105,9 @@ def render_item_card(item_data, affix_provider=None, seed=None):
     border_color = RARITY_COLORS.get(rarity_str, "#FFFFFF")
     icon = SLOT_ICONS.get(slot_str, "📦")
 
-    rng = random.Random(name + str(item_data.get("num_random_affixes", 0)) + str(seed))
+    # Create a deterministic seed for the RNG wrapper
+    seed_str = name + str(item_data.get("num_random_affixes", 0)) + str(seed)
+    rng = RNG(seed=hash(seed_str) % (2**32))  # Ensure positive 32-bit seed
     
     # --- Determine Quality ---
     sim_quality_val = rng.randint(1, 100)
@@ -173,6 +175,7 @@ def render_item_card(item_data, affix_provider=None, seed=None):
     if raw_pools == 'nan': raw_pools = ""
     pools_raw = raw_pools.replace(";", "|").split("|")
     
+    pools = []  # Initialize outside conditional scope
     if num_random > 0 and affix_provider:
         pools = [p.strip() for p in pools_raw if p.strip()]
         candidates = []

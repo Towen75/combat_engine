@@ -1,5 +1,5 @@
 import pytest
-import random
+from src.core.rng import RNG
 from src.utils.item_generator import ItemGenerator
 from src.data.typed_models import AffixDefinition
 
@@ -22,7 +22,7 @@ class TestItemGeneratorStrict:
         )
         
         # 2. Seed RNG
-        gen.rng = random.Random(42)
+        gen.rng = RNG(42)
         
         # 3. Execute
         rolled = gen._roll_one_affix('test_dual', 100)

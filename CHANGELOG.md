@@ -1,8 +1,24 @@
-# [](https://github.com/Towen75/combat_engine/compare/v2.6.0...v) (2025-11-21)
+# [](https://github.com/Towen75/combat_engine/compare/v2.7.0...v) (2025-11-23)
 
 
 
+# [2.7.0](https://github.com/Towen75/combat_engine/compare/v2.6.0...v2.7.0) (2025-11-21)
 
+### Added
+- **Interactive Combat Dashboard**: Complete Streamlit web application for combat simulation and analysis
+  - **Dashboard Structure**: Modular page-based navigation (Forge, Arena, Coliseum)
+  - **Entity Management**: Drag-and-drop entity configuration with real-time stat feedback
+  - **Combat Visualization**: Live battle logs, DPS tracking, and performance metrics
+  - **Forge System**: Equipment generation with quality tiers and affix selection
+  - **Simulation Engine**: Real-time combat simulation with detailed result analysis
+- **DPS Tracking**: Enhanced simulation batch runner with damage-per-second calculations
+- **Dashboard Components**: Reusable Streamlit components for entities, items, and battle logs
+
+### Technical Details
+- **Dashboard Architecture**: Multi-page Streamlit app with component-based design
+- **Data Integration**: Full integration with existing combat engine and data providers
+- **Performance Monitoring**: Added DPS calculations to simulation aggregators
+- **Test Coverage**: Added dashboard import verification tests
 
 # [2.6.0](https://github.com/Towen75/combat_engine/compare/v2.5.0...v2.6.0) (2025-11-20)
 

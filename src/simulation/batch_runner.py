@@ -4,12 +4,12 @@ Provides SimulationBatchRunner for running thousands of combat simulations
 with deterministic seeding and comprehensive result collection.
 """
 
-import random
 from dataclasses import dataclass, field
 from typing import List, Dict, Optional, Any
 from src.core.models import Entity
 from src.core.state import StateManager
 from src.core.events import EventBus, OnHitEvent
+from src.core.rng import RNG
 from src.combat.engine import CombatEngine
 from .. import simulation as sim_module
 from .aggregators import DpsAggregator, WinRateAggregator
@@ -108,7 +108,7 @@ class SimulationBatchRunner:
         for i in range(iterations):
             # 1. Create deterministic seed for this specific run
             run_seed = base_seed + i
-            rng = random.Random(run_seed)
+            rng = RNG(run_seed)
             
             # 2. Inject RNG into all components (PR-P1S2 compliance)
             combat_engine = CombatEngine(rng=rng)
@@ -137,7 +137,7 @@ class SimulationBatchRunner:
                 defender.equipment = defender_template.equipment.copy()
             
             # 4. Run simulation
-            runner = sim_module.SimulationRunner(combat_engine, state_manager, event_bus)
+            runner = sim_module.SimulationRunner(combat_engine, state_manager, event_bus, rng)
             runner.add_entity(attacker)
             runner.add_entity(defender)
             

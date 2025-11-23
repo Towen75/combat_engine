@@ -2,7 +2,7 @@ import streamlit as st
 import sys
 import pandas as pd
 from pathlib import Path
-import random
+from src.core.rng import RNG
 import copy
 
 # --- Setup Path ---
@@ -266,7 +266,7 @@ def render_arena():
         bus.subscribe(EntityDeathEvent, log_handler)
         
         # 3. Execute Action
-        rng = random.Random() # New RNG every click for variety
+        rng = RNG()  # Use unseeded RNG for dashboard interactivity
         engine = CombatEngine(rng=rng)
         
         if selected_action == "Basic Attack":
