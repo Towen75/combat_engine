@@ -12,12 +12,33 @@ from src.data.typed_models import Rarity
 
 # Rarity to critical hit tier mapping
 RARITY_TO_CRIT_TIER = {
-    Rarity.COMMON: 1,
-    Rarity.UNCOMMON: 1,
-    Rarity.RARE: 2,
-    Rarity.EPIC: 2,
-    Rarity.LEGENDARY: 3,
-    Rarity.MYTHIC: 3
+    "Common": 1,
+    "Uncommon": 1,
+    "Rare": 2,
+    "Epic": 2,
+    "Legendary": 3,
+    "Mythic": 3
+}
+
+# Crit tier probability thresholds (ascending order)
+# Each tier represents different crit behaviors/strengths
+CRIT_TIER_PROBABILITIES = {
+    "Common": [0.10],                                    # 10% chance for tier 1
+    "Uncommon": [0.10],                                 # 10% chance for tier 1
+    "Rare": [0.15, 0.05],                               # 15% tier 2, 5% tier 1
+    "Epic": [0.15, 0.05],                               # 15% tier 2, 5% tier 1
+    "Legendary": [0.20, 0.10, 0.02],                   # 20% tier 3, 10% tier 2, 2% tier 1
+    "Mythic": [0.20, 0.10, 0.02]                       # 20% tier 3, 10% tier 2, 2% tier 1
+}
+
+# Crit tier multipliers (indexed by tier-1)
+CRIT_TIER_MULTIPLIERS = {
+    "Common": [1.5],                                     # 50% bonus
+    "Uncommon": [1.5],                                  # 50% bonus
+    "Rare": [1.5, 2.0],                                 # 50%, 100% bonuses
+    "Epic": [1.5, 2.0],                                 # 50%, 100% bonuses
+    "Legendary": [1.5, 2.0, 3.0],                      # 50%, 100%, 200% bonuses
+    "Mythic": [1.5, 2.0, 3.0]                          # 50%, 100%, 200% bonuses
 }
 
 
@@ -143,6 +164,22 @@ class Entity:
             Critical hit tier (1, 2, or 3)
         """
         return RARITY_TO_CRIT_TIER.get(self.rarity, 1)
+
+    def get_crit_tier_probabilities(self) -> list[float]:
+        """Get the critical hit tier probability thresholds for this entity's rarity.
+
+        Returns:
+            List of ascending probability thresholds (e.g., [0.15, 0.05] for 2-tier)
+        """
+        return CRIT_TIER_PROBABILITIES.get(self.rarity, [0.10])
+
+    def get_crit_multipliers(self) -> list[float]:
+        """Get the critical hit multipliers for this entity's rarity.
+
+        Returns:
+            List of damage multipliers indexed by tier-1 (e.g., [1.5, 2.0] for 2-tier)
+        """
+        return CRIT_TIER_MULTIPLIERS.get(self.rarity, [1.5])
 
     def equip_item(self, item: "Item") -> None:
         """Equip an item to its designated slot and recalculate stats.
@@ -366,6 +403,52 @@ class Item:
 
 
 # Effect Configuration and Handler Data
+
+@dataclass
+class StatusEffect:
+    """Status effect with structured proc rates following PR specification.
+
+    Enables deterministic RNG-based procs for all status effect events.
+    """
+    id: str
+    name: str
+    duration: float
+    tick_interval: float = 0.0  # If > 0, ticks every X seconds
+
+    # Proc rates as specified in PR
+    proc_chance: float = 1.0             # Base proc chance (used by effect)
+    on_apply_proc_chance: float = 1.0    # Chance to proc on application
+    tick_proc_chance: float = 1.0        # Chance to proc on each tick
+
+    # Effect parameters
+    damage_per_tick: float = 0.0
+    stat_modifier: float = 0.0
+    display_message: str = ""
+
+    def on_apply(self, rng: "RNG", target: Entity) -> bool:
+        """Called when status is applied. Returns True if proc succeeds."""
+        if rng.roll(self.on_apply_proc_chance):
+            # Apply initial effect (e.g., stat modifier)
+            return True
+        return False
+
+    def on_tick(self, rng: "RNG", target: Entity, current_stacks: int) -> bool:
+        """Called each tick. Returns True if proc succeeds."""
+        if rng.roll(self.tick_proc_chance):
+            # Apply tick damage/effect
+            return True
+        return False
+
+    def get_proc_rate(self, event_type: str) -> float:
+        """Get proc rate for specific event type."""
+        if event_type == "on_apply":
+            return self.on_apply_proc_chance
+        elif event_type == "tick":
+            return self.tick_proc_chance
+        elif event_type == "base":
+            return self.proc_chance
+        return 1.0
+
 
 @dataclass
 class DamageOnHitConfig:

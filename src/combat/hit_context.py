@@ -27,6 +27,9 @@ class HitContext:
     was_blocked: bool = False
     was_glancing: bool = False
 
+    # Crit tier system (PR spec implementation)
+    crit_multiplier: float = 1.0  # Applied when crit tier is hit
+
     # Partial damage accounting
     damage_pre_mitigation: float = 0.0  # Damage before armor mitigation
     damage_post_armor: float = 0.0      # Damage after pierce/armor calculation

@@ -25,4 +25,6 @@ class Skill:
     name: str
     damage_type: str = "Physical"
     hits: int = 1
+    cooldown: float = 0.0  # Cooldown in seconds
+    resource_cost: float = 0.0  # Resource cost to use skill
     triggers: List[Trigger] = field(default_factory=list)

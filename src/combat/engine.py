@@ -147,9 +147,30 @@ class CombatEngine:
         elif evasion_result == 'evade':
             ctx.was_glancing = True
 
-        # Step 4: Critical Hit Check - Call pure math function
-        is_crit, _ = resolve_crit(self.rng, attacker_crit_chance, attacker.final_stats.crit_damage)
-        ctx.was_crit = is_crit and not ctx.was_glancing  # Glancing hits cannot crit
+        # Step 4: Critical Hit Check - Use tiered crit system with base chance gate
+        # First check if we can attempt a crit based on base crit_chance
+        base_crit_roll = self.rng.roll(attacker_crit_chance)
+        if base_crit_roll:
+            # Crit attempt successful - now determine tier
+            crit_tier_probs = attacker.get_crit_tier_probabilities()
+            crit_tier_hit = self.rng.roll_tiered(crit_tier_probs)
+
+            if crit_tier_hit == -1:
+                # No crit tier hit - fallback to basic crit
+                ctx.was_crit = True
+                ctx.crit_multiplier = 1.0  # This will be multiplied by crit_damage later
+            else:
+                # Crit tier hit - apply tiered multiplier
+                crit_multipliers = attacker.get_crit_multipliers()
+                ctx.was_crit = True
+                ctx.crit_multiplier = crit_multipliers[crit_tier_hit]
+        else:
+            # No crit at all
+            ctx.was_crit = False
+            ctx.crit_multiplier = 1.0
+
+        # Glancing hits cannot crit
+        ctx.was_crit = ctx.was_crit and not ctx.was_glancing
 
         # Step 5: Pre-Mitigation Damage Calculation
         ctx.damage_pre_mitigation = base_damage_input

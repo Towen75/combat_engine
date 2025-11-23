@@ -116,16 +116,67 @@ class RNG:
         k: int = 1
     ) -> List[T]:
         """Return k random elements from population with replacement.
-        
+
         Args:
             population: Sequence to sample from
             weights: Optional weights for each element
             k: Number of elements to select
-            
+
         Returns:
             List of k elements (may contain duplicates)
         """
         return self._rng.choices(population, weights=weights, k=k)
+
+    def roll_tiered(self, thresholds: list[float]) -> int:
+        """
+        Rolls against a list of ascending probability thresholds.
+        Returns the index of the tier hit.
+
+        Args:
+            thresholds: List of ascending probability thresholds (e.g., [0.1, 0.03, 0.01])
+
+        Returns:
+            Index of tier hit, or -1 if no tier hit
+
+        Examples:
+            >>> rng = RNG(seed=42)
+            >>> rng.roll_tiered([0.2, 0.1, 0.02])  # Roll against 20%, 10%, 2% tiers
+            0  # Hit first tier
+        """
+        for idx, threshold in enumerate(thresholds):
+            if self.roll(threshold):
+                return idx
+        return -1
+
+    def weighted_choice(self, items: list[T], weights: list[float]) -> T:
+        """
+        Return a weighted random choice from items based on weights.
+
+        Args:
+            items: List of items to choose from
+            weights: Corresponding weights for each item
+
+        Returns:
+            Randomly selected item based on weights
+
+        Examples:
+            >>> rng = RNG(seed=42)
+            >>> rng.weighted_choice(['A', 'B', 'C'], [0.5, 0.3, 0.2])
+            'A'  # Will tend to pick 'A' most often
+        """
+        if len(items) != len(weights):
+            raise ValueError("items and weights must have same length")
+
+        total = sum(weights)
+        r = self.random() * total
+
+        for item, weight in zip(items, weights):
+            if r < weight:
+                return item
+            r -= weight
+
+        # Fallback (should rarely happen due to floating point precision)
+        return items[-1]
 
     @property
     def seed(self) -> Optional[int]:
