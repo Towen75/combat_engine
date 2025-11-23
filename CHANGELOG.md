@@ -1,12 +1,58 @@
-# [](https://github.com/Towen75/combat_engine/compare/v2.9.0...v) (2025-11-23)
+# [2.10.0](https://github.com/Towen75/combat_engine/compare/v2.9.0...v2.10.0) (2025-11-23)
 
+### Added
+- **Major Architectural Refactoring**: GameDataProvider converted from singleton to explicit dependency injection
+  - **Explicit Data Ownership**: Removed singleton pattern, requires explicit instantiation at application boundaries
+  - **Clean Data Dependencies**: Constructor injection pattern establishes clear data ownership and boundaries
+  - **Path Resolution**: Robust cross-platform path handling with environment variable fallback
+  - **Type Safety Maintained**: Full type annotation preservation with enhanced error handling
 
+### Technical Details
+- **Dependency Injection**: GameDataProvider now requires explicit instantiation with optional data directory parameter
+- **Cross-Platform Paths**: pathlib.Path usage with COMBAT_ENGINE_DATA_DIR environment variable support
+- **File Existence Validation**: Pre-load validation ensures data directory exists before initialization
+- **Backward Compatibility**: ItemGenerator maintains emergency fallback to auto-create provider when needed
+- **Code Hygiene**: Removed deprecated convenience functions that exposed singleton usage pattern
 
-# [](https://github.com/Towen75/combat_engine/compare/v2.8.0...v) (2025-11-23)
+### Breaking Changes
+- **GameDataProvider API**: No longer a singleton - consumers must instantiate explicitly at application startup
+- **Data Ownership**: Applications now explicitly declare and manage their data requirements through constructor injection
 
+# [2.9.0](https://github.com/Towen75/combat_engine/compare/v2.8.0...v2.9.0) (2025-11-19)
 
+### Added
+- **RNG Rollout Completion**: Implemented tiered critical hits with rarity-based scaling
+  - **Tiered Critical System**: Different crit damage multipliers by rarity (Normal 1.5x, Magic 1.5x/2x, Mythic 1.5x/2x/3x)
+  - **Deterministic Combat**: Full RNG integration enabling perfectly reproducible combat simulations
+  - **Status Proc System**: DoT ticks, on-damage triggers, and status effect probabilities all using injected RNG
+  - **Multi-Hit Support**: Complex skills with proper RNG propagation for all damage instances
+  - **Weighted Random Selection**: Helper functions for deterministic weighted choices in item generation
 
-# [](https://github.com/Towen75/combat_engine/compare/v2.7.0...v) (2025-11-23)
+### Technical Details
+- **Central RNG Architecture**: Single RNG instance injected through component constructors
+- **Tiered Probability System**: Probability arrays define crit multiplier selection per rarity
+- **Event-Driven Effects**: Full integration with existing effect and skill trigger systems
+- **Deterministic Testing**: Seeded RNG enables reproducible testing for all probabilistic features
+- **Performance**: Zero overhead RNG propagation with sub-millisecond execution times
+
+### Breaking Changes
+- **RNG Policy Enforcement**: All random calls must use injected RNG instance, no global seeding
+- **Critical Hit Mechanics**: Crit damage calculation now uses tiered probabilities instead of fixed multipliers
+
+# [2.8.0](https://github.com/Towen75/combat_engine/compare/v2.7.0...v2.8.0) (2025-11-19)
+
+### Added
+- **Central Deterministic RNG**: Complete rewrite of random number generation system
+  - **Single RNG Wrapper**: Unified RNG class replacing all Python random calls with deterministic instances
+  - **Roll Helpers**: Convenience methods (roll(), roll_tiered(), weighted_choice()) for common probabilistic operations
+  - **Explicit Injection**: Constructor-based RNG injection throughout combat system components
+  - **Seeded Determinism**: Configurable seeding for reproducible simulations and testing
+
+### Technical Details
+- **RNG Injection Pattern**: All components accepted RNG parameter, defaulting to random.random() for production
+- **No Global State**: Eliminated dependency on Python's global random module for testing capabilities
+- **Backward Compatibility**: Default parameters maintain production unpredictability while enabling testing
+- **Architecture**: Clean separation between deterministic testing and live gameplay randomness
 
 
 
