@@ -1,4 +1,4 @@
-# [](https://github.com/Towen75/combat_engine/compare/v2.10.0...v) (2025-11-24)
+# # [2.11.0](https://github.com/Towen75/combat_engine/compare/v2.10.0...v2.11.0) (2025-11-24)
 
 
 ### Bug Fixes
