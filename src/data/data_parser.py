@@ -67,6 +67,7 @@ def parse_all_csvs(base_path: Union[str, Path] = "data") -> Dict[str, Any]:
 
     csv_files = [
         ("affixes.csv", "affixes"),
+        ("affix_pools.csv", "affix_pools"),  # NEW: optional affix pools data
         ("items.csv", "items"),
         ("quality_tiers.csv", "quality_tiers"),
         ("effects.csv", "effects"),
@@ -75,6 +76,7 @@ def parse_all_csvs(base_path: Union[str, Path] = "data") -> Dict[str, Any]:
 
     game_data = {
         "affixes": {},
+        "affix_pools": {},  # NEW: nested structure {pool_id: {rarity: {tier: [{affix_id, weight}]}}}
         "items": {},
         "quality_tiers": [],
         "effects": {},
@@ -106,6 +108,19 @@ def parse_all_csvs(base_path: Union[str, Path] = "data") -> Dict[str, Any]:
                 id_key = list(schema["required"])[0]  # First required column is usually the ID
                 for row in rows:
                     game_data[data_key][row[id_key]] = row
+            elif data_key == "affix_pools":
+                # NEW: Special nested structure for affix pools
+                pools = {}
+                for row in rows:
+                    pool = row['pool_id']
+                    rarity = row['rarity']
+                    tier = row['tier']
+                    affixes = {
+                        "affix_id": row['affix_id'],
+                        "weight": row['weight']
+                    }
+                    pools.setdefault(pool, {}).setdefault(rarity, {}).setdefault(tier, []).append(affixes)
+                game_data[data_key] = pools
             else:
                 # quality_tiers is a list
                 game_data[data_key] = rows
@@ -115,6 +130,20 @@ def parse_all_csvs(base_path: Union[str, Path] = "data") -> Dict[str, Any]:
         except Exception as e:
             logger.error(f"Failed to parse {filename}: {e}")
             raise
+
+    # Cross-validation: Ensure affix IDs in affix_pools exist in affixes
+    if game_data.get('affix_pools'):
+        missing_affixes = []
+        for pool_id, rarities in game_data['affix_pools'].items():
+            for rarity, tiers in rarities.items():
+                for tier, entries in tiers.items():
+                    for entry in entries:
+                        affix_id = entry['affix_id']
+                        if affix_id not in game_data['affixes']:
+                            missing_affixes.append((pool_id, rarity, tier, affix_id))
+
+        if missing_affixes:
+            raise ValueError(f"affix_pools.csv references unknown affix IDs: {missing_affixes}")
 
     return game_data
 

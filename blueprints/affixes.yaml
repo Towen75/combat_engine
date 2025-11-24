@@ -1,0 +1,35 @@
+definitions:
+  - id: "flat_dmg"
+    stat: "base_damage"
+    type: "flat"
+    base_val: 10
+    name: "Damage"
+    pools: ["weapon_pool", "sword_pool"]
+
+  - id: "Mult_dmg"
+    stat: "base_damage"
+    type: "multiplier"
+    base_val: 0.10
+    name: "% Damage"
+    pools: ["weapon_pool", "sword_pool"]
+
+  - id: "flat_health"
+    stat: "max_health"
+    type: "flat"
+    base_val: 20
+    name: "Vitality"
+    pools: ["armor_pool"]
+
+  - id: "crit_chance"
+    stat: "crit_chance"
+    type: "flat"
+    base_val: 0.02
+    name: "Precision"
+    pools: ["jewelry_pool", "sword_pool"]
+
+  - id: "flat_crit_dmg"
+    stat: "crit_damage"
+    type: "flat"
+    base_val: 10
+    name: "Critical Damage"
+    pools: ["weapon_pool", "sword_pool"]

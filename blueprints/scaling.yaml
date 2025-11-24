@@ -1,0 +1,13 @@
+rarity_curve:
+  Common: 1.0
+  Uncommon: 1.5
+  Rare: 2.5
+  Epic: 5.0
+  Legendary: 10.0
+
+random_affix_slots:
+  Common: 0
+  Uncommon: 1
+  Rare: 2
+  Epic: 3
+  Legendary: 4

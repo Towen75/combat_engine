@@ -1,6 +1,6 @@
 import uuid
 import warnings
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Union, Optional, Any
 from src.core.models import Item, RolledAffix
 from src.core.rng import RNG
 from src.data.game_data_provider import GameDataProvider
@@ -8,6 +8,9 @@ from src.data.typed_models import (
     AffixDefinition, ItemTemplate, QualityTier,
     hydrate_affix_definition, hydrate_item_template, hydrate_quality_tier
 )
+
+# Rarity order derived from quality_tiers.csv column order
+RARITY_ORDER = ["Normal", "Common", "Unusual", "Uncommon", "Rare", "Exotic", "Epic", "Glorious", "Exalted", "Legendary", "Mythic", "Godly"]
 
 class ItemGenerator:
     """
@@ -31,6 +34,7 @@ class ItemGenerator:
             self.affix_defs = provider.get_affixes()
             self.item_templates = provider.get_items()
             self.quality_tiers = provider.get_quality_tiers()
+            self.affix_pools = provider.get_affix_pools()  # NEW: rarity-gated pools
         elif game_data is not None:
             # Legacy support: Hydrate raw dicts into Typed Objects (backwards compatibility)
             self.affix_defs: Dict[str, AffixDefinition] = {
@@ -42,12 +46,14 @@ class ItemGenerator:
             self.quality_tiers: List[QualityTier] = [
                 hydrate_quality_tier(q) for q in game_data['quality_tiers']
             ]
+            self.affix_pools = game_data.get('affix_pools', {})  # NEW: legacy fallback
         else:
             # Emergency fallback: Create provider automatically (maintained for existing code)
             provider = GameDataProvider()
             self.affix_defs = provider.get_affixes()
             self.item_templates = provider.get_items()
             self.quality_tiers = provider.get_quality_tiers()
+            self.affix_pools = provider.get_affix_pools()  # NEW: auto-created provider
 
         # Create RNG instance if not provided
         self.rng = rng if rng is not None else RNG()
@@ -112,6 +118,81 @@ class ItemGenerator:
 
         weights = [getattr(tier, rarity_key) for tier in possible_tiers]
         return self.rng.choices(possible_tiers, weights=weights, k=1)[0]
+
+    def _pick_affix_for_item(self, base_item_id: str) -> Optional[str]:
+        """
+        Selects an affix ID using rarity-gated affix pools with weighted tier/fallback selection.
+        Falls back to legacy behavior if affix_pools data is not available.
+
+        Returns:
+            Affix ID string to use for the item's rarity.
+        """
+        item = self.item_templates[base_item_id]
+        item_rarity = item.rarity.value if hasattr(item.rarity, 'value') else item.rarity
+
+        # Parse pool names (allowing pipe/semicolon separated lists)
+        pools_str = item.affix_pools if isinstance(item.affix_pools, str) else "|".join(item.affix_pools or [])
+        pool_names = [p.strip() for p in pools_str.split('|') if p.strip()] if pools_str else []
+
+        if not pool_names:
+            # No pools defined for this item - fallback to empty result
+            return None
+
+        # Check if we have affix_pools data available
+        if self.affix_pools and pool_names:
+            # Attempt rarity fallback logic: try item's rarity, then fall back to lower rarities
+            try:
+                current_rarity_index = RARITY_ORDER.index(item_rarity)
+            except ValueError:
+                current_rarity_index = -1  # Rarity not in standard list
+
+            selected_entries = []
+            # Loop from item's rarity downwards to find a valid pool
+            for i in range(current_rarity_index, -1, -1):
+                test_rarity = RARITY_ORDER[i]
+
+                # Collect entries from all relevant pools for this rarity
+                for pool_name in pool_names:
+                    pool_data = self.affix_pools.get(pool_name, {})
+                    if test_rarity in pool_data:
+                        # Collect all tier entries for this rarity
+                        for tier_entries in pool_data[test_rarity].values():
+                            selected_entries.extend(tier_entries)
+                        break  # Found a valid rarity, stop checking lower ones
+
+                if selected_entries:
+                    break  # Found entries, no need to check lower rarities
+
+            if selected_entries:
+                # Select tier via aggregated tier weights, then affix via weights within tier
+                # Group entries by tier
+                tier_groups = {}
+                for entry in selected_entries:
+                    tier = entry.get('tier', 1)
+                    if tier not in tier_groups:
+                        tier_groups[tier] = []
+                    tier_groups[tier].append(entry)
+
+                # Compute tier weights (sum of entry weights in each tier)
+                tiers = sorted(tier_groups.keys())
+                tier_weights = [float(sum(entry.get('weight', 1) for entry in tier_groups[tier])) for tier in tiers]
+
+                # Select tier via weighted choice
+                selected_tier = self.rng.weighted_choice(tiers, tier_weights) if tiers else tiers[0]
+
+                # Select affix from the chosen tier via weighted choice
+                tier_entries = tier_groups[selected_tier]
+                affix_ids = [entry['affix_id'] for entry in tier_entries]
+                affix_weights = [float(entry.get('weight', 1)) for entry in tier_entries]
+
+                return self.rng.weighted_choice(affix_ids, affix_weights)
+
+        # Fallback: Use legacy pool selection logic
+        possible_affixes = self._get_affix_pool(pool_names)
+        if possible_affixes:
+            return self.rng.choice(possible_affixes)
+
+        return None  # No affixes available for this item
 
     def _get_affix_pool(self, pools: List[str]) -> List[str]:
         if not pools:

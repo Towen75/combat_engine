@@ -62,6 +62,7 @@ class GameDataProvider:
         self.quality_tiers: List[QualityTier] = []
         self.effects: Dict[str, EffectDefinition] = {}
         self.skills: Dict[str, SkillDefinition] = {}
+        self.affix_pools: Dict[str, Any] = {}  # NEW: nested structure for rarity-gated pools
 
         self._is_initialized: bool = False
 
@@ -123,6 +124,9 @@ class GameDataProvider:
         self.skills = {}
         for skill_id, raw_skill in raw_data.get('skills', {}).items():
             self.skills[skill_id] = hydrate_skill_definition(raw_skill)
+
+        # Store raw affix_pools data (no hydration needed as it's a simple nested dict)
+        self.affix_pools = raw_data.get('affix_pools', {})
 
         logger.info("GameDataProvider: Successfully hydrated all data into typed objects")
 
@@ -243,6 +247,16 @@ class GameDataProvider:
             raise RuntimeError("GameDataProvider has not been initialized yet")
         return self.skills
 
+    def get_affix_pools(self) -> Dict[str, Any]:
+        """Get the affix pools data.
+
+        Returns:
+            Nested dictionary structure {pool_id: {rarity: {tier: [{affix_id, weight}]}}}
+        """
+        if not self._is_initialized:
+            raise RuntimeError("GameDataProvider has not been initialized yet")
+        return self.affix_pools
+
     def get_data_stats(self) -> Dict[str, int]:
         """Get statistics about loaded data.
 
@@ -301,6 +315,7 @@ class GameDataProvider:
         last_quality_tiers = self.quality_tiers if old_initialized else []
         last_effects = self.effects if old_initialized else {}
         last_skills = self.skills if old_initialized else {}
+        last_affix_pools = self.affix_pools if old_initialized else {}
 
         try:
             self._load_and_validate_data()

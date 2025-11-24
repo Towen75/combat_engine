@@ -1,0 +1,44 @@
+families:
+  - id: "longsword"
+    name: "Longsword"
+    slot: "Weapon"
+    # Primary: Flat Dmg. Secondary (Legendary): Crit Chance.
+    implicits: ["flat_dmg", "crit_chance"]
+    affix_pools: "sword_pool"
+
+  - id: "Battle_Axe"
+    name: "Battle Axe"
+    slot: "Weapon"
+    # Primary: Flat Dmg. Secondary (Legendary): Crit Chance.
+    implicits: ["flat_dmg", "flat_crit_dmg"]
+    affix_pools: "weapon_pool"
+
+  - id: "iron_plate"
+    name: "Iron Plate"
+    slot: "Chest"
+    implicits: ["flat_health"]
+    affix_pools: "armor_pool"
+
+  - id: "leather_amour"
+    name: "Leather Amour"
+    slot: "Chest"
+    implicits: ["flat_health"]
+    affix_pools: "armor_pool"
+
+  - id: "pants"
+    name: "Pants"
+    slot: "Legs"
+    implicits: ["flat_health"]
+    affix_pools: "armor_pool"
+
+  - id: "sandals"
+    name: "Sandals"
+    slot: "feet"
+    implicits: ["flat_health"]
+    affix_pools: "armor_pool"
+
+  - id: "ring_of_power"
+    name: "Ring of Power"
+    slot: "ring"
+    implicits: ["flat_damage"]
+    affix_pools: "jewelry_pool"

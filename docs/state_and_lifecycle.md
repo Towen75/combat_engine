@@ -1,5 +1,7 @@
 # State Management and Entity Lifecycle
 
+**Note: While this document was updated to reflect recent refactoring, a final verification pass comparing its content against the current implementation of the StateManager is recommended due to the complexity of the changes.**
+
 *Complete guide to the StateManager and entity lifecycle events*
 
 ## Overview

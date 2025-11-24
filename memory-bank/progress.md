@@ -89,6 +89,7 @@
    - Content creation tool preparation
 
 ## Known Issues and Bugs (🐛 Active Tracking)
+**Note: This section requires review. Some of these issues may have been resolved during recent development phases. Please verify against the latest codebase.**
 
 ### Critical (Blockers)
 - **Proc Rate Hardcoded**: Skills use 50% proc instead of data-driven values

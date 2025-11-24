@@ -2,15 +2,10 @@
 
 ## Current Work Focus
 
-### Primary Active Task: PR-P2S5 - Simulation Batching
+### Primary Active Task: PR-P3S6 - Project Restructuring and Tooling Integration
 
-**Status**: Ready for Planning
-**Files in Active Development**:
-- `src/simulation.py` (BatchRunner class)
-- `src/engine/` (New telemetry/telemetry collection system)
-- `tests/test_batch_runner.py` (New batch test suite)
-
-**Rationale**: With entity lifecycle management complete, we need advanced simulation tools for statistical analysis and automated balance validation. Thousands of deterministic simulations enable comprehensive balance testing and performance optimization.
+**Status**: Planning / In Progress
+**Rationale**: To professionalize the repository and codebase, ensuring maintainability, quality, and adherence to best practices as the project moves towards Godot porting and final release.
 
 ## Recent Changes
 
@@ -55,18 +50,21 @@
 
 ## Next Steps Priority Queue
 
-### Immediate Next (Phase 2 Continuation)
+### Immediate Next (Phase 3: Finalization & Professionalization)
 
-1. **PR-P2S5 Implementation**: Simulation Batching (ACTIVE)
-   - Create `BatchRunner` class for thousands of automated simulations
-   - Implement deterministic seed increments for batch runs
-   - Add telemetry collection system for statistical analysis
-   - Build balance recommendation system based on simulation results
+1. **PR-P3S6 Implementation**: Project restructuring and tooling integration
+   - Repository restructuring with proper tooling (e.g., black/isort/mypy/pre-commit integration)
+   - Automated code quality enforcement
 
-2. **Phase 3 Preparation**: Godot Port Planning
-   - Analyze Python architecture for GDScript compatibility
-   - Plan incremental translation strategy
-   - Identify core components for initial port
+2. **PR-P3S7 Implementation**: Final integration test for CI
+   - Definitive end-to-end integration test for CI
+   - Assert-based validation replacing print checks
+   - Gold standard test serving as health check
+
+3. **PR-P3S8 Implementation**: Godot Ecosystem Preparation
+   - GDScript port planning and architecture translation
+   - Documentation finalization (API references, guides)
+   - Content creation tool preparation
 
 ## Active Decisions and Considerations
 

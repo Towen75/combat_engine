@@ -219,6 +219,17 @@ SKILLS_SCHEMA = {
     },
 }
 
+AFFIX_POOLS_SCHEMA = {
+    "required": ["pool_id", "rarity", "tier", "affix_id"],
+    "columns": {
+        "pool_id": str_validator,
+        "rarity": str_validator,
+        "tier": int_validator,
+        "affix_id": str_validator,
+        "weight": lambda v: int_validator(v) if v and v.strip() else 1
+    },
+}
+
 
 def get_schema_validator(filepath: str) -> Dict[str, Any]:
     """Get the appropriate schema validator for a CSV file based on its path.
@@ -236,6 +247,8 @@ def get_schema_validator(filepath: str) -> Dict[str, Any]:
 
     if "affixes" in filename and filename.endswith(".csv"):
         return AFFIX_SCHEMA
+    elif "affix_pools" in filename and filename.endswith(".csv"):
+        return AFFIX_POOLS_SCHEMA
     elif "items" in filename and filename.endswith(".csv"):
         return ITEM_SCHEMA
     elif "quality_tiers" in filename and filename.endswith(".csv"):

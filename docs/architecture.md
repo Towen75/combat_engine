@@ -36,6 +36,7 @@ src/
 │   ├── models.py           # Entity, stats, items, actions
 │   ├── state.py            # StateManager (health, effects, lifecycle)
 │   ├── events.py           # EventBus and event definitions
+│   ├── rng.py              # Single, injectable RNG class
 │   └── skills.py           # Skill and trigger data models
 │
 ├── data/            # Data loading and validation
@@ -313,24 +314,27 @@ stateDiagram-v2
 - `EffectInstance`: Runtime status effect
 
 #### `state.py` - StateManager
-**Purpose**: Dynamic entity state tracking
+**Purpose**: Dynamic entity state tracking and lifecycle management (refactored for v2.3.0)
 
 **Responsibilities:**
+- Full entity lifecycle management (registration, activation, death, removal)
 - Health, resource, cooldown management
-- Effect tracking and ticking
-- Lifecycle event dispatching
+- Effect application, tracking, and ticking
+- Lifecycle event dispatching via EventBus
 - Time-based simulation updates
+- Enhanced state reset and initialization hooks
 
 See [state_and_lifecycle.md](file:///g:/Godot%20Projects/combat_engine/docs/state_and_lifecycle.md)
 
 #### `events.py` - EventBus
-**Purpose**: Decoupled event system
+**Purpose**: Decoupled event system (enhanced for v2.3.0)
 
 **Features:**
 - Type-safe event classes
 - Subscribe/dispatch pattern
 - Wildcard event listeners
 - Deterministic delivery order
+- Supports key lifecycle events: `EntitySpawnEvent`, `EntityActivateEvent`, `EntityDeathEvent`, `EntityDespawnEvent`, `EffectApplied`, `EffectTick`, `EffectExpired`.
 
 ### Data Package (`src/data/`)
 

@@ -1,0 +1,36 @@
+item_id,name,slot,rarity,affix_pools,implicit_affixes,num_random_affixes
+longsword_common,Common Longsword,Weapon,Common,sword_pool,flat_dmg_common,0
+longsword_uncommon,Uncommon Longsword,Weapon,Uncommon,sword_pool,flat_dmg_uncommon,1
+longsword_rare,Rare Longsword,Weapon,Rare,sword_pool,flat_dmg_rare,2
+longsword_epic,Epic Longsword,Weapon,Epic,sword_pool,flat_dmg_epic,3
+longsword_legendary,Legendary Longsword,Weapon,Legendary,sword_pool,flat_dmg_epic|crit_chance_epic,4
+Battle_Axe_common,Common Battle Axe,Weapon,Common,weapon_pool,flat_dmg_common,0
+Battle_Axe_uncommon,Uncommon Battle Axe,Weapon,Uncommon,weapon_pool,flat_dmg_uncommon,1
+Battle_Axe_rare,Rare Battle Axe,Weapon,Rare,weapon_pool,flat_dmg_rare,2
+Battle_Axe_epic,Epic Battle Axe,Weapon,Epic,weapon_pool,flat_dmg_epic,3
+Battle_Axe_legendary,Legendary Battle Axe,Weapon,Legendary,weapon_pool,flat_dmg_epic|flat_crit_dmg_epic,4
+iron_plate_common,Common Iron Plate,Chest,Common,armor_pool,flat_health_common,0
+iron_plate_uncommon,Uncommon Iron Plate,Chest,Uncommon,armor_pool,flat_health_uncommon,1
+iron_plate_rare,Rare Iron Plate,Chest,Rare,armor_pool,flat_health_rare,2
+iron_plate_epic,Epic Iron Plate,Chest,Epic,armor_pool,flat_health_epic,3
+iron_plate_legendary,Legendary Iron Plate,Chest,Legendary,armor_pool,flat_health_epic,4
+leather_amour_common,Common Leather Amour,Chest,Common,armor_pool,flat_health_common,0
+leather_amour_uncommon,Uncommon Leather Amour,Chest,Uncommon,armor_pool,flat_health_uncommon,1
+leather_amour_rare,Rare Leather Amour,Chest,Rare,armor_pool,flat_health_rare,2
+leather_amour_epic,Epic Leather Amour,Chest,Epic,armor_pool,flat_health_epic,3
+leather_amour_legendary,Legendary Leather Amour,Chest,Legendary,armor_pool,flat_health_epic,4
+pants_common,Common Pants,Legs,Common,armor_pool,flat_health_common,0
+pants_uncommon,Uncommon Pants,Legs,Uncommon,armor_pool,flat_health_uncommon,1
+pants_rare,Rare Pants,Legs,Rare,armor_pool,flat_health_rare,2
+pants_epic,Epic Pants,Legs,Epic,armor_pool,flat_health_epic,3
+pants_legendary,Legendary Pants,Legs,Legendary,armor_pool,flat_health_epic,4
+sandals_common,Common Sandals,feet,Common,armor_pool,flat_health_common,0
+sandals_uncommon,Uncommon Sandals,feet,Uncommon,armor_pool,flat_health_uncommon,1
+sandals_rare,Rare Sandals,feet,Rare,armor_pool,flat_health_rare,2
+sandals_epic,Epic Sandals,feet,Epic,armor_pool,flat_health_epic,3
+sandals_legendary,Legendary Sandals,feet,Legendary,armor_pool,flat_health_epic,4
+ring_of_power_common,Common Ring of Power,ring,Common,jewelry_pool,flat_damage_common,0
+ring_of_power_uncommon,Uncommon Ring of Power,ring,Uncommon,jewelry_pool,flat_damage_uncommon,1
+ring_of_power_rare,Rare Ring of Power,ring,Rare,jewelry_pool,flat_damage_rare,2
+ring_of_power_epic,Epic Ring of Power,ring,Epic,jewelry_pool,flat_damage_epic,3
+ring_of_power_legendary,Legendary Ring of Power,ring,Legendary,jewelry_pool,flat_damage_epic,4
