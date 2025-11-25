@@ -230,6 +230,19 @@ AFFIX_POOLS_SCHEMA = {
     },
 }
 
+LOOT_TABLES_SCHEMA = {
+    "required": ["table_id", "entry_type", "entry_id", "weight"],
+    "columns": {
+        "table_id": str_validator,
+        "entry_type": str_validator,
+        "entry_id": str_validator,
+        "weight": lambda x: int_validator(x) if x else 0,
+        "min_count": lambda x: int_validator(x) if x else 1,
+        "max_count": lambda x: int_validator(x) if x else 1,
+        "drop_chance": lambda x: float_validator(x) if x else 1.0,
+    },
+}
+
 
 def get_schema_validator(filepath: str) -> Dict[str, Any]:
     """Get the appropriate schema validator for a CSV file based on its path.
@@ -257,5 +270,7 @@ def get_schema_validator(filepath: str) -> Dict[str, Any]:
         return EFFECTS_SCHEMA
     elif "skills" in filename and filename.endswith(".csv"):
         return SKILLS_SCHEMA
+    elif "loot_tables" in filename and filename.endswith(".csv"):
+        return LOOT_TABLES_SCHEMA
     else:
         raise ValueError(f"No schema found for CSV file: {filepath}")

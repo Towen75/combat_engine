@@ -126,7 +126,7 @@ class Entity:
     Dynamic state (health, buffs, etc.) is managed separately.
     """
 
-    def __init__(self, id: str, base_stats: EntityStats, name: Optional[str] = None, rarity: str = "Common"):
+    def __init__(self, id: str, base_stats: EntityStats, name: Optional[str] = None, rarity: str = "Common", loot_table_id: Optional[str] = None):
         """Initialize an Entity.
 
         Args:
@@ -134,6 +134,7 @@ class Entity:
             base_stats: Base statistics for this entity (before equipment modifiers)
             name: Optional display name (defaults to id)
             rarity: Character rarity tier (Common, Uncommon, Rare, Epic, Legendary, Mythic)
+            loot_table_id: Optional ID of the loot table this entity drops from.
         """
         if not id:
             raise ValueError("Entity id cannot be empty")
@@ -147,6 +148,7 @@ class Entity:
         self.id = id
         self.base_stats = base_stats
         self.name = name or id
+        self.loot_table_id = loot_table_id  # NEW: Loot table reference
         self.equipment: Dict[str, Item] = {}
         self.active_triggers: List["Trigger"] = []  # For affix reactive effects
         self.final_stats = self.calculate_final_stats()

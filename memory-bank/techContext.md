@@ -57,13 +57,17 @@ pip install -r requirements.txt
 
 ### Core Dependencies Breakdown
 ```
-pandas>=1.3.0         # CSV processing, data manipulation
+pandas>=1.3.0         # CSV processing, data manipulation, loot table parsing
 pydantic>=2.0.0       # Runtime validation, type enforcement
 pytest>=7.0.0         # Test framework with fixtures
 pytest-cov>=4.0.0     # Coverage reporting
 mypy>=1.0.0           # Static type checking
 black>=22.0.0         # Code formatting
 ruff>=0.1.0           # Fast linting
+# Loot System Extensions:
+# - Event-driven loot generation with LootManager
+# - Simulation integration via LootHandler
+# - Data-driven loot tables with recursion safety
 ```
 
 ## Technical Constraints

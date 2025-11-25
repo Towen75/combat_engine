@@ -1,3 +1,12 @@
+# [](https://github.com/Towen75/combat_engine/compare/v2.11.0...v) (2025-11-25)
+
+
+### Bug Fixes
+
+* correct changelog links and format v2.11.0 release ([032a24a](https://github.com/Towen75/combat_engine/commit/032a24a63c2a84aad7068c532437903328610132))
+
+
+
 # # [2.11.0](https://github.com/Towen75/combat_engine/compare/v2.10.0...v2.11.0) (2025-11-24)
 
 

@@ -12,6 +12,8 @@ To implement a complete RPG combat system with pierce-based damage calculation, 
 - Event-driven effects system for DoTs, buffs, and skill interactions
 - Thematic affix pools with equipment mechanics
 - DoT ticks, duration management, and temporal effects
+- **Deterministic Loot System**: Event-driven loot drops with data-driven tables, recursion safety, and simulation integration
+- **Comprehensive Documentation**: Complete system architecture, data pipelines, and state management guides
 
 ## Architecture Principles
 - Data-driven design with all game content in external data structures

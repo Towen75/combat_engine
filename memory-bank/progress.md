@@ -3,10 +3,10 @@
 ## Current Status Summary
 
 **Version**: 2.5.0 (2025-11-19)
-**Phase**: Phase 2: New Feature Implementation
-**Status**: PR-P2S5 COMPLETED - Major Architecture Restructuring
+**Phase**: Phase C: Deterministic Loot System
+**Status**: COMPLETE - Full Loot System from CSV Tables to Combat Integration
 
-### Overall Progress: 88% Complete
+### Overall Progress: 95% Complete
 
 ## What Works (✅ Fully Implemented & Tested)
 
@@ -18,6 +18,13 @@
 
 ### Phase 2: New Feature Implementation (100% Complete)
 - **✅ PR-P2S5**: Simulation batching and telemetry system (COMPLETED)
+
+### Phase C: Deterministic Loot System (100% Complete)
+- **✅ C1**: Loot data structures and validation (Weighted tables, entry types, CSV parsing)
+- **✅ C2**: Loot resolution engine (LootManager with safety limits, recursion protection)
+- **✅ C3**: Loot simulation integration (Event-driven death→loot→logging pipeline)
+- **✅ Integration**: Full loot drops from enemy deaths in combat simulations
+- **✅ Testing**: End-to-end integration with 9/9 unit tests passing
 
 ### Phase 3: Finalization & Professionalization (0% Complete)
 - **⏳ PR-P3S6**: Project restructuring and tooling integration

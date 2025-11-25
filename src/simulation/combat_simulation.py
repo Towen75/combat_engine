@@ -12,10 +12,13 @@ from src.core.rng import RNG
 
 if TYPE_CHECKING:
     from src.core.models import Entity
-    from src.core.events import OnHitEvent, DamageTickEvent
+    from src.core.events import OnHitEvent, DamageTickEvent, Item
 
 # Import for runtime use
 from src.core.events import OnHitEvent, DamageTickEvent
+from src.core.loot_manager import LootManager
+from src.handlers.loot_handler import LootHandler
+from src.core.events import LootDroppedEvent # Add to imports
 
 
 @dataclass
@@ -109,6 +112,23 @@ class CombatLogger:
         )
         self.entries.append(entry)
 
+    def log_loot_drop(self, source_id: str, items: List[Any]) -> None:
+        """Log a loot drop event.
+
+        Args:
+            source_id: ID of the entity that dropped loot
+            items: List of Item instances dropped
+        """
+        # Extract item names for cleaner logs
+        item_summary = [{"name": i.name, "rarity": i.rarity} for i in items]
+        entry = CombatLogEntry(
+            timestamp=time.time(),
+            event_type="loot_drop",
+            attacker_id=source_id,  # Reusing field for source
+            metadata={"items": item_summary}
+        )
+        self.entries.append(entry)
+
     def log_death(self, entity_id: str) -> None:
         """Log an entity death event.
 
@@ -161,6 +181,26 @@ class CombatLogger:
 
         return dict(effect_stats)
 
+    def get_loot_report(self) -> Dict[str, Any]:
+        """Generate summary of dropped loot."""
+        total_drops = 0
+        total_items = 0
+        rarity_counts = defaultdict(int)
+
+        for entry in self.entries:
+            if entry.event_type == "loot_drop":
+                total_drops += 1
+                items = entry.metadata.get("items", [])
+                total_items += len(items)
+                for item in items:
+                    rarity_counts[item['rarity']] += 1
+
+        return {
+            "total_drops": total_drops,
+            "total_items": total_items,
+            "rarity_breakdown": dict(rarity_counts)
+        }
+
     def get_simulation_duration(self) -> float:
         """Get the total duration of the logged simulation.
 
@@ -203,7 +243,7 @@ class SimulationRunner:
     Manages the simulation loop, entity attacks, and effect processing.
     """
 
-    def __init__(self, combat_engine, state_manager, event_bus, rng: RNG, logger: Optional[CombatLogger] = None):
+    def __init__(self, combat_engine, state_manager, event_bus, rng: RNG, logger: Optional[CombatLogger] = None, loot_manager: Optional[LootManager] = None):
         """Initialize the simulation runner.
 
         Args:
@@ -213,7 +253,8 @@ class SimulationRunner:
             rng: RNG for random target selection and other behaviors.
                  Must not be None - all randomness must be explicit.
             logger: Optional combat logger for recording events
-        
+            loot_manager: Optional loot manager for handling loot drops
+
         Raises:
             AssertionError: If rng is None
         """
@@ -223,12 +264,17 @@ class SimulationRunner:
         self.event_bus = event_bus
         self.rng = rng
         self.logger = logger or CombatLogger()
+        self.loot_manager = loot_manager
 
         # Simulation state
         self.entities: List["Entity"] = []
         self.attack_timers: Dict[str, float] = {}
         self.simulation_time: float = 0.0
         self.is_running: bool = False
+
+        # Initialize Loot Handler if manager is provided
+        if self.loot_manager:
+            self.loot_handler = LootHandler(self.event_bus, self.state_manager, self.loot_manager)
 
         # Set up event subscriptions for logging
         self._setup_event_subscriptions()
@@ -238,6 +284,8 @@ class SimulationRunner:
         if self.logger:
             self.event_bus.subscribe(OnHitEvent, self._log_hit_event)
             self.event_bus.subscribe(DamageTickEvent, self._log_damage_tick_event)
+            if hasattr(self.logger, 'log_loot_drop'):
+                self.event_bus.subscribe(LootDroppedEvent, self._log_loot_event)
 
     def _log_hit_event(self, event) -> None:
         """Log a hit event."""
@@ -255,6 +303,10 @@ class SimulationRunner:
             effect_name=event.effect_name,
             damage=event.damage_dealt
         )
+
+    def _log_loot_event(self, event) -> None:
+        """Log a loot drop event."""
+        self.logger.log_loot_drop(event.source_id, event.items)
 
     def add_entity(self, entity: "Entity") -> None:
         """Add an entity to the simulation.
@@ -378,6 +430,7 @@ class SimulationRunner:
             "events_per_second": self.logger.get_events_per_second(),
             "damage_breakdown": self.logger.get_damage_breakdown(),
             "effect_uptime": self.logger.get_effect_uptime(),
+            "loot_analysis": self.logger.get_loot_report(),
             "final_entity_states": {
                 entity_id: {
                     "health": state.current_health,

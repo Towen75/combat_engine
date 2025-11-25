@@ -85,8 +85,33 @@ class TriggerEvent(str, Enum):
     ON_USE = "OnUse"
     ON_SELF = "OnSelf"
 
+class LootEntryType(str, Enum):
+    """Enum for types of entries in a loot table."""
+    ITEM = "Item"
+    TABLE = "Table"
+
 
 # ========== Data Classes ==========
+
+@dataclass
+class LootTableEntry:
+    """A single row in a loot table."""
+    table_id: str
+    entry_type: LootEntryType
+    entry_id: str
+    weight: int
+    min_count: int
+    max_count: int
+    drop_chance: float
+
+@dataclass
+class LootTableDefinition:
+    """Aggregate object representing a full loot table (multiple entries)."""
+    table_id: str
+    entries: List[LootTableEntry] = field(default_factory=list)
+
+    def get_total_weight(self) -> int:
+        return sum(e.weight for e in self.entries)
 
 @dataclass
 class AffixDefinition:
@@ -384,4 +409,15 @@ def hydrate_skill_definition(raw_data: Dict[str, Any]) -> SkillDefinition:
         trigger_result=raw_data.get('trigger_result', ''),
         trigger_duration=float(raw_data['trigger_duration']) if raw_data.get('trigger_duration') else 10.0,
         stacks_max=int(raw_data['stacks_max']) if raw_data.get('stacks_max') else 1
+    )
+
+def hydrate_loot_entry(raw_data: Dict[str, Any]) -> LootTableEntry:
+    return LootTableEntry(
+        table_id=raw_data['table_id'],
+        entry_type=normalize_enum(LootEntryType, raw_data['entry_type']),
+        entry_id=raw_data['entry_id'],
+        weight=int(raw_data['weight']),
+        min_count=int(raw_data['min_count']) if raw_data.get('min_count') else 1,
+        max_count=int(raw_data['max_count']) if raw_data.get('max_count') else 1,
+        drop_chance=float(raw_data['drop_chance']) if raw_data.get('drop_chance') else 1.0
     )

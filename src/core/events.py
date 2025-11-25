@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Callable, Dict, List, Optional
 
 if TYPE_CHECKING:
-    from models import Entity, EffectInstance
+    from models import Entity, EffectInstance, Item
     from engine import HitContext
 
 logger = logging.getLogger(__name__)
@@ -100,6 +100,13 @@ class EntityActivateEvent(Event):
 class EntityDeathEvent(Event):
     """Fired when an entity's health reaches zero."""
     entity_id: str
+
+
+@dataclass
+class LootDroppedEvent(Event):
+    """Fired when an entity drops loot upon death."""
+    source_id: str
+    items: List["Item"]
 
 
 @dataclass

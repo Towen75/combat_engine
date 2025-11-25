@@ -71,7 +71,8 @@ def parse_all_csvs(base_path: Union[str, Path] = "data") -> Dict[str, Any]:
         ("items.csv", "items"),
         ("quality_tiers.csv", "quality_tiers"),
         ("effects.csv", "effects"),
-        ("skills.csv", "skills")
+        ("skills.csv", "skills"),
+        ("loot_tables.csv", "loot_tables")  # NEW: loot tables data
     ]
 
     game_data = {
@@ -80,7 +81,8 @@ def parse_all_csvs(base_path: Union[str, Path] = "data") -> Dict[str, Any]:
         "items": {},
         "quality_tiers": [],
         "effects": {},
-        "skills": {}
+        "skills": {},
+        "loot_tables": []  # NEW: list of loot table entries
     }
 
     for filename, data_key in csv_files:

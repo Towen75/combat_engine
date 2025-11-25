@@ -1,0 +1,4 @@
+table_id,entry_type,entry_id,weight,min_count,max_count,drop_chance
+forest_zone_loot,Table,goblin_loot,100,1,1,1.0
+goblin_loot,Item,longsword_common,50,1,1,0.5
+goblin_loot,Item,longsword_uncommon,50,1,2,0.3

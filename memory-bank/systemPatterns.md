@@ -49,6 +49,12 @@ The Combat Engine follows a modular, event-driven architecture with clear separa
 - **Benefits**: Clear separation of calculation phases, easy debugging
 - **Critical Path**: Pierce formula, crit calculation, defensive calculations in sequence
 
+### 6. Loot Resolution Pipeline Pattern
+- **Pattern**: Event-driven loot generation with recursive table traversal
+- **Implementation**: `LootManager.roll_loot()` with weighted selection, recursion limits, safety caps
+- **Benefits**: Data-driven loot tables, deterministic RNG, explosion prevention
+- **Critical Path**: Death Event → LootHandler → LootManager → LootDroppedEvent → Logging
+
 ## Component Relationships
 
 ### Core Combat Flow

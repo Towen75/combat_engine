@@ -17,11 +17,14 @@ from .typed_models import (
     QualityTier,
     EffectDefinition,
     SkillDefinition,
+    LootTableDefinition,
+    LootEntryType,
     hydrate_affix_definition,
     hydrate_item_template,
     hydrate_quality_tier,
     hydrate_effect_definition,
     hydrate_skill_definition,
+    hydrate_loot_entry,
     validate_entity_stats_are_valid
 )
 
@@ -63,6 +66,7 @@ class GameDataProvider:
         self.effects: Dict[str, EffectDefinition] = {}
         self.skills: Dict[str, SkillDefinition] = {}
         self.affix_pools: Dict[str, Any] = {}  # NEW: nested structure for rarity-gated pools
+        self.loot_tables: Dict[str, LootTableDefinition] = {}  # NEW: aggregated loot table definitions
 
         self._is_initialized: bool = False
 
@@ -127,6 +131,16 @@ class GameDataProvider:
 
         # Store raw affix_pools data (no hydration needed as it's a simple nested dict)
         self.affix_pools = raw_data.get('affix_pools', {})
+
+        # Hydrate Loot Tables (Aggregate rows into Definitions)
+        self.loot_tables = {}
+        raw_loot_list = raw_data.get('loot_tables', [])
+
+        for row in raw_loot_list:
+            entry = hydrate_loot_entry(row)
+            if entry.table_id not in self.loot_tables:
+                self.loot_tables[entry.table_id] = LootTableDefinition(table_id=entry.table_id)
+            self.loot_tables[entry.table_id].entries.append(entry)
 
         logger.info("GameDataProvider: Successfully hydrated all data into typed objects")
 
@@ -195,7 +209,59 @@ class GameDataProvider:
                             invalid_id=str(value)
                         )
 
+        self._validate_loot_tables()
+
         logger.info("GameDataProvider: Cross-reference validation completed successfully")
+
+    def _validate_loot_tables(self) -> None:
+        """Validate Loot Tables: Check references and enforce DAG structure."""
+        logger.info("GameDataProvider: Validating loot tables...")
+
+        visited = set()
+        recursion_stack = set()
+
+        def dfs_check_cycles(table_id: str):
+            visited.add(table_id)
+            recursion_stack.add(table_id)
+
+            definition = self.loot_tables[table_id]
+
+            for entry in definition.entries:
+                # 1. Check Reference Validity
+                if entry.entry_type == LootEntryType.ITEM:
+                    if entry.entry_id not in self.items:
+                        raise DataValidationError(
+                            f"Loot table '{table_id}' references non-existent Item '{entry.entry_id}'",
+                            data_type="LootTable", field_name="entry_id", invalid_id=entry.entry_id
+                        )
+                elif entry.entry_type == LootEntryType.TABLE:
+                    if entry.entry_id not in self.loot_tables:
+                        raise DataValidationError(
+                            f"Loot table '{table_id}' references non-existent Table '{entry.entry_id}'",
+                            data_type="LootTable", field_name="entry_id", invalid_id=entry.entry_id
+                        )
+
+                    # 2. Check Cycle (DFS)
+                    if entry.entry_id in recursion_stack:
+                        raise DataValidationError(
+                            f"Circular dependency detected in loot tables: {table_id} -> {entry.entry_id}",
+                            data_type="LootTable", field_name="entry_id", invalid_id=entry.entry_id
+                        )
+
+                    if entry.entry_id not in visited:
+                        dfs_check_cycles(entry.entry_id)
+
+            recursion_stack.remove(table_id)
+
+        # Run DFS on all tables
+        for tid in self.loot_tables:
+            if tid not in visited:
+                dfs_check_cycles(tid)
+
+    def get_loot_table(self, table_id: str) -> Optional[LootTableDefinition]:
+        if not self._is_initialized:
+            raise RuntimeError("GameDataProvider not initialized")
+        return self.loot_tables.get(table_id)
 
     def get_affixes(self) -> Dict[str, AffixDefinition]:
         """Get the affixes data.
