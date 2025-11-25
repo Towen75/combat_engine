@@ -77,6 +77,8 @@ def flexible_damage_validator(value: str) -> float:
         raise ValueError(f"Invalid damage value: '{value}'")
 
 
+
+
 def positive_float_validator(value: str) -> float:
     """Validate positive float values."""
     val = float_validator(value)
@@ -243,6 +245,25 @@ LOOT_TABLES_SCHEMA = {
     },
 }
 
+ENTITIES_SCHEMA = {
+    "required": ["entity_id", "name", "base_health", "base_damage", "rarity"],
+    "columns": {
+        "entity_id": str_validator,
+        "name": str_validator,
+        "archetype": str_validator,
+        "level": lambda x: int_validator(x) if x else 1,
+        "rarity": str_validator,
+        "base_health": positive_float_validator,
+        "base_damage": non_negative_float_validator,
+        "armor": lambda x: non_negative_float_validator(x) if x and x.strip() else 0.0,
+        "crit_chance": lambda x: non_negative_float_validator(x) if x and x.strip() else 0.0,
+        "attack_speed": lambda x: positive_float_validator(x) if x and x.strip() else 1.0,
+        "equipment_pools": affix_pools_validator,  # Reuse the same validator
+        "loot_table_id": str_validator,
+        "description": str_validator,
+    },
+}
+
 
 def get_schema_validator(filepath: str) -> Dict[str, Any]:
     """Get the appropriate schema validator for a CSV file based on its path.
@@ -272,5 +293,7 @@ def get_schema_validator(filepath: str) -> Dict[str, Any]:
         return SKILLS_SCHEMA
     elif "loot_tables" in filename and filename.endswith(".csv"):
         return LOOT_TABLES_SCHEMA
+    elif "entities" in filename and filename.endswith(".csv"):
+        return ENTITIES_SCHEMA
     else:
         raise ValueError(f"No schema found for CSV file: {filepath}")

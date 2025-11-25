@@ -19,9 +19,15 @@
 ### Phase 2: New Feature Implementation (100% Complete)
 - **✅ PR-P2S5**: Simulation batching and telemetry system (COMPLETED)
 
+### Phase B: Data-Driven Entities (100% Complete)
+- **✅ B1**: Entity Data Structure (CSV schema, EntityTemplate model, GameDataProvider integration)
+- **✅ B2**: Entity Factory (EntityFactory class, equipment pool resolution, deterministic RNG)
+- **✅ Integration**: Data-driven entity spawning in simulation with procedural equipment
+- **✅ Testing**: Entity template loading and equipment generation tests
+
 ### Phase C: Deterministic Loot System (100% Complete)
 - **✅ C1**: Loot data structures and validation (Weighted tables, entry types, CSV parsing)
-- **✅ C2**: Loot resolution engine (LootManager with safety limits, recursion protection)
+- **✅ C2**: Loot resolution engine (LootManager with safety limits, recursion safety)
 - **✅ C3**: Loot simulation integration (Event-driven death→loot→logging pipeline)
 - **✅ Integration**: Full loot drops from enemy deaths in combat simulations
 - **✅ Testing**: End-to-end integration with 9/9 unit tests passing

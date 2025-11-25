@@ -72,7 +72,8 @@ def parse_all_csvs(base_path: Union[str, Path] = "data") -> Dict[str, Any]:
         ("quality_tiers.csv", "quality_tiers"),
         ("effects.csv", "effects"),
         ("skills.csv", "skills"),
-        ("loot_tables.csv", "loot_tables")  # NEW: loot tables data
+        ("loot_tables.csv", "loot_tables"),  # NEW: loot tables data
+        ("entities.csv", "entities")  # NEW: entity templates
     ]
 
     game_data = {
@@ -82,7 +83,8 @@ def parse_all_csvs(base_path: Union[str, Path] = "data") -> Dict[str, Any]:
         "quality_tiers": [],
         "effects": {},
         "skills": {},
-        "loot_tables": []  # NEW: list of loot table entries
+        "loot_tables": [],  # NEW: list of loot table entries
+        "entities": {}  # NEW: entity templates keyed by entity_id
     }
 
     for filename, data_key in csv_files:
@@ -105,7 +107,7 @@ def parse_all_csvs(base_path: Union[str, Path] = "data") -> Dict[str, Any]:
                             f"Quality tier validation error in {filename}: "
                             f"min_range ({row['min_range']}) must be < max_range ({row['max_range']})"
                         )
-            elif data_key in ["affixes", "items", "effects", "skills"]:
+            elif data_key in ["affixes", "items", "effects", "skills", "entities"]:
                 # These are keyed by ID
                 id_key = list(schema["required"])[0]  # First required column is usually the ID
                 for row in rows:

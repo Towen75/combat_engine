@@ -55,6 +55,12 @@ The Combat Engine follows a modular, event-driven architecture with clear separa
 - **Benefits**: Data-driven loot tables, deterministic RNG, explosion prevention
 - **Critical Path**: Death Event → LootHandler → LootManager → LootDroppedEvent → Logging
 
+### 7. Entity Factory Pattern
+- **Pattern**: Data-driven entity creation from templates with procedural equipment
+- **Implementation**: `EntityFactory.create()` hydrates EntityTemplates, resolves equipment pools
+- **Benefits**: Runtime entity spawning from CSV data, deterministic item generation
+- **Critical Path**: EntityTemplate → Stats Hydration → Equipment Pool Resolution → Entity Instance
+
 ## Component Relationships
 
 ### Core Combat Flow

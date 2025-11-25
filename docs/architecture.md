@@ -18,8 +18,9 @@ The Combat Engine is a modular, event-driven RPG combat system built with produc
 **Key Design Principles:**
 - **Separation of Concerns**: Pure calculation functions separated from state-mutating execution
 - **Event-Driven Architecture**: Loose coupling through observer pattern (EventBus)
-- **Data-Driven Content**: Skills, items, and effects defined in CSV files, not code
+- **Data-Driven Content**: Skills, items, effects, and entities defined in CSV files, not code
 - **Deterministic Testing**: Injectable RNG for reproducible test results
+- **Data-Driven Entities**: Runtime entity creation from CSV templates with procedural equipment
 - **Type Safety**: Comprehensive type hints and validation throughout
 
 ## Package Structure
@@ -34,6 +35,7 @@ src/
 │
 ├── core/            # Core data models and systems
 │   ├── models.py           # Entity, stats, items, actions
+│   ├── factory.py          # EntityFactory for data-driven entity creation
 │   ├── state.py            # StateManager (health, effects, lifecycle)
 │   ├── events.py           # EventBus and event definitions
 │   ├── rng.py              # Single, injectable RNG class
@@ -57,6 +59,18 @@ src/
 │
 └── utils/           # Utility modules
     └── item_generator.py       # Procedural item generation
+```
+
+**Data Files:**
+```
+data/
+├── entities.csv         # Entity templates with stats and equipment pools
+├── skills.csv           # Skills and their trigger conditions
+├── effects.csv          # Effect definitions for DoTs and buffs
+├── items.csv            # Item templates with affixes and properties
+├── affixes.csv          # Random affix definitions for proc effects
+├── loot_tables.csv      # Loot drop tables with weights and recursion
+└── quality_tiers.csv    # Item quality tiers and rarity probabilities
 ```
 
 ## Core Architectural Patterns
@@ -312,6 +326,19 @@ stateDiagram-v2
 - `Item`, `RolledAffix`: Procedural itemization
 - `Action` hierarchy: `ApplyDamageAction`, `DispatchEventAction`, `ApplyEffectAction`
 - `EffectInstance`: Runtime status effect
+
+#### `factory.py` - EntityFactory
+**Purpose**: Data-driven entity creation from CSV templates (Phase B2)
+
+**Key Methods:**
+- `create()`: Hydrate EntityTemplate into equipped Entity instance
+- `_equip_entity()`: Resolve equipment pools into generated items
+- `_resolve_item_id()`: Dual-strategy equipment selection (direct ID vs pool lookup)
+
+**Features:**
+- Deterministic equipment generation with injected RNG
+- Cross-reference validation with GameDataProvider
+- Equipment pool resolution from templates
 
 #### `state.py` - StateManager
 **Purpose**: Dynamic entity state tracking and lifecycle management (refactored for v2.3.0)

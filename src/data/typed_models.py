@@ -6,6 +6,9 @@ This module defines dataclasses and enums for all core game data structures.
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import List, Optional, Dict, Any, Type, TypeVar
+import logging
+
+logger = logging.getLogger(__name__)
 
 T = TypeVar('T', bound=Enum)
 
@@ -235,6 +238,29 @@ class SkillDefinition:
         if not self.name:
             raise ValueError("name cannot be empty")
 
+@dataclass
+class EntityTemplate:
+    """Strongly-typed model for entity definition."""
+    entity_id: str
+    name: str
+    archetype: str
+    level: int
+    rarity: Rarity
+    base_health: float
+    base_damage: float
+    armor: float
+    crit_chance: float
+    attack_speed: float
+    equipment_pools: List[str] = field(default_factory=list)
+    loot_table_id: str = ""
+    description: str = ""
+
+    def __post_init__(self):
+        if not self.entity_id:
+            raise ValueError("entity_id cannot be empty")
+        if self.base_health <= 0:
+            raise ValueError(f"base_health must be positive, got {self.base_health}")
+
 
 # ========== Exception Classes ==========
 
@@ -420,4 +446,21 @@ def hydrate_loot_entry(raw_data: Dict[str, Any]) -> LootTableEntry:
         min_count=int(raw_data['min_count']) if raw_data.get('min_count') else 1,
         max_count=int(raw_data['max_count']) if raw_data.get('max_count') else 1,
         drop_chance=float(raw_data['drop_chance']) if raw_data.get('drop_chance') else 1.0
+    )
+
+def hydrate_entity_template(raw_data: Dict[str, Any]) -> EntityTemplate:
+    return EntityTemplate(
+        entity_id=raw_data['entity_id'],
+        name=raw_data['name'],
+        archetype=raw_data.get('archetype', 'Unit'),
+        level=int(raw_data['level']) if raw_data.get('level') else 1,
+        rarity=normalize_enum(Rarity, raw_data.get('rarity') or 'Common', default=Rarity.COMMON),
+        base_health=float(raw_data['base_health']),
+        base_damage=float(raw_data['base_damage']),
+        armor=float(raw_data.get('armor', 0.0)),
+        crit_chance=float(raw_data.get('crit_chance', 0.0)),
+        attack_speed=float(raw_data.get('attack_speed', 1.0)),
+        equipment_pools=parse_affix_pools(raw_data.get('equipment_pools', '')),
+        loot_table_id=raw_data.get('loot_table_id', ''),
+        description=raw_data.get('description', '')
     )

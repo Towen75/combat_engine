@@ -49,12 +49,15 @@ class TestLootValidation:
         provider = GameDataProvider.__new__(GameDataProvider)
         provider._is_initialized = False
 
-        # Set up provider state
+        # Set up provider state - need to initialize all dicts/lists
         provider.affixes = {}
         provider.quality_tiers = []
         provider.effects = {}
         provider.skills = {}
         provider.affix_pools = {}
+        provider.items = {}  # Initialize items dict properly
+        provider.loot_tables = []
+        provider.entities = {}
 
         # Hydrate & Validate - this will set items correctly
         provider._hydrate_data(raw_data)

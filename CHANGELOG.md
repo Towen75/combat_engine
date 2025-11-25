@@ -1,9 +1,24 @@
-# [](https://github.com/Towen75/combat_engine/compare/v2.11.0...v) (2025-11-25)
+# [](https://github.com/Towen75/combat_engine/compare/v2.12.0...v) (2025-11-25)
 
 
-### Bug Fixes
 
-* correct changelog links and format v2.11.0 release ([032a24a](https://github.com/Towen75/combat_engine/commit/032a24a63c2a84aad7068c532437903328610132))
+# [2.12.0](https://github.com/Towen75/combat_engine/compare/v2.11.0...v2.12.0) (2025-11-25)
+
+
+### Added
+
+* **feat:** implement deterministic loot system with event-driven loot drops
+  - Add complete loot system from CSV tables to combat simulation
+  - Implement event-driven Death→LootHandler→LootManager→LootDropped pipeline
+  - Add weighted probability loot tables with recursion safety
+  - Integrate loot drops into combat simulation with deterministic RNG
+  - Add comprehensive test suite with 9/9 unit tests passing
+  - Extend data pipeline with loot table parsing and validation
+  - Add loot events (LootDroppedEvent) for game mechanic integration
+
+### Breaking Changes
+
+* New loot-related events may require game logic updates
 
 
 

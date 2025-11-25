@@ -2,19 +2,28 @@
 
 ## Current Work Focus
 
-### Primary Active Task: Phase C - Deterministic Loot System (COMPLETE)
+### Primary Active Task: Phase B - Data-Driven Entities (COMPLETE)
+
+**Status**: Fully Implemented and Verified
+**Results**: Complete end-to-end data-driven entity system from CSV templates to equipped entities
+- **Phase B1**: Entity Data Structure (CSV schema, EntityTemplate model, GameDataProvider integration)
+- **Phase B2**: Entity Factory (EntityFactory class, equipment pool resolution, deterministic RNG)
+- **Integration**: Data-driven entity spawning in simulation with procedural equipment
+- **Testing**: 9 comprehensive unit tests covering all EntityFactory functionality
+
+### Secondary Active Task: Phase C - Deterministic Loot System (COMPLETE)
 
 **Status**: Fully Implemented and Verified
 **Results**: Complete end-to-end loot system from CSV tables to simulation integration
-- **Phase C1**: Loot data structures and cycle validation (Weighted probability tables, entry types)
+- **Phase C1**: Loot data structures and validation (Weighted tables, entry types, CSV parsing)
 - **Phase C2**: Loot resolution engine (LootManager with safety limits, recursion safety)
 - **Phase C3**: Loot simulation integration (Event-driven death→loot→logging pipeline)
 
-### Next Phase Planning: Data-Driven Entity Spawning Pipeline
+### Next Phase Planning: Phase D - Advanced Simulation Tools
 
 **Status**: Planning / Scheduled
-**Objective**: Create a data-driven entity spawning system for consistent, reproducible enemy generation
-**Dependencies**: Completes loot system integration
+**Objective**: Implement advanced simulation tools for comprehensive balance validation
+**Dependencies**: Entity & loot systems operational
 
 ## Recent Changes
 

@@ -21,77 +21,41 @@ from src.handlers.effect_handlers import BleedHandler, PoisonHandler
 from src.simulation.combat_simulation import SimulationRunner, ReportGenerator
 from src.utils.item_generator import ItemGenerator
 from src.data.game_data_provider import GameDataProvider
+from src.core.factory import EntityFactory  # Add import for Phase B2
 
 
-def create_sample_entities() -> list[Entity]:
-    """Create sample entities for simulation testing.
+def create_sample_entities(factory: EntityFactory) -> list[Entity]:
+    """Create entities using the Data-Driven Factory from Phase B2.
+
+    Note: These IDs must exist in your entities.csv from Phase B1
+    If they don't match your CSV, update these strings or add corresponding
+    entries to data/entities.csv
+
+    Args:
+        factory: EntityFactory for creating data-driven entities
 
     Returns:
-        List of sample entities with different stats
+        List of data-driven sample entities
     """
-    # Warrior - High damage, low speed, tanky
-    warrior_stats = EntityStats(
-        base_damage=25.0,
-        attack_speed=0.8,  # attacks per second
-        crit_chance=0.1,
-        crit_damage=1.8,
-        pierce_ratio=0.05,
-        max_health=150.0,
-        armor=15.0,
-        resistances=0.0
-    )
-    warrior = Entity("warrior", warrior_stats, "Warrior", "Rare")
-
-    # Assassin - High speed, moderate damage, low health
-    assassin_stats = EntityStats(
-        base_damage=18.0,
-        attack_speed=1.5,  # attacks per second
-        crit_chance=0.25,
-        crit_damage=2.0,
-        pierce_ratio=0.1,
-        max_health=80.0,
-        armor=5.0,
-        resistances=0.0
-    )
-    assassin = Entity("assassin", assassin_stats, "Assassin", "Epic")
-
-    # Mage - Moderate damage, low speed, squishy
-    mage_stats = EntityStats(
-        base_damage=30.0,
-        attack_speed=0.6,  # attacks per second
-        crit_chance=0.15,
-        crit_damage=1.5,
-        pierce_ratio=0.02,
-        max_health=70.0,
-        armor=0.0,
-        resistances=0.2
-    )
-    mage = Entity("mage", mage_stats, "Mage", "Legendary")
-
-    # Tank - Low damage, very tanky, slow
-    tank_stats = EntityStats(
-        base_damage=12.0,
-        attack_speed=0.5,  # attacks per second
-        crit_chance=0.05,
-        crit_damage=1.3,
-        pierce_ratio=0.01,
-        max_health=200.0,
-        armor=25.0,
-        resistances=0.1
-    )
-    tank = Entity("tank", tank_stats, "Tank", "Uncommon")
-
-    return [warrior, assassin, mage, tank]
+    try:
+        return [
+            factory.create("goblin_grunt"),
+            factory.create("orc_warrior"),
+            # factory.create("hero_paladin") # Uncomment if added to CSV
+        ]
+    except ValueError as e:
+        logger.warning(f"Could not create sample entities: {e}. Is data/entities.csv populated?")
+        return []
 
 
-def setup_simulation(rng: RNG) -> SimulationRunner:
+def setup_simulation(rng: RNG):
     """Set up the simulation with all necessary components.
 
     Args:
         rng: Seeded RNG instance for deterministic simulation
 
     Returns:
-        Configured SimulationRunner instance
+        Tuple of (SimulationRunner instance, EntityFactory instance)
     """
     # Initialize core systems
     state_manager = StateManager()
@@ -102,10 +66,16 @@ def setup_simulation(rng: RNG) -> SimulationRunner:
     bleed_handler = BleedHandler(event_bus, state_manager, proc_rate=0.4, rng=rng)
     poison_handler = PoisonHandler(event_bus, state_manager, proc_rate=0.25, rng=rng)
 
+    # Initialize data provider (for Phase B2 EntityFactory)
+    provider = GameDataProvider()
+    provider.initialize()  # Load all CSV data
+    item_gen = ItemGenerator(provider=provider, rng=rng)
+    entity_factory = EntityFactory(provider, item_gen, rng)
+
     # Create simulation runner
     runner = SimulationRunner(combat_engine, state_manager, event_bus, rng)
 
-    return runner
+    return runner, entity_factory
 
 
 def run_combat_simulation(seed: int = 42, duration: float = 30.0) -> dict:
@@ -124,10 +94,10 @@ def run_combat_simulation(seed: int = 42, duration: float = 30.0) -> dict:
     logger.info(f"Starting combat simulation (seed: {seed}, duration: {duration}s)")
 
     # Set up simulation
-    runner = setup_simulation(rng)
+    runner, factory = setup_simulation(rng)
 
     # Create and add entities
-    entities = create_sample_entities()
+    entities = create_sample_entities(factory)
     for entity in entities:
         runner.add_entity(entity)
         logger.info(f"Added entity: {entity.name} ({entity.id}) - {entity.final_stats}")

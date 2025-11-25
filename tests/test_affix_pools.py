@@ -26,7 +26,59 @@ def test_weighted_choice_deterministic():
 
 def test_item_generator_with_affix_pools():
     """Test ItemGenerator can load and use affix pools."""
+    from src.data.typed_models import ItemTemplate, Rarity, ItemSlot
+
     provider = GameDataProvider()
+
+    # Mock affix pools data since provider needs initialization
+    # Structure: pool_name -> rarity -> tier -> entries
+    mock_affix_pools = {
+        'weapon_pool': {  # Pool name from item's affix_pools
+            'Common': {
+                '1': [{'affix_id': 'damage_flat', 'weight': 70}],
+                '2': [{'affix_id': 'health_flat', 'weight': 50}]
+            },
+            'Rare': {
+                '1': [{'affix_id': 'damage_flat', 'weight': 30}],
+                '2': [{'affix_id': 'health_flat', 'weight': 20}]
+            }
+        }
+    }
+    provider.affix_pools = mock_affix_pools
+
+    # Mock item templates for the generator
+    mock_item_templates = {
+        'longsword_rare': ItemTemplate(
+            item_id='longsword_rare',
+            name='Longsword',
+            slot=ItemSlot.WEAPON,
+            rarity=Rarity.RARE,
+            affix_pools=['weapon_pool']
+        )
+    }
+    provider.items = mock_item_templates
+
+    # Affixes are needed too
+    from src.data.typed_models import AffixDefinition
+    provider.affixes = {
+        'damage_flat': AffixDefinition(
+            affix_id='damage_flat',
+            stat_affected='base_damage',
+            mod_type='flat',
+            base_value='5.0',
+            description='+5 Base Damage',
+            dual_stat=False
+        ),
+        'health_flat': AffixDefinition(
+            affix_id='health_flat',
+            stat_affected='max_health',
+            mod_type='flat',
+            base_value='20.0',
+            description='+20 Health',
+            dual_stat=False
+        )
+    }
+
     generator = ItemGenerator(provider=provider, rng=RNG(seed=123))
 
     # Should have affix pools loaded

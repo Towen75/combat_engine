@@ -1,0 +1,4 @@
+entity_id,name,archetype,level,rarity,base_health,base_damage,armor,crit_chance,attack_speed,equipment_pools,loot_table_id,description
+goblin_grunt,Goblin Grunt,Monster,1,Common,50,8,0,0.05,1.2,weapon_pool,goblin_loot,A small, angry goblin.
+orc_warrior,Orc Warrior,Monster,3,Uncommon,120,15,10,0.10,0.9,weapon_pool|armor_pool,orc_loot,A tough orc fighter.
+hero_paladin,Paladin,Hero,5,Rare,300,25,50,0.15,1.0,sword_pool|armor_pool,,A holy warrior.
