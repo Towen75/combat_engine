@@ -1,10 +1,18 @@
 definitions:
+  # EXISTING BASE AFFIXES (restored for compatibility with existing items.csv)
   - id: "flat_dmg"
     stat: "base_damage"
     type: "flat"
     base_val: 10
     name: "Damage"
     pools: ["weapon_pool", "sword_pool"]
+
+  - id: "flat_damage"
+    stat: "base_damage"
+    type: "flat"
+    base_val: 10
+    name: "Base Damage"
+    pools: ["weapon_pool", "jewelry_pool"]
 
   - id: "Mult_dmg"
     stat: "base_damage"
@@ -33,3 +41,106 @@ definitions:
     base_val: 10
     name: "Critical Damage"
     pools: ["weapon_pool", "sword_pool"]
+
+  # MISSING AFFIX that was referenced in existing items.csv - add these to avoid errors
+  - id: "attack_speed"
+    stat: "attack_speed"
+    type: "flat"
+    base_val: 15
+    name: "Attack Speed"
+    pools: ["weapon_pool", "armor_pool"]
+
+  # MISSING AFFIX that was referenced in rogue leather pants family
+  - id: "evasion_chance"
+    stat: "evasion_chance"
+    type: "flat"
+    base_val: 0.02
+    name: "Evasion Chance"
+    pools: ["armor_pool"]
+
+  # ========== SPELLCASTER AFFIXES ==========
+  - id: "spell_power"
+    stat: "base_damage"
+    type: "multiplier"
+    base_val: 0.12
+    name: "Spell Power"
+    pools: ["caster_pool", "staff_pool", "magic_pool"]
+
+  - id: "mana_regeneration"
+    stat: "resource_on_hit"
+    type: "flat"
+    base_val: 5
+    name: "Mana Regeneration"
+    pools: ["caster_pool", "magic_pool"]
+
+  - id: "magic_penetration"
+    stat: "pierce_ratio"
+    type: "flat"
+    base_val: 0.08
+    name: "Magic Penetration"
+    pools: ["caster_pool", "staff_pool", "magic_pool"]
+
+  - id: "spell_crit_damage"
+    stat: "crit_damage"
+    type: "flat"
+    base_val: 0.25
+    name: "Spell Critical Damage"
+    pools: ["caster_pool", "staff_pool", "jewelry_pool"]
+
+  # ========== WARRIOR AFFIXES ==========
+  - id: "tank_armor"
+    stat: "armor"
+    type: "multiplier"
+    base_val: 0.15
+    name: "Tank Armor"
+    pools: ["tank_pool", "armor_pool", "plate_pool"]
+
+  - id: "melee_damage"
+    stat: "base_damage"
+    type: "multiplier"
+    base_val: 0.18
+    name: "Melee Damage"
+    pools: ["warrior_pool", "sword_pool", "axe_pool"]
+
+  - id: "threat_generation"
+    stat: "damage_multiplier" # Proxied as damage for now
+    type: "flat"
+    base_val: 0.05
+    name: "Threat Generation"
+    pools: ["tank_pool", "shield_pool"]
+
+  - id: "bleed_damage"
+    stat: "damage_over_time"
+    type: "multiplier"
+    base_val: 0.25
+    name: "Bleed Damage"
+    pools: ["warrior_pool", "axe_pool"]
+
+  # ========== ROGUE AFFIXES ==========
+  - id: "movement_speed"
+    stat: "movement_speed"
+    type: "multiplier"
+    base_val: 0.10
+    name: "Movement Speed"
+    pools: ["rogue_pool", "leather_pool", "jewelry_pool"]
+
+  - id: "crit_multiplier"
+    stat: "crit_damage"  # Uses existing crit_damage field
+    type: "flat"
+    base_val: 0.3
+    name: "Critical Multiplier"
+    pools: ["rogue_pool", "dagger_pool", "bow_pool"]
+
+  - id: "stealth_value"
+    stat: "evasion_chance"
+    type: "flat"
+    base_val: 0.08
+    name: "Stealth"
+    pools: ["rogue_pool", "leather_pool", "cloak_pool"]
+
+  - id: "poison_damage"
+    stat: "damage_over_time" # Uses existing DoT field
+    type: "multiplier"
+    base_val: 0.20
+    name: "Poison Damage"
+    pools: ["rogue_pool", "dagger_pool", "poison_pool"]

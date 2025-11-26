@@ -121,11 +121,16 @@ def test_builder_generates_valid_affix_pools(tmp_path):
 
     assert len(reader) > 0, "affix_pools.csv is empty"
 
-    # Example assertion: Find a predictable row to validate the logic.
-    # The specifics depend on your blueprint data.
-    expected_pool_ids = ['weapon_pool', 'sword_pool', 'armor_pool', 'jewelry_pool']
+    # Check that the original expected pools are present (among others that may have been added)
+    expected_base_pools = ['weapon_pool', 'sword_pool', 'armor_pool', 'jewelry_pool']
     found_pool_ids = set(row['pool_id'] for row in reader)
-    assert found_pool_ids == set(expected_pool_ids), f"Expected pools {expected_pool_ids}, got {found_pool_ids}"
+
+    # All expected pools should be present
+    for pool in expected_base_pools:
+        assert pool in found_pool_ids, f"Required pool {pool} not found in generated pools"
+
+    # Verify we have many more pools now (archetype-specific ones)
+    assert len(found_pool_ids) > len(expected_base_pools), "Expected additional archetype pools to be generated"
 
     # Check that all entries have required fields
     for row in reader:

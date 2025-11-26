@@ -1,0 +1,106 @@
+item_id,name,slot,rarity,affix_pools,implicit_affixes,num_random_affixes
+longsword_common,Common Longsword,Weapon,Common,sword_pool,flat_dmg_common,0
+longsword_uncommon,Uncommon Longsword,Weapon,Uncommon,sword_pool,flat_dmg_uncommon,1
+longsword_rare,Rare Longsword,Weapon,Rare,sword_pool,flat_dmg_rare,2
+longsword_epic,Epic Longsword,Weapon,Epic,sword_pool,flat_dmg_epic,3
+longsword_legendary,Legendary Longsword,Weapon,Legendary,sword_pool,flat_dmg_epic|crit_chance_epic,4
+Battle_Axe_common,Common Battle Axe,Weapon,Common,weapon_pool,flat_dmg_common,0
+Battle_Axe_uncommon,Uncommon Battle Axe,Weapon,Uncommon,weapon_pool,flat_dmg_uncommon,1
+Battle_Axe_rare,Rare Battle Axe,Weapon,Rare,weapon_pool,flat_dmg_rare,2
+Battle_Axe_epic,Epic Battle Axe,Weapon,Epic,weapon_pool,flat_dmg_epic,3
+Battle_Axe_legendary,Legendary Battle Axe,Weapon,Legendary,weapon_pool,flat_dmg_epic|flat_crit_dmg_epic,4
+iron_plate_common,Common Iron Plate,Chest,Common,armor_pool,flat_health_common,0
+iron_plate_uncommon,Uncommon Iron Plate,Chest,Uncommon,armor_pool,flat_health_uncommon,1
+iron_plate_rare,Rare Iron Plate,Chest,Rare,armor_pool,flat_health_rare,2
+iron_plate_epic,Epic Iron Plate,Chest,Epic,armor_pool,flat_health_epic,3
+iron_plate_legendary,Legendary Iron Plate,Chest,Legendary,armor_pool,flat_health_epic,4
+leather_amour_common,Common Leather Amour,Chest,Common,armor_pool,flat_health_common,0
+leather_amour_uncommon,Uncommon Leather Amour,Chest,Uncommon,armor_pool,flat_health_uncommon,1
+leather_amour_rare,Rare Leather Amour,Chest,Rare,armor_pool,flat_health_rare,2
+leather_amour_epic,Epic Leather Amour,Chest,Epic,armor_pool,flat_health_epic,3
+leather_amour_legendary,Legendary Leather Amour,Chest,Legendary,armor_pool,flat_health_epic,4
+pants_common,Common Pants,Legs,Common,armor_pool,flat_health_common,0
+pants_uncommon,Uncommon Pants,Legs,Uncommon,armor_pool,flat_health_uncommon,1
+pants_rare,Rare Pants,Legs,Rare,armor_pool,flat_health_rare,2
+pants_epic,Epic Pants,Legs,Epic,armor_pool,flat_health_epic,3
+pants_legendary,Legendary Pants,Legs,Legendary,armor_pool,flat_health_epic,4
+sandals_common,Common Sandals,feet,Common,armor_pool,flat_health_common,0
+sandals_uncommon,Uncommon Sandals,feet,Uncommon,armor_pool,flat_health_uncommon,1
+sandals_rare,Rare Sandals,feet,Rare,armor_pool,flat_health_rare,2
+sandals_epic,Epic Sandals,feet,Epic,armor_pool,flat_health_epic,3
+sandals_legendary,Legendary Sandals,feet,Legendary,armor_pool,flat_health_epic,4
+ring_of_power_common,Common Ring of Power,ring,Common,jewelry_pool,flat_dmg_common,0
+ring_of_power_uncommon,Uncommon Ring of Power,ring,Uncommon,jewelry_pool,flat_dmg_uncommon,1
+ring_of_power_rare,Rare Ring of Power,ring,Rare,jewelry_pool,flat_dmg_rare,2
+ring_of_power_epic,Epic Ring of Power,ring,Epic,jewelry_pool,flat_dmg_epic,3
+ring_of_power_legendary,Legendary Ring of Power,ring,Legendary,jewelry_pool,flat_dmg_epic,4
+base_iron_axe,Iron Axe,Weapon,Rare,weapon_pool|axe_pool,,2
+base_gold_ring,Gold Ring,Ring,Legendary,jewelry_pool,crit_dmg,3
+base_leather_chest,Leather Tunic,Chest,Common,armor_pool,,1
+base_steel_sword,Steel Sword,Weapon,Uncommon,weapon_pool|sword_pool,,2
+base_iron_helm,Iron Helm,Head,Epic,armor_pool,,2
+base_leather_gloves,Leather Gloves,Hands,Rare,armor_pool,,1
+base_steel_boots,Steel Boots,Feet,Uncommon,armor_pool,,1
+base_wooden_shield,Wooden Shield,OffHand,Common,armor_pool,,1
+base_silver_amulet,Silver Amulet,Amulet,Mythic,jewelry_pool,,3
+base_leather_belt,Leather Belt,Belt,Epic,armor_pool|jewelry_pool,,2
+base_plate_shoulders,Plate Shoulders,Shoulders,Rare,armor_pool,,2
+base_cloth_pants,Cloth Pants,Legs,Uncommon,armor_pool,,1
+base_onyx_ring,Onyx Ring,Ring,Mythic,jewelry_pool,,3
+base_dragon_scale,Demon Scale,Chest,Epic,armor_pool|jewelry_pool,resistance,3
+base_mystic_staff,Mystic Staff,Weapon,Legendary,jewelry_pool|weapon_pool,attack_speed,3
+base_ancient_sword,Ancient Sword,Weapon,Mythic,weapon_pool|sword_pool,flat_dmg,3
+base_fire_staff,Fire Staff,Weapon,Epic,jewelry_pool|weapon_pool,attack_speed,2
+sword_vorpal,Vorpal Longsword,Weapon,Rare,weapon_pool|sword_pool,flat_dmg;hollow_point,2
+amulet_siphon,Siphon Amulet,Amulet,Uncommon,jewelry_pool,siphon_strikes,1
+shield_mimic,Mimic Aegis,OffHand,Rare,shield_pool,mimic_shield,1
+dagger_echo,Echo Dagger,Weapon,Magic,dagger_pool,echoing_blow,2
+armor_adamant,Adamant Plate,Chest,Uncommon,armor_pool,flat_armor,1
+ring_focused,Focused Band,Ring,Magic,jewelry_pool,focused_rage,1
+bow_precision,Precision Bow,Weapon,Mythic,weapon_pool|bow_pool,precision_power,2
+staff_venom,Venom Staff,Weapon,Rare,weapon_pool|staff_pool,venomous_edge,2
+cape_pulse,Pulsing Cape,Cloak,Uncommon,armor_pool,pulsing_core,1
+reaper_greave,Reaper Greaves,Legs,Rare,armor_pool,berserker_rage,1
+mirror_shield_item,Mirror Shield,OffHand,Legendary,shield_pool,retribution;mirror_shield,0
+amulet_lifebind,Lifebind Pendant,Amulet,Magic,jewelry_pool,lifebind,1
+serpent_dagger,Serpent Dagger,Weapon,Uncommon,weapon_pool|dagger_pool,poison_stab,1
+embers_edge,Ember's Edge,Weapon,Rare,weapon_pool|sword_pool,flame_arc,2
+glacial_spear,Glacial Spear,Weapon,Uncommon,weapon_pool|spear_pool,glacial_spike,1
+echo_blade,Echo Blade,Weapon,Rare,weapon_pool|sword_pool,echo_strike,1
+stormcaller_staff,Stormcaller Staff,Weapon,Epic,weapon_pool|staff_pool,shock_burst,2
+reaper_scythe,Reaper Scythe,Weapon,Epic,weapon_pool|scythe_pool,shadow_slash,2
+berserker_helm,Berserker Helm,Head,Rare,armor_pool,berserker_rage,1
+stoneform_plate,Stoneform Plate,Chest,Epic,armor_pool,stoneform,1
+hastewrap,Cloak of Haste,Cloak,Uncommon,armor_pool,rallying_cry,1
+verdant_band,Verdant Band,Amulet,Uncommon,jewelry_pool,poison,1
+igneous_heart,Igneous Heart,Amulet,Epic,jewelry_pool,burn,1
+echoing_pendant,Echoing Pendant,Amulet,Rare,jewelry_pool,echo_mark,1
+glacial_ring,Ring of Frostbite,Ring,Magic,jewelry_pool,frostbite,1
+storm_bracers,Storm Bracers,Hands,Rare,armor_pool,shock_pulse,1
+corrosion_gauntlets,Corrosion Gauntlets,Hands,Uncommon,armor_pool,corrosion,1
+spear_starter,Serrated Spear,Weapon,Common,weapon_pool|spear_pool,,1
+iron_shield,Iron Buckler,OffHand,Common,shield_pool,,1
+cloth_cowl,Cloth Cowl,Head,Common,armor_pool,,1
+traveller_robe,Traveller Robe,Chest,Common,armor_pool,,1
+simple_ring,Simple Ring,Ring,Common,jewelry_pool,,1
+ember_shiv,Ember Shiv,Weapon,Magic,weapon_pool|dagger_pool,burn,1
+stone_guard_plate,Stone Guard Plate,Chest,Rare,armor_pool,stoneform,1
+precision_bow,Precision Bow,Weapon,Rare,weapon_pool|bow_pool,precision_power,2
+berserker_greatsword,Berserker Greatsword,Weapon,Legendary,weapon_pool,berserker_charge,0
+void_circlet,Void Circlet,Head,Legendary,jewelry_pool,soul_burn,1
+echo_pride_cape,Echoing Pride,Cloak,Magic,armor_pool,echoing_blow,1
+lifebind_pendant,Lifebind Pendant,Amulet,Magic,jewelry_pool,lifebind,1
+seraphic_plate,Seraphic Plate,Chest,Mythic,armor_pool,health;resistance,2
+storm_quiver,Storm Quiver,Quiver,Rare,weapon_pool,shock_pulse,1
+feral_gloves,Feral Gloves,Hands,Magic,armor_pool,attack_speed,1
+vampiric_band,Vampiric Band,Ring,Magic,jewelry_pool,life_steal,1
+hunter_boots,Hunter Boots,Feet,Uncommon,armor_pool,attack_speed,1
+arcane_tome,Arcane Tome,Accessory,Magic,jewelry_pool,crit_chance,1
+runed_amulet,Runed Amulet,Amulet,Rare,jewelry_pool,devastating_strikes,1
+cinder_core,Cinder Core,Accessory,Epic,jewelry_pool,burning_fury,1
+gale_mask,Gale Mask,Head,Uncommon,armor_pool,wind_steps,1
+spinebreaker,Spinebreaker,Weapon,Rare,weapon_pool,vorpal_edge,1
+frostbrand,Frostbrand,Weapon,Epic,weapon_pool,frostbite,2
+corruptor_staff,Corruptor Staff,Weapon,Mythic,weapon_pool,corrosion,2
+glimmer_shield,Glimmer Shield,OffHand,Magic,shield_pool,reforged_plate,1
+big_boy_pants,Big Boy Pants,Legs,Rare,armor_pool,flat_armor,1

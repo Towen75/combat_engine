@@ -1,49 +1,34 @@
+# 🚀 Implementation Hand-off: Stock Items - Phase 2 (Expanded)
+
+**Related Work Item:** `WI_Stock_Items.md` (Archetype Weapon & Armor Families)
+**Update:** Now includes item families for **every equipment slot** defined in the engine.
+
+## 📦 File Manifest
+| Action | File Path | Description |
+| :---: | :--- | :--- |
+| ✏️ Modify | `blueprints/families.yaml` | Define complete item sets (Weapons, Armor, Jewelry) for Warrior, Rogue, and Spellcaster |
+| 🧪 Verify | `data/items.csv` | Generated output validation |
+
+---
+
+## 1️⃣ Configuration & Dependencies
+*No new pip packages required.*
+
+---
+
+## 2️⃣ Code Changes
+
+### A. `blueprints/families.yaml`
+**Path:** `blueprints/families.yaml`
+**Context:** Defines base item families.
+*   **Implicits:** Primary applies to all rarities. Secondary applies at Legendary.
+*   **Pools:** Ensures random rolls match the archetype (e.g., Plate armor gets Tank affixes).
+
+```yaml
 families:
-  # EXISTING BASE FAMILES (preserved for compatibility)
-  - id: "longsword"
-    name: "Longsword"
-    slot: "Weapon"
-    implicits: ["flat_dmg", "crit_chance"]
-    affix_pools: "sword_pool"
-
-  - id: "Battle_Axe"
-    name: "Battle Axe"
-    slot: "Weapon"
-    implicits: ["flat_dmg", "flat_crit_dmg"]
-    affix_pools: "weapon_pool"
-
-  - id: "iron_plate"
-    name: "Iron Plate"
-    slot: "Chest"
-    implicits: ["flat_health"]
-    affix_pools: "armor_pool"
-
-  - id: "leather_amour"
-    name: "Leather Amour"
-    slot: "Chest"
-    implicits: ["flat_health"]
-    affix_pools: "armor_pool"
-
-  - id: "pants"
-    name: "Pants"
-    slot: "Legs"
-    implicits: ["flat_health"]
-    affix_pools: "armor_pool"
-
-  - id: "sandals"
-    name: "Sandals"
-    slot: "feet"
-    implicits: ["flat_health"]
-    affix_pools: "armor_pool"
-
-  - id: "ring_of_power"
-    name: "Ring of Power"
-    slot: "ring"
-    implicits: ["flat_damage"]
-    affix_pools: "jewelry_pool"
-
   # =================================================================
-  # WARRIOR ARCHETYPE - Complete Equipment Set
+  # WARRIOR ARCHETYPE (Heavy / Tank / Bleed)
+  # Slots: Weapon, OffHand, Head, Chest, Hands, Legs, Feet, Shoulders, Belt, Ring, Amulet
   # =================================================================
   - id: "greatsword"
     name: "Greatsword"
@@ -54,19 +39,19 @@ families:
   - id: "battle_axe"
     name: "Battle Axe"
     slot: "Weapon"
-    implicits: ["melee_damage", "bleed_damage"]
+    implicits: ["pierce_bonus", "threat_generation"]
     affix_pools: "warrior_pool|axe_pool|weapon_pool"
 
   - id: "tower_shield"
     name: "Tower Shield"
     slot: "OffHand"
     implicits: ["tank_armor", "flat_health"]
-    affix_pools: "warrior_pool|shield_pool"
+    affix_pools: "warrior_pool|shield_pool|armor_pool"
 
   - id: "great_helm"
     name: "Great Helm"
     slot: "Head"
-    implicits: ["tank_armor", "flat_health"]
+    implicits: ["flat_health", "tank_armor"]
     affix_pools: "warrior_pool|armor_pool|plate_pool"
 
   - id: "plate_armor"
@@ -84,7 +69,7 @@ families:
   - id: "plate_greaves"
     name: "Plate Greaves"
     slot: "Legs"
-    implicits: ["tank_armor", "flat_health"]
+    implicits: ["flat_health", "tank_armor"]
     affix_pools: "warrior_pool|armor_pool|plate_pool"
 
   - id: "plate_boots"
@@ -108,7 +93,7 @@ families:
   - id: "soldier_ring"
     name: "Soldier's Ring"
     slot: "Ring"
-    implicits: ["melee_damage", "threat_generation"]
+    implicits: ["melee_damage", "crit_chance"]
     affix_pools: "warrior_pool|jewelry_pool"
 
   - id: "iron_amulet"
@@ -117,8 +102,10 @@ families:
     implicits: ["flat_health", "tank_armor"]
     affix_pools: "warrior_pool|jewelry_pool"
 
+
   # =================================================================
-  # ROGUE ARCHETYPE - Complete Equipment Set
+  # ROGUE ARCHETYPE (Medium / Crit / Poison)
+  # Slots: Weapon, Quiver, Head, Chest, Hands, Legs, Feet, Shoulders, Belt, Ring, Amulet, Cloak
   # =================================================================
   - id: "assassin_dagger"
     name: "Assassin Dagger"
@@ -129,19 +116,19 @@ families:
   - id: "recurve_bow"
     name: "Recurve Bow"
     slot: "Weapon"
-    implicits: ["crit_multiplier", "movement_speed"]
+    implicits: ["movement_speed", "crit_chance"]
     affix_pools: "rogue_pool|bow_pool|weapon_pool"
 
   - id: "hunter_quiver"
     name: "Hunter Quiver"
     slot: "Quiver"
-    implicits: ["attack_speed", "crit_multiplier"]
+    implicits: ["attack_speed", "crit_chance"]
     affix_pools: "rogue_pool|weapon_pool"
 
   - id: "leather_hood"
     name: "Leather Hood"
     slot: "Head"
-    implicits: ["crit_multiplier", "stealth_value"]
+    implicits: ["crit_chance", "stealth_value"]
     affix_pools: "rogue_pool|armor_pool|leather_pool"
 
   - id: "leather_tunic"
@@ -159,7 +146,7 @@ families:
   - id: "leather_pants"
     name: "Leather Pants"
     slot: "Legs"
-    implicits: ["movement_speed", "evasion_chance"]
+    implicits: ["movement_speed", "evasion_chance"] # Using core affix
     affix_pools: "rogue_pool|armor_pool|leather_pool"
 
   - id: "light_boots"
@@ -177,7 +164,7 @@ families:
   - id: "utility_belt"
     name: "Utility Belt"
     slot: "Belt"
-    implicits: ["crit_multiplier", "poison_damage"]
+    implicits: ["crit_chance", "poison_damage"]
     affix_pools: "rogue_pool|armor_pool"
 
   - id: "shadow_cloak"
@@ -189,7 +176,7 @@ families:
   - id: "thief_ring"
     name: "Thief's Ring"
     slot: "Ring"
-    implicits: ["crit_multiplier", "attack_speed"]
+    implicits: ["crit_chance", "crit_multiplier"]
     affix_pools: "rogue_pool|jewelry_pool"
 
   - id: "agility_amulet"
@@ -198,8 +185,10 @@ families:
     implicits: ["movement_speed", "attack_speed"]
     affix_pools: "rogue_pool|jewelry_pool"
 
+
   # =================================================================
-  # SPELLCASTER ARCHETYPE - Complete Equipment Set
+  # SPELLCASTER ARCHETYPE (Light / Magic / Mana)
+  # Slots: Weapon, OffHand, Head, Chest, Hands, Legs, Feet, Shoulders, Belt, Ring, Amulet
   # =================================================================
   - id: "arcane_staff"
     name: "Arcane Staff"
@@ -234,7 +223,7 @@ families:
   - id: "silk_gloves"
     name: "Silk Gloves"
     slot: "Hands"
-    implicits: ["spell_crit_damage", "attack_speed"]
+    implicits: ["attack_speed", "spell_crit_damage"] # Attack Speed maps to cast speed concept
     affix_pools: "caster_pool|armor_pool|cloth_pool"
 
   - id: "silk_skirt"
@@ -252,7 +241,7 @@ families:
   - id: "mantle"
     name: "Mantle"
     slot: "Shoulders"
-    implicits: ["spell_power", "mana_regeneration"]
+    implicits: ["mana_regeneration", "spell_power"]
     affix_pools: "caster_pool|armor_pool"
 
   - id: "sash"
@@ -272,3 +261,39 @@ families:
     slot: "Amulet"
     implicits: ["spell_crit_damage", "mana_regeneration"]
     affix_pools: "caster_pool|jewelry_pool"
+```
+
+---
+
+## 🧪 Verification Steps
+
+**1. Generate Content**
+Run the builder script to regenerate everything.
+```bash
+python scripts/build_content.py
+```
+
+**2. Validate CSV Output**
+Check that specific slot items were generated.
+
+```bash
+# Check for Warrior Helmet
+grep "great_helm_common" data/items.csv
+
+# Check for Rogue Cloak
+grep "shadow_cloak_rare" data/items.csv
+
+# Check for Mage Offhand
+grep "mystic_orb_legendary" data/items.csv
+```
+
+**3. Simulation Smoke Test**
+Run the simulation.
+```bash
+python run_simulation.py --quiet
+```
+
+## ⚠️ Rollback Plan
+If this corrupts the item database or causes crashes:
+1.  Revert `blueprints/families.yaml` to the previous version.
+2.  Run `python scripts/build_content.py` to restore `data/items.csv` to the known good state.

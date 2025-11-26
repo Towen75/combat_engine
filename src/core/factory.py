@@ -22,7 +22,7 @@ class EntityFactory:
     def __init__(
         self,
         provider: GameDataProvider,
-        item_generator: ItemGenerator,
+        item_generator: Optional[ItemGenerator],
         rng: RNG
     ):
         """
@@ -30,11 +30,15 @@ class EntityFactory:
 
         Args:
             provider: Data provider for looking up templates and items.
-            item_generator: Generator for creating equipment instances.
+            item_generator: Generator for creating equipment instances. If None, creates one internally.
             rng: RNG for making equipment pool selections.
         """
         self.provider = provider
-        self.item_gen = item_generator
+        # Create ItemGenerator internally if None provided
+        if item_generator is None:
+            self.item_gen = ItemGenerator(provider=provider)
+        else:
+            self.item_gen = item_generator
         self.rng = rng
 
     def create(self, entity_id: str, instance_id: Optional[str] = None) -> Entity:
