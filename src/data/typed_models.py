@@ -254,6 +254,7 @@ class EntityTemplate:
     equipment_pools: List[str] = field(default_factory=list)
     loot_table_id: str = ""
     description: str = ""
+    portrait_path: str = ""  # New field for portrait image path
 
     def __post_init__(self):
         if not self.entity_id:
@@ -462,5 +463,6 @@ def hydrate_entity_template(raw_data: Dict[str, Any]) -> EntityTemplate:
         attack_speed=float(raw_data.get('attack_speed', 1.0)),
         equipment_pools=parse_affix_pools(raw_data.get('equipment_pools', '')),
         loot_table_id=raw_data.get('loot_table_id', ''),
-        description=raw_data.get('description', '')
+        description=raw_data.get('description', ''),
+        portrait_path=raw_data.get('portrait_path', '')  # New field mapping
     )

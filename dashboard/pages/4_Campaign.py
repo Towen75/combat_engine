@@ -1,6 +1,6 @@
 import streamlit as st
 import time
-from dashboard.utils import get_game_session, get_game_data_provider, load_css
+from dashboard.utils import get_game_session, get_game_data_provider, load_css, display_portrait
 from dashboard.components.item_card import render_item_card
 from src.game.enums import GameState
 from src.data.typed_models import ItemSlot
@@ -80,6 +80,10 @@ def render_lobby(session, provider):
     with c2:
         # Show Hero Preview
         template = provider.entities[selected_hero]
+
+        # NEW: Display hero portrait
+        display_portrait(template.portrait_path, width=128)
+
         st.info(f"""
         **{template.name}**
 
@@ -101,6 +105,10 @@ def render_preparation(session, provider):
     # --- LEFT: HERO & SLOTS ---
     with col_hero:
         st.markdown(f"### 🛡️ {player.name}")
+
+        # NEW: Display hero portrait
+        hero_template = provider.entities[player.template_id]
+        display_portrait(hero_template.portrait_path, width=128)
 
         # Stats Bar
         stats = player.final_stats
@@ -148,9 +156,26 @@ def render_preparation(session, provider):
                                 session.inventory.unequip_item(player, slot_name)
                                 st.rerun()
 
-    # --- RIGHT: INVENTORY ---
+    # --- RIGHT: INVENTORY & NEXT ENEMY ---
     with col_inv:
-        st.markdown(f"### 🎒 Backpack ({session.inventory.count}/{session.inventory.capacity})")
+        # Show next enemy info
+        enemy_id = session._get_current_enemy_id()
+        enemy_template = provider.entities[enemy_id]
+
+        st.markdown("### 🎯 Next Enemy")
+        # NEW: Display enemy portrait
+        display_portrait(enemy_template.portrait_path, width=128)
+
+        st.info(f"""
+        **{enemy_template.name}**
+
+        *HP:* {enemy_template.base_health} | *Dmg:* {enemy_template.base_damage} | *Arm:* {enemy_template.armor}
+
+        *{enemy_template.description}*
+        """)
+
+        st.markdown("### 🎒 Backpack")
+        st.markdown(f"({session.inventory.count}/{session.inventory.capacity})")
 
         if session.inventory.count == 0:
             st.info("Your inventory is empty.")
@@ -205,6 +230,33 @@ def render_combat(session):
         st.balloons()
     elif session.state == GameState.GAME_OVER:
         st.error("💀 DEFEAT! 💀")
+
+    # NEW: Show defeated enemy info
+    provider = get_game_data_provider()
+    if provider:
+        enemy_id = session._get_current_enemy_id()
+        enemy_template = provider.entities[enemy_id]
+    else:
+        st.error("Could not load game data")
+        return
+
+    col_player, col_enemy = st.columns([1, 1])
+
+    with col_player:
+        st.markdown("### 🛡️ Your Hero")
+        # Could add hero portrait here too if desired
+        st.info("Combat completed!")
+
+    with col_enemy:
+        st.markdown("### 💀 Defeated Enemy")
+        # NEW: Display enemy portrait
+        display_portrait(enemy_template.portrait_path, width=128)
+
+        st.info(f"""
+        **{enemy_template.name}**
+
+        *Was defeated in battle*
+        """)
 
     # Show combat stats
     render_combat_stats(session)

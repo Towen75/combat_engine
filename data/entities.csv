@@ -1,16 +1,16 @@
-entity_id,name,archetype,level,rarity,base_health,base_damage,armor,crit_chance,attack_speed,equipment_pools,loot_table_id,description
-goblin_grunt,Goblin Grunt,Monster,1,Common,50,8,0,0.05,1.2,weapon_pool,goblin_loot,A small, angry goblin.
-orc_warrior,Orc Warrior,Monster,3,Uncommon,120,15,10,0.10,0.9,weapon_pool|armor_pool,orc_loot,A tough orc fighter.
-hero_paladin,Paladin,Hero,5,Rare,300,25,50,0.15,1.0,sword_pool|armor_pool,,A holy warrior.
-enemy_warrior_grunt,Iron Recruit,Warrior,1,Common,120,10,15,0.05,0.8,greatsword_common|plate_armor_common,loot_warrior_grunt,A sturdy recruit in basic plate.
-enemy_warrior_guard,Citadel Guard,Warrior,5,Uncommon,300,25,40,0.05,0.9,battle_axe_uncommon|tower_shield_uncommon|plate_armor_uncommon,loot_warrior_elite,Heavily armored defender.
-enemy_warrior_boss,Warlord Ghom,Warrior,10,Rare,800,60,100,0.10,0.8,greatsword_rare|great_helm_rare|plate_armor_rare,loot_warrior_boss,A mountain of steel and rage.
-enemy_rogue_thief,Street Rat,Rogue,1,Common,60,12,5,0.15,1.2,assassin_dagger_common|leather_tunic_common,loot_rogue_grunt,Quick but fragile thief.
-enemy_rogue_assassin,Shadow Blade,Rogue,5,Uncommon,180,35,15,0.25,1.4,assassin_dagger_uncommon|leather_hood_uncommon|leather_tunic_uncommon,loot_rogue_elite,Strikes from the shadows.
-enemy_rogue_boss,Nightmaster,Rogue,10,Rare,550,80,30,0.40,1.5,recurve_bow_rare|shadow_cloak_rare|leather_tunic_rare,loot_rogue_boss,You wont see him coming.
-enemy_mage_novice,Apprentice,Mage,1,Common,50,18,0,0.05,1.0,arcane_staff_common|silk_robes_common,loot_mage_grunt,Learning to control the arcane.
-enemy_mage_sorcerer,Void Caller,Mage,5,Uncommon,140,45,5,0.15,1.0,spellblade_uncommon|mystic_orb_uncommon|silk_robes_uncommon,loot_mage_elite,Wields dangerous chaotic energies.
-enemy_mage_boss,Grand Magus,Mage,10,Rare,450,120,10,0.25,1.1,arcane_staff_rare|circlet_rare|silk_robes_rare,loot_mage_boss,Master of the arcane arts.
-hero_warrior,Iron Vanguard,Hero,1,Rare,400,20,45,0.10,0.9,greatsword_rare|plate_armor_rare,loot_warrior_boss,The steadfast defender.
-hero_rogue,Nightblade,Hero,1,Rare,250,30,15,0.30,1.3,assassin_dagger_rare|leather_tunic_rare,loot_rogue_boss,Precision and speed.
-hero_mage,Arcane Weaver,Hero,1,Rare,200,40,5,0.15,1.0,arcane_staff_rare|silk_robes_rare,loot_mage_boss,Master of the elements.
+entity_id,name,archetype,level,rarity,base_health,base_damage,armor,crit_chance,attack_speed,equipment_pools,loot_table_id,description,portrait_path
+goblin_grunt,Goblin Grunt,Monster,1,Common,50,8,0,0.05,1.2,weapon_pool,goblin_loot,A small golibn - nothing to be scared of.,assets/portraits/goblin_grunt.png
+orc_warrior,Orc Warrior,Monster,3,Uncommon,120,15,10,0.1,0.9,weapon_pool|armor_pool,orc_loot,A tough orc fighter.,assets/portraits/orc_warrior.png
+hero_paladin,Paladin,Hero,5,Rare,300,25,50,0.15,1,sword_pool|armor_pool,,A holy warrior.,assets/portraits/hero_paladin.png
+enemy_warrior_grunt,Iron Recruit,Warrior,1,Common,120,10,15,0.05,0.8,greatsword_common|plate_armor_common,loot_warrior_grunt,A sturdy recruit in basic plate.,assets/portraits/goblin_grunt.png
+enemy_warrior_guard,Citadel Guard,Warrior,5,Uncommon,300,25,40,0.05,0.9,battle_axe_uncommon|tower_shield_uncommon|plate_armor_uncommon,loot_warrior_elite,Heavily armored defender.,assets/portraits/orc_warrior.png
+enemy_warrior_boss,Warlord Ghom,Warrior,10,Rare,800,60,100,0.1,0.8,greatsword_rare|great_helm_rare|plate_armor_rare,loot_warrior_boss,A mountain of steel and rage.,assets/portraits/enemy_boss.png
+enemy_rogue_thief,Street Rat,Rogue,1,Common,60,12,5,0.15,1.2,assassin_dagger_common|leather_tunic_common,loot_rogue_grunt,Quick but fragile thief.,assets/portraits/goblin_grunt.png
+enemy_rogue_assassin,Shadow Blade,Rogue,5,Uncommon,180,35,15,0.25,1.4,assassin_dagger_uncommon|leather_hood_uncommon|leather_tunic_uncommon,loot_rogue_elite,Strikes from the shadows.,assets/portraits/orc_warrior.png
+enemy_rogue_boss,Nightmaster,Rogue,10,Rare,550,80,30,0.4,1.5,recurve_bow_rare|shadow_cloak_rare|leather_tunic_rare,loot_rogue_boss,You wont see him coming.,assets/portraits/enemy_boss.png
+enemy_mage_novice,Apprentice,Mage,1,Common,50,18,0,0.05,1,arcane_staff_common|silk_robes_common,loot_mage_grunt,Learning to control the arcane.,assets/portraits/goblin_grunt.png
+enemy_mage_sorcerer,Void Caller,Mage,5,Uncommon,140,45,5,0.15,1,spellblade_uncommon|mystic_orb_uncommon|silk_robes_uncommon,loot_mage_elite,Wields dangerous chaotic energies.,assets/portraits/orc_warrior.png
+enemy_mage_boss,Grand Magus,Mage,10,Rare,450,120,10,0.25,1.1,arcane_staff_rare|circlet_rare|silk_robes_rare,loot_mage_boss,Master of the arcane arts.,assets/portraits/enemy_boss.png
+hero_warrior,Iron Vanguard,Hero,1,Rare,400,20,45,0.1,0.9,greatsword_rare|plate_armor_rare,loot_warrior_boss,The steadfast defender.,assets/portraits/hero_warrior.png
+hero_rogue,Nightblade,Hero,1,Rare,250,30,15,0.3,1.3,assassin_dagger_rare|leather_tunic_rare,loot_rogue_boss,Precision and speed.,assets/portraits/hero_rogue.png
+hero_mage,Arcane Weaver,Hero,1,Rare,200,40,5,0.15,1,arcane_staff_rare|silk_robes_rare,loot_mage_boss,Master of the elements.,assets/portraits/hero_mage.png

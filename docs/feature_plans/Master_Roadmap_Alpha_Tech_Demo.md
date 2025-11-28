@@ -23,7 +23,7 @@
 
 ### **Phase 3: Crafting & Leveling**
 *   **Objective:** Implement the "Natural vs Upgraded" rarity math.
-*   **Key Systems:** `The Forge` (Upgrade/Salvage logic), XP tracking, Entity Stat Scaling curves.
+*   **Key Systems:** `The Anvil` (Upgrade/Salvage logic), XP tracking, Entity Stat Scaling curves.
 
 ## 🔬 Milestone 4: Observability & Tooling
 *Goal: Professional-grade debugging and analysis tools.*

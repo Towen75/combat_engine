@@ -1,6 +1,7 @@
 import sys
 import os
 from pathlib import Path
+from typing import Optional
 import pandas as pd
 import streamlit as st
 
@@ -312,3 +313,85 @@ def load_css():
         }
         </style>
     """, unsafe_allow_html=True)
+
+
+# ========== Portrait Loading Utilities ==========
+
+@st.cache_data
+def load_portrait_image(portrait_path: str) -> Optional[bytes]:
+    """
+    Load PNG portrait image from assets directory.
+
+    Args:
+        portrait_path: Relative path to portrait file (e.g., 'assets/portraits/hero.png')
+
+    Returns:
+        Image bytes if file exists and is valid PNG, None otherwise
+    """
+    if not portrait_path or portrait_path.strip() == "":
+        return None
+
+    try:
+        # Convert relative path to absolute path from project root
+        full_path = PROJECT_ROOT / portrait_path
+
+        # Validate file exists
+        if not full_path.exists():
+            st.warning(f"Portrait file not found: {full_path}")
+            return None
+
+        # Validate it's a PNG file
+        if full_path.suffix.lower() != '.png':
+            st.warning(f"Portrait file is not PNG: {full_path}")
+            return None
+
+        # Read and validate image data
+        with open(full_path, 'rb') as f:
+            image_bytes = f.read()
+
+        # Basic validation - check PNG header
+        if not image_bytes.startswith(b'\x89PNG\r\n\x1a\n'):
+            st.warning(f"Invalid PNG file: {full_path}")
+            return None
+
+        return image_bytes
+
+    except Exception as e:
+        st.error(f"Error loading portrait {portrait_path}: {e}")
+        return None
+
+
+def display_portrait(portrait_path: str, width: int = 128) -> None:
+    """
+    Display portrait image in Streamlit with fixed width for layout stability.
+
+    Args:
+        portrait_path: Relative path to portrait file
+        width: Fixed width in pixels (default 128 for consistent layout)
+    """
+    image_bytes = load_portrait_image(portrait_path)
+
+    if image_bytes is not None:
+        # Use fixed width to prevent layout shift
+        st.image(image_bytes, width=width, caption=None, use_column_width=False)
+    else:
+        # Fallback display for missing portraits
+        st.image(
+            "https://via.placeholder.com/128x128/4a4a55/ffffff?text=No+Portrait",
+            width=width,
+            caption="Portrait not available",
+            use_column_width=False
+        )
+
+
+def get_portrait_cache_key(entity_id: str) -> str:
+    """
+    Generate cache key for portrait images.
+
+    Args:
+        entity_id: Entity identifier
+
+    Returns:
+        Cache key string
+    """
+    return f"portrait_{entity_id}"

@@ -1,52 +1,32 @@
 {
   "damage_analysis": {
     "summary": {
-      "total_damage": 246.46000000000004,
-      "total_hits": 21,
-      "total_crits": 7,
-      "overall_crit_rate": 0.3333333333333333,
-      "avg_damage_per_hit": 11.736190476190478
+      "total_damage": 58.50304799999999,
+      "total_hits": 4,
+      "total_crits": 0,
+      "overall_crit_rate": 0.0,
+      "avg_damage_per_hit": 14.625761999999998
     },
     "entity_breakdown": {
-      "assassin": {
-        "total_damage": 133.60000000000002,
-        "damage_percentage": 54.20757932321675,
-        "hits": 11,
-        "crits": 6,
-        "crit_rate": 0.5454545454545454,
-        "avg_damage_per_hit": 12.145454545454548,
-        "avg_crit_damage": 20.166666666666668,
-        "avg_normal_damage": 2.5200000000000005
-      },
-      "warrior": {
-        "total_damage": 107.5,
-        "damage_percentage": 43.61762557818712,
-        "hits": 6,
-        "crits": 1,
-        "crit_rate": 0.16666666666666666,
-        "avg_damage_per_hit": 17.916666666666668,
-        "avg_crit_damage": 40.0,
-        "avg_normal_damage": 13.5
-      },
-      "mage": {
-        "total_damage": 5.0,
-        "damage_percentage": 2.028726771078471,
-        "hits": 1,
+      "goblin_grunt_b017f199": {
+        "total_damage": 0.160648,
+        "damage_percentage": 0.2745976585698578,
+        "hits": 2,
         "crits": 0,
         "crit_rate": 0.0,
-        "avg_damage_per_hit": 5.0,
+        "avg_damage_per_hit": 0.080324,
         "avg_crit_damage": 0,
-        "avg_normal_damage": 5.0
+        "avg_normal_damage": 0.080324
       },
-      "tank": {
-        "total_damage": 0.36,
-        "damage_percentage": 0.1460683275176499,
-        "hits": 3,
+      "orc_warrior_a7e0b1e2": {
+        "total_damage": 58.34239999999999,
+        "damage_percentage": 99.72540234143014,
+        "hits": 2,
         "crits": 0,
         "crit_rate": 0.0,
-        "avg_damage_per_hit": 0.12,
+        "avg_damage_per_hit": 29.171199999999995,
         "avg_crit_damage": 0,
-        "avg_normal_damage": 0.12
+        "avg_normal_damage": 29.171199999999995
       }
     }
   },
@@ -60,18 +40,18 @@
     "entity_breakdown": {}
   },
   "performance_analysis": {
-    "simulation_duration": 0.0020034313201904297,
-    "total_events": 21,
-    "events_per_second": 10482.016422706176,
-    "performance_rating": "Excellent"
+    "simulation_duration": 0.0,
+    "total_events": 4,
+    "events_per_second": 0.0,
+    "performance_rating": "Poor"
   },
   "balance_insights": {
     "damage_distribution": {
       "distribution_type": "unbalanced",
-      "max_damage_percentage": 54.20757932321675,
-      "min_damage_percentage": 0.1460683275176499,
-      "variance": 586.2739963574386,
-      "range": 54.0615109956991
+      "max_damage_percentage": 99.72540234143014,
+      "min_damage_percentage": 0.2745976585698578,
+      "variance": 2472.615638017106,
+      "range": 99.45080468286028
     },
     "effect_balance": {
       "entities_with_effects": 0,
@@ -80,57 +60,36 @@
     },
     "recommendations": [
       "Consider balancing damage output - high variance detected in damage distribution",
-      "Effects are underutilized - consider increasing proc rates or effect triggers"
+      "Effects are underutilized - consider increasing proc rates or effect triggers",
+      "Simulation performance is poor - consider optimizing event handling"
     ]
   },
-  "generated_at": 1764100232.4426327,
+  "generated_at": 1764343630.745931,
   "metadata": {
     "seed": 42,
     "duration": 30.0,
-    "entity_count": 4,
+    "entity_count": 2,
     "entities": [
       {
-        "id": "warrior",
-        "name": "Warrior",
-        "rarity": "Rare",
+        "id": "goblin_grunt_b017f199",
+        "name": "Goblin Grunt",
+        "rarity": "Common",
         "stats": {
-          "damage": 25.0,
-          "attack_speed": 0.8,
-          "health": 150.0,
-          "armor": 15.0
-        }
-      },
-      {
-        "id": "assassin",
-        "name": "Assassin",
-        "rarity": "Epic",
-        "stats": {
-          "damage": 18.0,
-          "attack_speed": 1.5,
-          "health": 80.0,
-          "armor": 5.0
-        }
-      },
-      {
-        "id": "mage",
-        "name": "Mage",
-        "rarity": "Legendary",
-        "stats": {
-          "damage": 30.0,
-          "attack_speed": 0.6,
-          "health": 70.0,
+          "damage": 8.0324,
+          "attack_speed": 1.2,
+          "health": 50.0,
           "armor": 0.0
         }
       },
       {
-        "id": "tank",
-        "name": "Tank",
+        "id": "orc_warrior_a7e0b1e2",
+        "name": "Orc Warrior",
         "rarity": "Uncommon",
         "stats": {
-          "damage": 12.0,
-          "attack_speed": 0.5,
-          "health": 200.0,
-          "armor": 25.0
+          "damage": 29.171199999999995,
+          "attack_speed": 0.9,
+          "health": 120.0,
+          "armor": 10.0
         }
       }
     ]

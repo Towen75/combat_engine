@@ -1,4 +1,18 @@
-# [](https://github.com/Towen75/combat_engine/compare/v2.14.0...v) (2025-11-28)
+# [2.16.0](https://github.com/Towen75/combat_engine/compare/v2.15.0...v2.16.0) (2025-11-28)
+
+### Added
+
+* **feat:** implement character portrait system
+  - Add portrait_path column to entities.csv with hero and enemy portraits
+  - Extend EntityTemplate and Entity models with portrait support
+  - Create portrait loading utilities with PNG validation and caching
+  - Integrate hero portraits in lobby and preparation phases
+  - Add enemy portrait preview in preparation and defeated display in combat
+  - Expand campaign stages for better enemy progression
+
+### Breaking Changes
+
+* Entity model now requires template_id parameter
 
 
 

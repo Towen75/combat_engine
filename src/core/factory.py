@@ -78,7 +78,8 @@ class EntityFactory:
             base_stats=stats,
             name=template.name,
             rarity=template.rarity.value if hasattr(template.rarity, 'value') else str(template.rarity),
-            loot_table_id=template.loot_table_id
+            loot_table_id=template.loot_table_id,
+            template_id=entity_id  # Store reference to template for portrait access
         )
 
         # 4. Equip Items

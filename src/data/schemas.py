@@ -261,6 +261,7 @@ ENTITIES_SCHEMA = {
         "equipment_pools": affix_pools_validator,  # Reuse the same validator
         "loot_table_id": str_validator,
         "description": str_validator,
+        "portrait_path": str_validator,  # New field for portrait image path
     },
 }
 

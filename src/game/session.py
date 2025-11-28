@@ -27,11 +27,17 @@ if not logger.handlers:
 
 # Hardcoded campaign for Slice 1
 CAMPAIGN_STAGES = [
-    "goblin_grunt",       # Stage 1
-    "orc_warrior",        # Stage 2
-    "enemy_rogue_thief",  # Stage 3
-    "enemy_mage_novice",  # Stage 4
-    "enemy_warrior_boss"  # Stage 5
+    "goblin_grunt",       # Stage 1.1
+    "enemy_warrior_grunt",       # Stage 1.2
+    "enemy_rogue_thief",       # Stage 1.3
+    "enemy_mage_novice",       # Stage 1.4
+    "orc_warrior",        # Stage 2.1
+    "enemy_warrior_guard",       # Stage 2.2
+    "enemy_rogue_assassin",  # Stage 2.3
+    "enemy_mage_sorcerer",  # Stage 2.4
+    "enemy_warrior_boss",  # Stage 3.1
+    "enemy_rouge_boss",  # Stage 3.2
+    "enemy_mage_boss"  # Stage 3.3
 ]
 
 class GameSession:
