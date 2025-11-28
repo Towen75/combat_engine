@@ -24,7 +24,7 @@ def validate_content():
         from src.data.game_data_provider import GameDataProvider
 
         # Force a reload/fresh load
-        provider = GameDataProvider()
+        provider = GameDataProvider(data_dir=DATA_DIR)
         # If the singleton was already initialized in memory, force re-init logic isn't exposed easily
         # but instantiating it triggers _load_and_validate_data if not initialized.
         # Better: rely on the fact that this script runs in a fresh process usually.

@@ -142,25 +142,53 @@ def render_item_card(item_data, affix_provider=None, seed=None):
     html_parts.append('<div style="font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Implicit Affixes</div>')
     
     # --- 3. Implicit Logic (FIXED) ---
-    raw_imp = str(item_data.get("implicit_affixes", ""))
-    if raw_imp == 'nan': raw_imp = ""
-    # Handle both separators: replace ; with | then split
-    implicits_raw = raw_imp.replace(";", "|").split("|")
-    
-    has_implicits = False
-    
-    if affix_provider and implicits_raw and implicits_raw != ['']:
-        for affix_id in implicits_raw:
-            affix_id = affix_id.strip()
-            if not affix_id: continue
-            
-            affix_def = affix_provider.get_affixes().get(affix_id)
-            if affix_def:
-                # Implicits usually fixed, scaling with quality for preview
-                text = format_affix_line(affix_def, simulate_roll=True, quality=sim_quality_val/100.0)
-                html_parts.append(f'<div style="color: #90CAF9; margin-bottom: 4px; font-weight: 500; font-size: 0.95rem;">{text}</div>')
-                has_implicits = True
-    
+    # Check if this is a generated Item instance (has 'affixes' list) or template data
+    actual_affixes = item_data.get("affixes", [])
+    has_actual_affixes = isinstance(actual_affixes, list) and len(actual_affixes) > 0
+
+    # Initialize implicits_raw for use in random affixes section
+    implicits_raw = []
+
+    if has_actual_affixes:
+        # This is a generated Item - display actual rolled affixes
+        for affix in actual_affixes:
+            # Format the affix using its description and values
+            if hasattr(affix, 'description') and hasattr(affix, 'value'):
+                # Simple formatting for rolled affixes
+                val = affix.value
+                # Handle multipliers for display
+                if hasattr(affix, 'mod_type') and affix.mod_type == "multiplier":
+                    val = f"{val * 100:.1f}%"
+                else:
+                    val = f"{val:.1f}"
+
+                desc = affix.description.replace("{value}", str(val))
+                html_parts.append(f'<div style="color: #90CAF9; margin-bottom: 4px; font-weight: 500; font-size: 0.95rem;">{desc}</div>')
+        has_implicits = len(actual_affixes) > 0
+    else:
+        # This is template data - parse implicit_affixes as before
+        raw_imp = str(item_data.get("implicit_affixes", ""))
+        if raw_imp == 'nan': raw_imp = ""
+        # Handle both separators: replace ; with | then split
+        implicits_raw = raw_imp.replace(";", "|").split("|")
+
+        has_implicits = False
+
+        if affix_provider and implicits_raw and implicits_raw != ['']:
+            for affix_id in implicits_raw:
+                affix_id = affix_id.strip()
+                if not affix_id: continue
+
+                affix_def = affix_provider.get_affixes().get(affix_id)
+                if affix_def:
+                    # Implicits usually fixed, scaling with quality for preview
+                    text = format_affix_line(affix_def, simulate_roll=True, quality=sim_quality_val/100.0)
+                    html_parts.append(f'<div style="color: #90CAF9; margin-bottom: 4px; font-weight: 500; font-size: 0.95rem;">{text}</div>')
+                    has_implicits = True
+                else:
+                    # FIX: Show missing ID instead of nothing
+                    html_parts.append(f'<div style="color: #F44336; margin-bottom: 4px;">? {affix_id} (Missing)</div>')
+
     if not has_implicits:
         html_parts.append('<div style="color: #555; font-style: italic; margin-bottom: 4px;">None</div>')
         
@@ -168,41 +196,48 @@ def render_item_card(item_data, affix_provider=None, seed=None):
 
     # Random Affixes Label
     html_parts.append('<div style="font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Random Affixes</div>')
-    
+
     # Random Affixes Logic
-    num_random = int(item_data.get("num_random_affixes", 0))
-    
-    # Handle pools safely
-    raw_pools = str(item_data.get("affix_pools", ""))
-    if raw_pools == 'nan': raw_pools = ""
-    pools_raw = raw_pools.replace(";", "|").split("|")
-    
-    pools = []  # Initialize outside conditional scope
-    if num_random > 0 and affix_provider:
-        pools = [p.strip() for p in pools_raw if p.strip()]
-        candidates = []
-        all_affixes = affix_provider.get_affixes()
-        
-        for aid, adef in all_affixes.items():
-            # Check pools and ensure not already implicit
-            if (any(p in adef.affix_pools for p in pools) and aid not in implicits_raw):
-                candidates.append(adef)
-        
-        if candidates:
-            picks = []
-            if len(candidates) >= num_random:
-                picks = rng.sample(candidates, num_random)
-            else:
-                picks = candidates
-            
-            for affix in picks:
-                affix_roll_pct = rng.random() * (sim_quality_val / 100.0)
-                text = format_affix_line(affix, simulate_roll=True, quality=affix_roll_pct)
-                html_parts.append(f'<div style="color: #81C784; margin-bottom: 4px; font-size: 0.95rem;">● {text}</div>')
-        else:
-            html_parts.append('<div style="color: #555; font-style: italic;">No valid affixes found.</div>')
+    pools = []  # Initialize pools for footer display
+
+    if has_actual_affixes:
+        # For generated items, all affixes are already displayed above as implicits
+        html_parts.append('<div style="color: #555; font-style: italic;">(All affixes shown above)</div>')
     else:
-        html_parts.append('<div style="color: #555; font-style: italic;">None</div>')
+        # For template data, simulate random affixes
+        num_random = int(item_data.get("num_random_affixes", 0))
+
+        # Handle pools safely
+        raw_pools = str(item_data.get("affix_pools", ""))
+        if raw_pools == 'nan': raw_pools = ""
+        pools_raw = raw_pools.replace(";", "|").split("|")
+
+        pools = []  # Initialize outside conditional scope
+        if num_random > 0 and affix_provider:
+            pools = [p.strip() for p in pools_raw if p.strip()]
+            candidates = []
+            all_affixes = affix_provider.get_affixes()
+
+            for aid, adef in all_affixes.items():
+                # Check pools and ensure not already implicit
+                if (any(p in adef.affix_pools for p in pools) and aid not in implicits_raw):
+                    candidates.append(adef)
+
+            if candidates:
+                picks = []
+                if len(candidates) >= num_random:
+                    picks = rng.sample(candidates, num_random)
+                else:
+                    picks = candidates
+
+                for affix in picks:
+                    affix_roll_pct = rng.random() * (sim_quality_val / 100.0)
+                    text = format_affix_line(affix, simulate_roll=True, quality=affix_roll_pct)
+                    html_parts.append(f'<div style="color: #81C784; margin-bottom: 4px; font-size: 0.95rem;">● {text}</div>')
+            else:
+                html_parts.append('<div style="color: #555; font-style: italic;">No valid affixes found.</div>')
+        else:
+            html_parts.append('<div style="color: #555; font-style: italic;">None</div>')
 
     html_parts.append('<div style="height: 20px;"></div>')
 

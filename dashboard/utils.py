@@ -9,6 +9,7 @@ PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.append(str(PROJECT_ROOT))
 
 from src.data.game_data_provider import GameDataProvider
+from src.game.session import GameSession
 
 @st.cache_resource
 def get_game_data_provider():
@@ -23,6 +24,20 @@ def get_game_data_provider():
     except Exception as e:
         st.error(f"Failed to load game data: {e}")
         return None
+
+def get_game_session():
+    """
+    Returns the persistent GameSession instance.
+    Creates it if it doesn't exist.
+    """
+    if 'game_session' not in st.session_state:
+        provider = get_game_data_provider()
+        if provider is None:
+            st.error("Failed to initialize game data provider")
+            return None
+        st.session_state.game_session = GameSession(provider)
+
+    return st.session_state.game_session
 
 def load_css():
     """

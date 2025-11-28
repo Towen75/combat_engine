@@ -22,6 +22,7 @@ class LootHandler:
     def handle_death(self, event: EntityDeathEvent):
         """Handle entity death by rolling loot."""
         try:
+
             # 1. Retrieve the entity definition to find its loot table
             state = self.state_manager.get_state(event.entity_id)
             entity = state.entity
@@ -35,13 +36,12 @@ class LootHandler:
             if not items:
                 return # Table dropped nothing (empty roll)
 
-            logger.info(f"Entity '{entity.name}' dropped {len(items)} items.")
 
             # 3. Dispatch result
             drop_event = LootDroppedEvent(source_id=entity.id, items=items)
             self.event_bus.dispatch(drop_event)
 
-        except KeyError:
+        except KeyError as e:
             logger.warning(f"LootHandler: Could not find state for dead entity '{event.entity_id}'")
         except Exception as e:
             logger.error(f"LootHandler: Error generating loot for '{event.entity_id}': {e}", exc_info=True)

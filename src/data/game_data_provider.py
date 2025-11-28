@@ -17,7 +17,14 @@ logger = logging.getLogger(__name__)
 class GameDataProvider:
     """Singleton provider for all game data with validation and cross-references."""
 
-    def __init__(self):
+
+    def __init__(self, data_dir: Optional[str] = None) -> None:
+        """Initialize the provider. 
+        
+        Args:
+            data_dir: Optional path to data directory. If None, resolves automatically.
+        """
+        
         self._is_initialized = False
         # Initialize empty collections
         self.affixes = {}
@@ -28,6 +35,38 @@ class GameDataProvider:
         self.skills = {}
         self.loot_tables = []
         self.entities = {}
+        
+        from pathlib import Path
+        
+        self._is_initialized = False
+        
+        if data_dir:
+            self.data_dir = Path(data_dir)
+        else:
+            # Resolve absolute path relative to THIS file: src/data/ -> ../../data
+            self.data_dir = Path(__file__).resolve().parent.parent.parent / 'data'
+            
+        if not self._is_initialized:
+            self._load_and_validate_data()
+
+    def _load_and_validate_data(self) -> None:
+        """Load, hydrate, and validate game data from CSV files."""
+        try:
+            # Use self.data_dir instead of hardcoded relative path
+            # Convert Path object to string for the parser
+            raw_data = parse_all_csvs(str(self.data_dir))
+
+            # Stage 2: Hydrate raw dictionaries into strongly-typed dataclasses
+            self._hydrate_data(raw_data)
+
+            # Stage 3: Perform cross-reference validation
+            self._validate_cross_references()
+
+            self._is_initialized = True
+
+        except Exception as e:
+            logger.error("GameDataProvider: Failed to load and validate data: %s", e)
+            raise
 
     def initialize(self, data_path: str = "data") -> None:
         """Load and validate all game data."""
@@ -36,12 +75,10 @@ class GameDataProvider:
             return
 
         try:
-            logger.info(f"GameDataProvider: Loading data from {data_path}")
             raw_data = parse_all_csvs(data_path)
             self._hydrate_data(raw_data)
             self._validate_cross_references()
             self._is_initialized = True
-            logger.info("GameDataProvider: Initialization complete")
 
         except Exception as e:
             logger.error(f"GameDataProvider initialization failed: {e}")
@@ -49,7 +86,6 @@ class GameDataProvider:
 
     def _hydrate_data(self, raw_data: Dict[str, Any]) -> None:
         """Convert raw CSV data into strongly-typed models."""
-        logger.info("GameDataProvider: Hydrating data...")
 
         # Hydrate Affixes
         for affix_id, raw_affix in raw_data.get('affixes', {}).items():
@@ -74,18 +110,22 @@ class GameDataProvider:
         for skill_id, raw_skill in raw_data.get('skills', {}).items():
             self.skills[skill_id] = hydrate_skill_definition(raw_skill)
 
-        # Hydrate Loot Tables - convert list to typed objects
-        self.loot_tables = [hydrate_loot_entry(raw_entry) for raw_entry in raw_data.get('loot_tables', [])]
+        # Hydrate Loot Tables - convert list to dict keyed by table_id
+        loot_entries = [hydrate_loot_entry(raw_entry) for raw_entry in raw_data.get('loot_tables', [])]
+        self.loot_tables = {}
+        for entry in loot_entries:
+            if entry.table_id not in self.loot_tables:
+                # Create a mock table definition object with entries list
+                self.loot_tables[entry.table_id] = type('LootTableDef', (), {'entries': []})()
+            self.loot_tables[entry.table_id].entries.append(entry)
 
         # Hydrate Entities
         for ent_id, raw_ent in raw_data.get('entities', {}).items():
             self.entities[ent_id] = hydrate_entity_template(raw_ent)
 
-        logger.info(f"GameDataProvider hydrated: {len(self.affixes)} affixes, {len(self.items)} items, {len(self.entities)} entities")
 
     def _validate_cross_references(self) -> None:
         """Validate all cross-references between data types."""
-        logger.info("GameDataProvider: Validating cross-references...")
 
         self._validate_affix_pools()
         self._validate_items()
@@ -94,11 +134,9 @@ class GameDataProvider:
         # Loot table validation
         self._validate_loot_tables()
 
-        logger.info("GameDataProvider: Cross-reference validation complete")
 
     def _validate_affix_pools(self) -> None:
         """Validate affix pool references."""
-        logger.info("GameDataProvider: Validating affix pools...")
 
         for pool_id, rarities in self.affix_pools.items():
             for rarity, tiers in rarities.items():
@@ -115,7 +153,6 @@ class GameDataProvider:
 
     def _validate_items(self) -> None:
         """Validate item references."""
-        logger.info("GameDataProvider: Validating items...")
 
         for item_id, item in self.items.items():
             # Validate implicit affixes exist
@@ -130,7 +167,6 @@ class GameDataProvider:
 
     def _validate_entities(self) -> None:
         """Validate entity references (Equipment Pools and Loot Tables)."""
-        logger.info("GameDataProvider: Validating entities...")
 
         # Pre-calculate valid equipment targets
         # Valid targets are: 1. Actual Item IDs, 2. Affix Pools used by items
@@ -142,8 +178,7 @@ class GameDataProvider:
             # 1. Validate Loot Table
             if entity.loot_table_id:
                 # Check if loot table exists in the loaded loot tables
-                loot_table_ids = [lt.table_id for lt in self.loot_tables]
-                if entity.loot_table_id not in loot_table_ids:
+                if entity.loot_table_id not in self.loot_tables:
                     raise DataValidationError(
                         f"Entity '{ent_id}' references non-existent loot table '{entity.loot_table_id}'",
                         data_type="EntityTemplate",
@@ -161,7 +196,6 @@ class GameDataProvider:
 
     def _validate_loot_tables(self) -> None:
         """Validate loot table references and detect circular dependencies."""
-        logger.info("GameDataProvider: Validating loot tables...")
 
         # Create lookup for all item_ids
         item_ids = set(self.items.keys())
@@ -170,24 +204,23 @@ class GameDataProvider:
         table_deps = {}  # table_id -> set of referenced table_ids
 
         # First pass: build dependency graph and validate item references
-        for entry in self.loot_tables:
-            table_id = entry.table_id
-
-            if entry.entry_type == "Item":
-                # Validate item exists
-                if entry.entry_id not in item_ids:
-                    raise DataValidationError(
-                        f"Loot table '{table_id}' references non-existent Item '{entry.entry_id}'",
-                        data_type="LootTable",
-                        field_name="entry_id",
-                        invalid_id=entry.entry_id,
-                        suggestions=sorted(list(item_ids))
-                    )
-            elif entry.entry_type == "Table":
-                # Build dependency graph for cycle detection
-                if table_id not in table_deps:
-                    table_deps[table_id] = set()
-                table_deps[table_id].add(entry.entry_id)
+        for table_id, table_def in self.loot_tables.items():
+            for entry in table_def.entries:
+                if entry.entry_type == "Item":
+                    # Validate item exists
+                    if entry.entry_id not in item_ids:
+                        raise DataValidationError(
+                            f"Loot table '{table_id}' references non-existent Item '{entry.entry_id}'",
+                            data_type="LootTable",
+                            field_name="entry_id",
+                            invalid_id=entry.entry_id,
+                            suggestions=sorted(list(item_ids))
+                        )
+                elif entry.entry_type == "Table":
+                    # Build dependency graph for cycle detection
+                    if table_id not in table_deps:
+                        table_deps[table_id] = set()
+                    table_deps[table_id].add(entry.entry_id)
 
         # Second pass: detect circular dependencies
         def detect_cycle(node, visited, rec_stack):
@@ -229,6 +262,21 @@ class GameDataProvider:
         if entity_id not in self.entities:
             raise ValueError(f"Entity template '{entity_id}' not found")
         return self.entities[entity_id]
+    
+    def get_data_stats(self) -> Dict[str, int]:
+        """Get statistics about loaded data."""
+        # Use getattr to be safe if Phase B/C haven't fully merged yet
+        n_entities = len(getattr(self, 'entities', {}))
+        n_loot = len(getattr(self, 'loot_tables', {}))
+        
+        return {
+            'affixes': len(self.affixes),
+            'skills': len(self.skills),
+            'effects': len(self.effects),
+            'items': len(self.items),
+            'entities': n_entities,
+            'loot_tables': n_loot
+        }
 
     # Getter methods for API consistency
     def get_affix(self, affix_id: str) -> AffixDefinition:
@@ -280,13 +328,16 @@ class GameDataProvider:
         """Get all quality tiers."""
         return self.quality_tiers
 
-    def get_loot_tables(self) -> List[LootTableEntry]:
-        """Get all loot tables."""
+    def get_loot_tables(self) -> Dict[str, Any]:
+        """Get all loot tables as dict keyed by table_id."""
         return self.loot_tables
 
     def get_entities(self) -> Dict[str, EntityTemplate]:
         """Get all entity templates."""
         return self.entities
+    
+    def get_effects(self) -> Dict[str, EffectDefinition]:
+        return self.effects
 
     # Property getters for backward compatibility with existing tests
     @property
@@ -308,3 +359,13 @@ class GameDataProvider:
     def items(self, value: Dict[str, ItemTemplate]) -> None:
         """Set items dict (backward compatibility)."""
         self.__dict__['items'] = value
+
+    @property
+    def loot_tables(self) -> Dict[str, Any]:
+        """Access loot_tables dict (updated for new structure)."""
+        return self.__dict__.get('loot_tables', {})
+
+    @loot_tables.setter
+    def loot_tables(self, value) -> None:
+        """Set loot_tables (supports both old list and new dict formats)."""
+        self.__dict__['loot_tables'] = value

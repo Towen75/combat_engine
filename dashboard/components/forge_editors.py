@@ -45,6 +45,16 @@ def render_items_editor():
 
     df = pd.read_csv(path)
     
+    # Ensure Slot and Rarity are strings to satisfy SelectboxColumn
+    if "slot" in df.columns:
+        df["slot"] = df["slot"].astype(str)
+    if "rarity" in df.columns:
+        df["rarity"] = df["rarity"].astype(str)
+        
+    # Ensure numerical columns are numeric
+    if "num_random_affixes" in df.columns:
+        df["num_random_affixes"] = pd.to_numeric(df["num_random_affixes"], errors='coerce').fillna(0).astype(int)
+    
     # Get valid options from Enums
     slot_options = [s.value for s in ItemSlot]
     rarity_options = [r.value for r in Rarity]
@@ -139,6 +149,15 @@ def render_affixes_editor():
     
     path = get_csv_path("affixes.csv")
     df = pd.read_csv(path)
+    
+    if "base_value" in df.columns:
+        df["base_value"] = df["base_value"].astype(str)
+    
+    if "dual_stat" in df.columns:
+        df["dual_stat"] = df["dual_stat"].fillna(False).astype(bool)
+        
+    if "scaling_power" in df.columns:
+        df["scaling_power"] = df["scaling_power"].fillna(False).astype(bool)
     
     mod_types = [m.value for m in ModType]
     triggers = [t.value for t in TriggerEvent]

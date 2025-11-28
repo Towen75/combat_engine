@@ -309,16 +309,19 @@ class SimulationRunner:
         self.logger.log_loot_drop(event.source_id, event.items)
 
     def add_entity(self, entity: "Entity") -> None:
-        """Add an entity to the simulation.
-
-        Args:
-            entity: The entity to add
-        """
+        """Add an entity to the simulation."""
         if entity not in self.entities:
             self.entities.append(entity)
-            self.state_manager.register_entity(entity)
-            # Initialize attack timer based on attack speed (attacks per second)
-            self.attack_timers[entity.id] = 1.0 / entity.final_stats.attack_speed
+            
+            # --- THIS CHECK IS REQUIRED ---
+            # Check if already registered to prevent "Entity already registered" crash
+            if not self.state_manager.is_registered(entity.id):
+                self.state_manager.register_entity(entity)
+            # ------------------------------
+                
+            # Initialize attack timer
+            speed = max(0.1, entity.final_stats.attack_speed)
+            self.attack_timers[entity.id] = 1.0 / speed
 
     def remove_entity(self, entity_id: str) -> None:
         """Remove an entity from the simulation.
