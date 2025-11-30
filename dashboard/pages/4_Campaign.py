@@ -57,6 +57,247 @@ def main():
 
 # --- VIEWS ---
 
+def render_combat_log(session, provider):
+    """Render detailed combat log for weapon mechanics visibility.
+
+    Args:
+        session: GameSession with combat results
+        provider: GameDataProvider for entity/item lookups
+    """
+    # Access combat simulation results
+    report = session.last_report
+    if not report:
+        st.warning("No combat data available")
+        return
+
+    # Extract weapon mechanics events from CombatLogger.entries
+    skill_events = []
+    attack_events = []
+    effect_events = []
+    damage_events = []
+
+    # Parse CombatLogger entries for weapon-relevant events
+    logger_entries = report.get('logger_entries', [])
+    for entry in logger_entries:
+        event_type = entry.event_type
+
+        if event_type == 'hit':
+            # Regular attacks (basic attacks from both player and enemy)
+            attack_events.append({
+                'attacker_id': entry.attacker_id,
+                'defender_id': entry.defender_id,
+                'damage': entry.damage_dealt or 0,
+                'is_crit': entry.is_crit or False,
+                'timestamp': entry.timestamp
+            })
+
+        elif event_type == 'skill_use' or event_type == 'skill':
+            # Weapon skill usage - check if it's a special weapon skill vs basic attack
+            skill_obj = entry.metadata.get('skill')
+            skill_id = skill_obj.id if hasattr(skill_obj, 'id') else str(skill_obj)
+
+            # Only treat as special ability if it's not a basic attack skill
+            if not skill_id.startswith('attack_') or skill_id in ['attack_dual_slash', 'attack_heavy_swing', 'attack_cleave', 'attack_precise_shot']:
+                # This is a special weapon skill
+                skill_events.append({
+                    'entity_id': entry.attacker_id,
+                    'skill_name': skill_obj,
+                    'damage_breakdown': entry.metadata.get('damage_breakdown', []),
+                    'timestamp': entry.timestamp
+                })
+            else:
+                # This is a basic attack, treat it as a regular attack
+                attack_events.append({
+                    'attacker_id': entry.attacker_id,
+                    'defender_id': entry.defender_id,
+                    'damage': entry.metadata.get('damage_breakdown', [0])[0] if entry.metadata.get('damage_breakdown') else 0,
+                    'is_crit': False,  # Skills don't track crit separately in current implementation
+                    'timestamp': entry.timestamp
+                })
+
+        elif event_type == 'effect_apply':
+            # Status effect applications (bleed, poison, etc.)
+            effect_events.append({
+                'target_id': entry.defender_id,
+                'effect_name': entry.effect_name,
+                'stacks': entry.effect_stacks or 1,
+                'timestamp': entry.timestamp
+            })
+
+        elif event_type == 'damage_tick':
+            # Damage over time from effects
+            damage_events.append({
+                'target_id': entry.defender_id,
+                'effect_name': entry.effect_name,
+                'damage': entry.damage_dealt or 0,
+                'timestamp': entry.timestamp
+            })
+
+    # Display all attacks (regular attacks from both sides)
+    with st.expander("⚔️ Combat Attacks", expanded=True):
+        if attack_events:
+            # Sort by timestamp to show chronological order
+            attack_events.sort(key=lambda x: x.get('timestamp', 0))
+
+            for event in attack_events:
+                message = format_attack_message(event, provider)
+                st.write(f"⚔️ {message}")
+        else:
+            st.info("No attacks occurred in this combat")
+
+    # Display weapon skill usage (keeping for now as separate section)
+    with st.expander("🗡️ Special Abilities", expanded=False):
+        if skill_events:
+            for event in skill_events:
+                message = format_skill_message(event, provider)
+                st.write(f"🔸 {message}")
+        else:
+            st.info("No special abilities used in this combat")
+
+    # Display effect applications and damage
+    with st.expander("✨ Combat Effects", expanded=True):
+        if effect_events or damage_events:
+            # Show effect applications
+            for event in effect_events:
+                message = format_effect_message(event, provider)
+                st.write(f"💫 {message}")
+
+            # Show damage over time
+            dot_summary = {}
+            for event in damage_events:
+                key = f"{event['target_id']}_{event['effect_name']}"
+                if key not in dot_summary:
+                    dot_summary[key] = {
+                        'target_id': event['target_id'],
+                        'effect_name': event['effect_name'],
+                        'total_damage': 0,
+                        'ticks': 0
+                    }
+                dot_summary[key]['total_damage'] += event['damage']
+                dot_summary[key]['ticks'] += 1
+
+            for summary in dot_summary.values():
+                target_name = get_entity_display_name(summary['target_id'], provider)
+                effect_name = summary['effect_name'].replace('_', ' ').title()
+                st.write(f"💔 {target_name} took {summary['total_damage']:.1f} {effect_name} damage ({summary['ticks']} ticks)")
+        else:
+            st.info("No special effects triggered")
+
+    # Summary statistics
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        total_damage = report.get('damage_analysis', {}).get('summary', {}).get('total_damage', 0)
+        st.metric("Total Damage", f"{total_damage:.1f}")
+    with col2:
+        duration = report.get('performance_analysis', {}).get('simulation_duration', 0)
+        st.metric("Combat Duration", f"{duration:.2f}s")
+    with col3:
+        effect_count = len(effect_events)
+        st.metric("Effects Applied", effect_count)
+
+def format_attack_message(event, provider):
+    """Format a regular attack message.
+
+    Args:
+        event: Attack event data
+        provider: GameDataProvider for entity lookups
+
+    Returns:
+        Formatted message string
+    """
+    attacker_name = get_entity_display_name(event['attacker_id'], provider)
+    defender_name = get_entity_display_name(event['defender_id'], provider)
+    damage = int(event.get('damage', 0))
+    is_crit = event.get('is_crit', False)
+
+    if is_crit:
+        return f"{attacker_name} critically hits {defender_name} for {damage} damage!"
+    else:
+        return f"{attacker_name} attacks {defender_name} for {damage} damage"
+
+def format_skill_message(event, provider):
+    """Format a weapon skill usage message.
+
+    Args:
+        event: Skill event data
+        provider: GameDataProvider for entity lookups
+
+    Returns:
+        Formatted message string
+    """
+    entity_name = get_entity_display_name(event['entity_id'], provider)
+
+    # Handle skill name - could be string or skill object
+    skill_obj = event['skill_name']
+    if hasattr(skill_obj, 'name'):
+        # It's a skill object, extract the name
+        skill_name = skill_obj.name
+    else:
+        # It's already a string
+        skill_name = skill_obj or 'Unknown Skill'
+
+    damage_breakdown = event.get('damage_breakdown', [])
+
+    if damage_breakdown and len(damage_breakdown) > 1:
+        # Multi-hit skill (e.g., Dual Slash)
+        total = sum(damage_breakdown)
+        hits_str = " + ".join(f"{int(d)}" for d in damage_breakdown)
+        return f"{entity_name} {skill_name.lower()}s ({hits_str} = {int(total)} damage)"
+    elif damage_breakdown and len(damage_breakdown) == 1:
+        # Single-hit skill (e.g., Heavy Swing)
+        return f"{entity_name} {skill_name.lower()}s for {int(damage_breakdown[0])} damage"
+    else:
+        # No damage data available
+        return f"{entity_name} uses {skill_name}"
+
+def format_effect_message(event, provider):
+    """Format a status effect application message.
+
+    Args:
+        event: Effect event data
+        provider: GameDataProvider for entity lookups
+
+    Returns:
+        Formatted message string
+    """
+    target_name = get_entity_display_name(event['target_id'], provider)
+    effect_name = event['effect_name'].replace('_', ' ').title()
+    stacks = event.get('stacks', 1)
+
+    if stacks > 1:
+        return f"{effect_name} ({stacks} stacks) applied to {target_name}"
+    else:
+        return f"{effect_name} applied to {target_name}"
+
+def get_entity_display_name(entity_id, provider):
+    """Get display name for an entity ID.
+
+    Args:
+        entity_id: Entity identifier
+        provider: GameDataProvider for lookups
+
+    Returns:
+        Display name string
+    """
+    if not entity_id:
+        return "Unknown"
+
+    # Handle special cases
+    if entity_id == 'hero_player':
+        return "Hero"
+    elif entity_id.startswith('enemy_'):
+        # Try to get enemy name from template
+        try:
+            enemy_template = provider.entities.get(entity_id.replace('enemy_', ''))
+            if enemy_template:
+                return enemy_template.name
+        except:
+            pass
+        return "Enemy"
+
+    # Fallback
+    return entity_id.replace('_', ' ').title()
+
 def render_lobby(session, provider):
     st.markdown("### 🏰 Choose Your Hero")
 
@@ -104,57 +345,85 @@ def render_preparation(session, provider):
 
     # --- LEFT: HERO & SLOTS ---
     with col_hero:
-        st.markdown(f"### 🛡️ {player.name}")
+        # Generate equipment summary for header
+        weapon_name = "Unarmed"
+        weapon_skill = "Strike"
+        if player.equipment.get("Weapon"):
+            weapon_item = player.equipment["Weapon"]
+            weapon_name = weapon_item.name
+            # Try to get skill name from weapon template
+            try:
+                weapon_template = provider.items.get(weapon_item.template_id)
+                if weapon_template and hasattr(weapon_template, 'default_skill'):
+                    skill_id = weapon_template.default_skill
+                    skill = provider.skills.get(skill_id)
+                    if skill:
+                        weapon_skill = skill.name
+            except:
+                pass  # Fallback to default
 
-        # NEW: Display hero portrait
-        hero_template = provider.entities[player.template_id]
-        display_portrait(hero_template.portrait_path, width=128)
-
-        # Stats Bar
+        # Stats summary for header
         stats = player.final_stats
-        st.caption(f"❤️ HP: {stats.max_health:.0f} | ⚔️ DMG: {stats.base_damage:.1f} | 🛡️ ARM: {stats.armor:.0f} | ⚡ CRIT: {stats.crit_chance*100:.1f}%")
+        stats_summary = f"❤️{stats.max_health:.0f} ⚔️{stats.base_damage:.1f} 🛡️{stats.armor:.0f}"
 
-        st.markdown("#### Currently Equipped")
+        # Equipment expander with collapsed state by default
+        with st.expander(f"🛡️ Equipment - {player.name} ({weapon_name}: {weapon_skill}) | {stats_summary}", expanded=False):
+            st.markdown(f"### 🛡️ {player.name}")
 
-        # Render slots dynamically based on Enum
-        slots = [s for s in ItemSlot]
+            # NEW: Display hero portrait (with safe lookup)
+            hero_template = None
+            if player.template_id:
+                hero_template = provider.entities.get(player.template_id)
+            if hero_template:
+                display_portrait(hero_template.portrait_path, width=128)
+            else:
+                # Fallback if no template found - could use a default portrait
+                st.caption("Hero portrait not available")
 
-        for slot in slots:
-            slot_name = slot.value
-            equipped_item = player.equipment.get(slot_name)
+            # Stats Bar
+            st.caption(f"❤️ HP: {stats.max_health:.0f} | ⚔️ DMG: {stats.base_damage:.1f} | 🛡️ ARM: {stats.armor:.0f} | ⚡ CRIT: {stats.crit_chance*100:.1f}%")
 
-            with st.container(border=True):
-                c_info, c_btn = st.columns([3, 1])
-                with c_info:
-                    if equipped_item:
-                        # 1. Basic Info
-                        st.markdown(f"**{slot_name}:** {equipped_item.name} <span style='color:orange'>({equipped_item.rarity})</span>", unsafe_allow_html=True)
+            st.markdown("#### Currently Equipped")
 
-                        # 2. NEW: Display Affixes underneath
-                        if equipped_item.affixes:
-                            for affix in equipped_item.affixes:
-                                # Simple formatting
-                                val = affix.value
-                                # Handle multipliers for display
-                                if affix.mod_type == "multiplier":
-                                    val = f"{val * 100:.1f}%"
-                                else:
-                                    val = f"{val:.1f}"
-                                    
-                                st.caption(f"• {affix.description.replace('{value}', str(val))}")
-                        else:
-                            st.caption("• *No Affixes*")
-                    else:
-                        st.markdown(f"**{slot_name}:** *Empty*")
+            # Render slots dynamically based on Enum
+            slots = [s for s in ItemSlot]
 
-                with c_btn:
-                    if equipped_item:
-                        if st.button("Unequip", key=f"unequip_{slot_name}"):
-                            if session.inventory.is_full:
-                                st.error("Inventory Full!")
+            for slot in slots:
+                slot_name = slot.value
+                equipped_item = player.equipment.get(slot_name)
+
+                with st.container(border=True):
+                    c_info, c_btn = st.columns([3, 1])
+                    with c_info:
+                        if equipped_item:
+                            # 1. Basic Info
+                            st.markdown(f"**{slot_name}:** {equipped_item.name} <span style='color:orange'>({equipped_item.rarity})</span>", unsafe_allow_html=True)
+
+                            # 2. NEW: Display Affixes underneath
+                            if equipped_item.affixes:
+                                for affix in equipped_item.affixes:
+                                    # Simple formatting
+                                    val = affix.value
+                                    # Handle multipliers for display
+                                    if affix.mod_type == "multiplier":
+                                        val = f"{val * 100:.1f}%"
+                                    else:
+                                        val = f"{val:.1f}"
+
+                                    st.caption(f"• {affix.description.replace('{value}', str(val))}")
                             else:
-                                session.inventory.unequip_item(player, slot_name)
-                                st.rerun()
+                                st.caption("• *No Affixes*")
+                        else:
+                            st.markdown(f"**{slot_name}:** *Empty*")
+
+                    with c_btn:
+                        if equipped_item:
+                            if st.button("Unequip", key=f"unequip_{slot_name}"):
+                                if session.inventory.is_full:
+                                    st.error("Inventory Full!")
+                                else:
+                                    session.inventory.unequip_item(player, slot_name)
+                                    st.rerun()
 
     # --- RIGHT: INVENTORY & NEXT ENEMY ---
     with col_inv:
@@ -174,29 +443,48 @@ def render_preparation(session, provider):
         *{enemy_template.description}*
         """)
 
-        st.markdown("### 🎒 Backpack")
-        st.markdown(f"({session.inventory.count}/{session.inventory.capacity})")
+        # Generate backpack summary for header
+        inventory = session.inventory
+        capacity_text = f"{inventory.count}/{inventory.capacity}"
 
-        if session.inventory.count == 0:
-            st.info("Your inventory is empty.")
+        # Find notable items for header highlights
+        notable_items = []
+        if inventory.items:
+            for item in inventory.items:
+                if item.rarity in ['rare', 'epic']:
+                    notable_items.append(f"{item.name} ({item.rarity})")
+            notable_items = notable_items[:2]  # Limit to 2 highlights
 
-        # Render grid of items
-        items = session.inventory.items
+        header_text = f"🎒 Backpack ({capacity_text})"
+        if notable_items:
+            header_text += f" - {', '.join(notable_items)}"
+        elif inventory.count == 0:
+            header_text += " - Empty"
+        else:
+            header_text += f" - {inventory.count} items"
 
-        # Display in rows of 2
-        for i in range(0, len(items), 2):
-            cols = st.columns(2)
-            for j in range(2):
-                if i + j < len(items):
-                    item = items[i+j]
-                    with cols[j]:
-                        # Render visual card
-                        render_item_card(item.__dict__, provider)
+        # Backpack expander with expanded state by default (for new users)
+        with st.expander(header_text, expanded=True):
+            if inventory.count == 0:
+                st.info("Your inventory is empty.")
+            else:
+                # Render grid of items
+                items = inventory.items
 
-                        # Action Button
-                        if st.button("Equip", key=f"equip_{item.instance_id}", use_container_width=True):
-                            session.inventory.equip_item(player, item.instance_id)
-                            st.rerun()
+                # Display in rows of 2
+                for i in range(0, len(items), 2):
+                    cols = st.columns(2)
+                    for j in range(2):
+                        if i + j < len(items):
+                            item = items[i+j]
+                            with cols[j]:
+                                # Render visual card
+                                render_item_card(item.__dict__, provider)
+
+                                # Action Button
+                                if st.button("Equip", key=f"equip_{item.instance_id}", use_container_width=True):
+                                    session.inventory.equip_item(player, item.instance_id)
+                                    st.rerun()
 
     st.markdown("---")
     if st.button("🔴 FIGHT NEXT ENEMY", type="primary", use_container_width=True):
@@ -293,6 +581,11 @@ def render_victory(session):
     render_combat_stats(session)
     st.balloons()
 
+    # NEW: Add combat log display
+    provider = get_game_data_provider()
+    if provider:
+        render_combat_log(session, provider)
+
     st.markdown("### 💰 Loot Found")
 
     if not session.loot_stash:
@@ -324,6 +617,11 @@ def render_game_over(session):
     st.title("💀 GAME OVER")
     render_combat_stats(session)
     st.error(f"You fell at Stage {session.current_stage + 1}")
+
+    # NEW: Add combat log display
+    provider = get_game_data_provider()
+    if provider:
+        render_combat_log(session, provider)
 
     if st.button("Return to Lobby"):
         session.state = GameState.LOBBY

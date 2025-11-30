@@ -161,6 +161,21 @@ class Entity:
     def __str__(self) -> str:
         return self.name
 
+    def get_default_attack_skill_id(self) -> str:
+        """
+        Determine the skill ID to use for auto-attacks based on equipment.
+
+        Returns:
+            Skill ID string (e.g., 'attack_dagger', 'attack_unarmed')
+        """
+        # Note: Ensure ItemSlot.WEAPON value matches dictionary key ("Weapon" usually)
+        weapon = self.equipment.get("Weapon")
+        if weapon and hasattr(weapon, "default_attack_skill") and weapon.default_attack_skill:
+            return weapon.default_attack_skill
+
+        # Fallback
+        return "attack_unarmed"
+
     def get_crit_tier(self) -> int:
         """Get the critical hit tier based on entity rarity.
 
@@ -417,6 +432,7 @@ class Item:
     quality_tier: str
     quality_roll: int
     affixes: List[RolledAffix] = field(default_factory=list)
+    default_attack_skill: Optional[str] = None  # <--- NEW FIELD
 
 
 # Effect Configuration and Handler Data

@@ -48,12 +48,14 @@ families:
   - id: "greatsword"
     name: "Greatsword"
     slot: "Weapon"
+    default_attack_skill: "attack_greatsword" # <--- NEW
     implicits: ["melee_damage", "bleed_damage"]
     affix_pools: "warrior_pool|sword_pool|weapon_pool"
 
   - id: "battle_axe"
     name: "Battle Axe"
     slot: "Weapon"
+    default_attack_skill: "attack_axe" # <--- NEW
     implicits: ["melee_damage", "bleed_damage"]
     affix_pools: "warrior_pool|axe_pool|weapon_pool"
 
@@ -123,12 +125,14 @@ families:
   - id: "assassin_dagger"
     name: "Assassin Dagger"
     slot: "Weapon"
+    default_attack_skill: "attack_dagger" # <--- NEW
     implicits: ["crit_multiplier", "poison_damage"]
     affix_pools: "rogue_pool|dagger_pool|weapon_pool"
 
   - id: "recurve_bow"
     name: "Recurve Bow"
     slot: "Weapon"
+    default_attack_skill: "attack_bow" # <--- NEW
     implicits: ["crit_multiplier", "movement_speed"]
     affix_pools: "rogue_pool|bow_pool|weapon_pool"
 
@@ -204,12 +208,14 @@ families:
   - id: "arcane_staff"
     name: "Arcane Staff"
     slot: "Weapon"
+    default_attack_skill: "attack_staff" # <--- NEW
     implicits: ["spell_power", "mana_regeneration"]
     affix_pools: "caster_pool|staff_pool|weapon_pool"
 
   - id: "spellblade"
     name: "Spellblade"
     slot: "Weapon"
+    default_attack_skill: "attack_sword" # <--- NEW
     implicits: ["magic_penetration", "spell_crit_damage"]
     affix_pools: "caster_pool|sword_pool|weapon_pool"
 

@@ -1,3 +1,15 @@
+# [2.17.0](https://github.com/Towen75/combat_engine/compare/v2.16.0...v2.17.0) (2025-11-30)
+
+### Added
+
+* **feat:** implement UI improvements for weapon mechanics visibility
+  - Add collapsible equipment sections for better UX
+  - Implement detailed combat log display in victory/defeat screens
+  - Show weapon skills, multi-hit damage, and effect applications
+  - Fix data flow issues and combat log rendering
+  - Update item and skill data for weapon mechanics
+  - Enhance memory bank documentation
+
 # [2.16.0](https://github.com/Towen75/combat_engine/compare/v2.15.0...v2.16.0) (2025-11-28)
 
 ### Added
@@ -16,11 +28,53 @@
 
 
 
+# [2.15.0](https://github.com/Towen75/combat_engine/compare/v2.14.0...v2.15.0) (2025-11-28)
+
+### Added
+
+* **feat:** implement comprehensive dashboard fixes and loot system improvements
+  - Enhanced dashboard components with improved item card rendering and forge editors
+  - Extended campaign functionality with loot stash management and item equipping
+  - Improved simulation integration with comprehensive reporting and analytics
+  - Added dashboard utility functions for game session management and CSS theming
+
+### Technical Details
+- **Dashboard Components**: Enhanced item_card.py with affix display and forge_editors.py with UI improvements
+- **Campaign System**: Extended 4_Campaign.py with loot management and equipment functionality
+- **Simulation Integration**: Improved run_simulation.py with advanced reporting capabilities
+
 # [2.14.0](https://github.com/Towen75/combat_engine/compare/v2.13.0...v2.14.0) (2025-11-26)
 
+### Added
 
+* **feat:** implement complete stock content archetypes system
+  - Comprehensive content library with archetypes, affixes, and items
+  - Extended blueprints system with YAML configurations for game content
+  - Enhanced data pipeline with additional CSV files for content management
+  - Added Gemini AI integration documentation for content generation
+  - Improved affix pools and quality tiers for balanced gameplay
+
+### Technical Details
+- **Content System**: Added 190+ affix pool entries and 265+ item configurations
+- **Data Pipeline**: Enhanced CSV processing with validation and cross-references
+- **Blueprint System**: YAML-based configuration for scalable content creation
+- **Quality Assurance**: Comprehensive testing for content integrity and balance
 
 # [2.13.0](https://github.com/Towen75/combat_engine/compare/v2.12.0...v2.13.0) (2025-11-25)
+
+### Added
+
+* **feat:** implement data-driven entity creation and loot validation
+  - Complete entity factory system with template-based entity creation
+  - Enhanced loot validation with cross-reference checking and cycle detection
+  - Improved simulation runner with entity management and state tracking
+  - Extended documentation with detailed developer handoffs and work items
+
+### Technical Details
+- **Entity Factory**: Template-based entity creation with equipment generation
+- **Loot Validation**: Cycle detection and cross-reference validation for loot tables
+- **Simulation Integration**: Enhanced runner with proper entity state management
+- **Documentation**: Comprehensive developer handoffs and architectural documentation
 
 
 

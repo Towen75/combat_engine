@@ -18,7 +18,9 @@ if TYPE_CHECKING:
 from src.core.events import OnHitEvent, DamageTickEvent
 from src.core.loot_manager import LootManager
 from src.handlers.loot_handler import LootHandler
-from src.core.events import LootDroppedEvent # Add to imports
+from src.core.events import LootDroppedEvent, OnSkillUsedEvent
+from src.data.game_data_provider import GameDataProvider
+from src.core.factory import create_runtime_skill
 
 
 @dataclass
@@ -142,6 +144,47 @@ class CombatLogger:
         )
         self.entries.append(entry)
 
+    def log_skill_use(self, entity_id: str, skill_name: str, damage_breakdown: Optional[List[float]] = None) -> None:
+        """Log skill usage with enhanced detail for weapon mechanics.
+
+        Args:
+            entity_id: ID of the entity using the skill
+            skill_name: Name of the skill used
+            damage_breakdown: Individual hit damages for multi-hit skills
+        """
+        metadata: Dict[str, Any] = {"skill": skill_name}
+        if damage_breakdown:
+            metadata["hits"] = len(damage_breakdown)
+            metadata["total_damage"] = sum(damage_breakdown)
+            if len(damage_breakdown) > 1:
+                metadata["damage_breakdown"] = damage_breakdown
+
+        entry = CombatLogEntry(
+            timestamp=time.time(),
+            event_type="skill_use",
+            attacker_id=entity_id,
+            metadata=metadata
+        )
+        self.entries.append(entry)
+
+    def format_skill_message(self, attacker_name: str, skill_name: str, damage_breakdown: List[float]) -> str:
+        """Format a human-readable skill usage message.
+
+        Args:
+            attacker_name: Display name of attacker
+            skill_name: Name of the skill used
+            damage_breakdown: Individual hit damages
+
+        Returns:
+            Formatted combat log message
+        """
+        if len(damage_breakdown) == 1:
+            return f"{attacker_name} {skill_name.lower()}s for {damage_breakdown[0]} damage"
+        else:
+            total = sum(damage_breakdown)
+            hits_str = " + ".join(str(int(d)) for d in damage_breakdown)
+            return f"{attacker_name} {skill_name.lower()}s ({hits_str} = {int(total)} damage)"
+
     def get_damage_breakdown(self) -> Dict[str, Dict[str, float]]:
         """Get a breakdown of damage dealt by each attacker.
 
@@ -243,7 +286,7 @@ class SimulationRunner:
     Manages the simulation loop, entity attacks, and effect processing.
     """
 
-    def __init__(self, combat_engine, state_manager, event_bus, rng: RNG, logger: Optional[CombatLogger] = None, loot_manager: Optional[LootManager] = None):
+    def __init__(self, combat_engine, state_manager, event_bus, rng: RNG, provider: GameDataProvider, logger: Optional[CombatLogger] = None, loot_manager: Optional[LootManager] = None):
         """Initialize the simulation runner.
 
         Args:
@@ -252,6 +295,7 @@ class SimulationRunner:
             event_bus: The event bus for dispatching events
             rng: RNG for random target selection and other behaviors.
                  Must not be None - all randomness must be explicit.
+            provider: GameDataProvider for accessing skill definitions
             logger: Optional combat logger for recording events
             loot_manager: Optional loot manager for handling loot drops
 
@@ -263,6 +307,7 @@ class SimulationRunner:
         self.state_manager = state_manager
         self.event_bus = event_bus
         self.rng = rng
+        self.provider = provider  # <--- NEW FIELD
         self.logger = logger or CombatLogger()
         self.loot_manager = loot_manager
 
@@ -284,6 +329,7 @@ class SimulationRunner:
         if self.logger:
             self.event_bus.subscribe(OnHitEvent, self._log_hit_event)
             self.event_bus.subscribe(DamageTickEvent, self._log_damage_tick_event)
+            self.event_bus.subscribe(OnSkillUsedEvent, self._log_skill_event)
             if hasattr(self.logger, 'log_loot_drop'):
                 self.event_bus.subscribe(LootDroppedEvent, self._log_loot_event)
 
@@ -307,6 +353,10 @@ class SimulationRunner:
     def _log_loot_event(self, event) -> None:
         """Log a loot drop event."""
         self.logger.log_loot_drop(event.source_id, event.items)
+
+    def _log_skill_event(self, event) -> None:
+        """Log a skill use event."""
+        self.logger.log_skill_use(event.entity.id, event.skill_id)
 
     def add_entity(self, entity: "Entity") -> None:
         """Add an entity to the simulation."""
@@ -375,26 +425,29 @@ class SimulationRunner:
                 if self.attack_timers[entity.id] <= 0:
                     target = self.get_random_target(entity.id)
                     if target:
-                        # Perform attack using the combat engine
-                        hit_context = self.combat_engine.resolve_hit(entity, target, self.state_manager)
+                        # --- DYNAMIC SKILL LOGIC ---
+                        # 1. Determine Skill ID from Weapon
+                        skill_id = entity.get_default_attack_skill_id()
 
-                        # Apply damage
-                        damage = hit_context.final_damage
-                        self.state_manager.apply_damage(target.id, damage)
+                        # 2. Look up definition
+                        skill_def = self.provider.skills.get(skill_id)
 
-                        # Dispatch events
-                        from src.core.events import OnHitEvent, OnCritEvent
-                        hit_event = OnHitEvent(
-                            attacker=entity,
-                            defender=target,
-                            damage_dealt=damage,
-                            is_crit=hit_context.was_crit
-                        )
-                        self.event_bus.dispatch(hit_event)
+                        # 3. Fallback Logic
+                        if not skill_def:
+                            # Try generic unarmed
+                            skill_def = self.provider.skills.get("attack_unarmed")
 
-                        if hit_context.was_crit:
-                            crit_event = OnCritEvent(hit_event=hit_event)
-                            self.event_bus.dispatch(crit_event)
+                        # 4. Create Runtime Skill
+                        if skill_def:
+                            runtime_skill = create_runtime_skill(skill_def)
+                        else:
+                            # Emergency fallback if data is totally missing
+                            from src.core.skills import Skill
+                            runtime_skill = Skill(id="fallback", name="Basic Attack")
+
+                        # 5. Execute Skill via Engine
+                        self.combat_engine.process_skill_use(entity, target, runtime_skill, self.event_bus, self.state_manager)
+                        # ---------------------------
 
                         # Reset attack timer
                         self.attack_timers[entity.id] = 1.0 / entity.final_stats.attack_speed
@@ -434,6 +487,7 @@ class SimulationRunner:
             "damage_breakdown": self.logger.get_damage_breakdown(),
             "effect_uptime": self.logger.get_effect_uptime(),
             "loot_analysis": self.logger.get_loot_report(),
+            "logger_entries": self.logger.entries,  # Include detailed combat log entries for UI display
             "final_entity_states": {
                 entity_id: {
                     "health": state.current_health,

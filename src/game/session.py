@@ -138,7 +138,7 @@ class GameSession:
             from src.handlers.loot_handler import LootHandler
             loot_handler = LootHandler(event_bus, state_manager, loot_manager)
 
-            runner = SimulationRunner(combat_engine, state_manager, event_bus, rng)
+            runner = SimulationRunner(combat_engine, state_manager, event_bus, rng, provider=self.provider)
 
             # Add entities to runner (Vital for attack timers)
             runner.entities.append(self.player)

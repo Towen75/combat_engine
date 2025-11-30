@@ -27,4 +27,5 @@ class Skill:
     hits: int = 1
     cooldown: float = 0.0  # Cooldown in seconds
     resource_cost: float = 0.0  # Resource cost to use skill
+    damage_multiplier: float = 1.0  # <--- NEW FIELD
     triggers: List[Trigger] = field(default_factory=list)

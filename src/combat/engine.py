@@ -325,7 +325,9 @@ class CombatEngine:
             # 1. Resolve the damage for a single hit
             hit_context = self.resolve_hit(attacker, defender, state_manager)
             hit_results.append(hit_context)
-            damage = hit_context.final_damage
+
+            # Apply Skill Multiplier
+            damage = hit_context.final_damage * skill.damage_multiplier # <--- NEW
 
             # 2. Create actions for damage application and event dispatching
             actions.append(ApplyDamageAction(

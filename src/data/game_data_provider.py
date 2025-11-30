@@ -131,6 +131,18 @@ class GameDataProvider:
         self._validate_items()
         self._validate_entities()
 
+        # NEW: Validate Item -> Skill reference
+        for item_id, item in self.items.items():
+            if item.default_attack_skill:
+                if item.default_attack_skill not in self.skills:
+                    raise DataValidationError(
+                        f"Item '{item_id}' references non-existent default_attack_skill '{item.default_attack_skill}'",
+                        data_type="ItemTemplate",
+                        field_name="default_attack_skill",
+                        invalid_id=item.default_attack_skill,
+                        suggestions=list(self.skills.keys())
+                    )
+
         # Loot table validation
         self._validate_loot_tables()
 

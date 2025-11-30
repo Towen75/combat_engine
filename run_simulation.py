@@ -73,7 +73,7 @@ def setup_simulation(rng: RNG):
     entity_factory = EntityFactory(provider, item_gen, rng)
 
     # Create simulation runner
-    runner = SimulationRunner(combat_engine, state_manager, event_bus, rng)
+    runner = SimulationRunner(combat_engine, state_manager, event_bus, rng, provider=provider)
 
     return runner, entity_factory
 

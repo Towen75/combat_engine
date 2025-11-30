@@ -24,7 +24,7 @@ def validate_content():
         from src.data.game_data_provider import GameDataProvider
 
         # Force a reload/fresh load
-        provider = GameDataProvider(data_dir=DATA_DIR)
+        provider = GameDataProvider(data_dir=str(DATA_DIR))
         # If the singleton was already initialized in memory, force re-init logic isn't exposed easily
         # but instantiating it triggers _load_and_validate_data if not initialized.
         # Better: rely on the fact that this script runs in a fresh process usually.
@@ -165,12 +165,14 @@ def main(generate_affixes_only=False, run_validation=False):
     item_rows = []
     item_headers = [
         "item_id", "name", "slot", "rarity",
-        "affix_pools", "implicit_affixes", "num_random_affixes"
+        "affix_pools", "implicit_affixes", "num_random_affixes",
+        "default_attack_skill" # <--- NEW HEADER
     ]
 
     for fam in families:
         base_id = fam["id"]
         implicits = fam.get("implicits", [])
+        default_skill = fam.get("default_attack_skill", "") # <--- READ FROM BLUEPRINT
 
         for rarity in rarities:
             # item_id: longsword_rare
@@ -199,7 +201,8 @@ def main(generate_affixes_only=False, run_validation=False):
                 "rarity": rarity,
                 "affix_pools": fam["affix_pools"],
                 "implicit_affixes": "|".join(item_implicits),
-                "num_random_affixes": slots[rarity]
+                "num_random_affixes": slots[rarity],
+                "default_attack_skill": default_skill # <--- WRITE TO ROW
             }
             item_rows.append(row)
 

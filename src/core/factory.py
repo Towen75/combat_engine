@@ -5,8 +5,45 @@ from src.core.models import Entity, EntityStats, Item
 from src.core.rng import RNG
 from src.data.game_data_provider import GameDataProvider
 from src.utils.item_generator import ItemGenerator
+from src.data.typed_models import SkillDefinition
+from src.core.skills import Skill, Trigger
 
 logger = logging.getLogger(__name__)
+
+def create_runtime_skill(definition: SkillDefinition) -> Skill:
+    """
+    Convert a data SkillDefinition into a runtime Skill object.
+    Includes robust trigger hydration.
+    """
+    triggers = []
+    if definition.trigger_event and definition.trigger_result:
+        # Construct the result dictionary expected by EffectHandlers
+        result_data = {"apply_debuff": definition.trigger_result}
+
+        # Add optional fields if present
+        if definition.trigger_duration > 0:
+            result_data["duration"] = definition.trigger_duration
+
+        if definition.stacks_max > 1:
+            result_data["stacks"] = 1 # Usually apply 1 stack per hit, capping at stacks_max via logic elsewhere
+            result_data["stacks_max"] = definition.stacks_max
+
+        triggers.append(Trigger(
+            event=definition.trigger_event.value,
+            check={"proc_rate": definition.proc_rate},
+            result=result_data
+        ))
+
+    return Skill(
+        id=definition.skill_id,
+        name=definition.name,
+        damage_type=definition.damage_type.value,
+        hits=definition.hits,
+        cooldown=definition.cooldown,
+        resource_cost=definition.resource_cost,
+        damage_multiplier=definition.damage_multiplier,
+        triggers=triggers
+    )
 
 class EntityFactory:
     """

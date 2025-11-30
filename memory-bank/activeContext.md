@@ -2,28 +2,25 @@
 
 ## Current Work Focus
 
-### Primary Active Task: Phase B - Data-Driven Entities (COMPLETE)
+### Primary Active Task: UI Improvements Suite (COMPLETE)
 
 **Status**: Fully Implemented and Verified
-**Results**: Complete end-to-end data-driven entity system from CSV templates to equipped entities
-- **Phase B1**: Entity Data Structure (CSV schema, EntityTemplate model, GameDataProvider integration)
-- **Phase B2**: Entity Factory (EntityFactory class, equipment pool resolution, deterministic RNG)
-- **Integration**: Data-driven entity spawning in simulation with procedural equipment
-- **Testing**: 9 comprehensive unit tests covering all EntityFactory functionality
+**Results**: Complete UI enhancement suite making weapon mechanics visible and accessible
+- **UI-1: Collapsible Equipment Sections**: Equipment/backpack sections collapse to show key info, eliminating scrolling
+- **UI-2: Combat Log Display**: Detailed combat logs show weapon skills, multi-hit damage, and effects in victory/defeat screens
+- **Impact**: Weapon mechanics are now discoverable and testable through improved UX
 
-### Secondary Active Task: Phase C - Deterministic Loot System (COMPLETE)
+### Next Phase Planning: UI-3 User Experience Polish
 
-**Status**: Fully Implemented and Verified
-**Results**: Complete end-to-end loot system from CSV tables to simulation integration
-- **Phase C1**: Loot data structures and validation (Weighted tables, entry types, CSV parsing)
-- **Phase C2**: Loot resolution engine (LootManager with safety limits, recursion safety)
-- **Phase C3**: Loot simulation integration (Event-driven death→loot→logging pipeline)
+**Status**: Ready for Implementation
+**Objective**: Elevate UI from functional to delightful with smooth transitions, weapon intelligence, and contextual guidance
+**Dependencies**: UI-1 and UI-2 completed
 
-### Next Phase Planning: Phase D - Advanced Simulation Tools
+### Future Phase: Crafting & Progression System
 
-**Status**: Planning / Scheduled
-**Objective**: Implement advanced simulation tools for comprehensive balance validation
-**Dependencies**: Entity & loot systems operational
+**Status**: Planned / Scheduled
+**Objective**: Implement economic loop with item salvaging, upgrading, and XP progression
+**Dependencies**: UI improvements operational
 
 ## Recent Changes
 
@@ -68,7 +65,23 @@
 
 ## Next Steps Priority Queue
 
-### Immediate Next (Phase 3: Finalization & Professionalization)
+### Immediate Next: UI-3 User Experience Polish
+
+**Priority**: HIGH - Completes weapon mechanics visibility suite
+**Work Item**: `docs/work_items/WI_UI_3_User_Experience_Polish.md`
+**Objective**: Transform UI from functional to delightful with smooth transitions and weapon intelligence
+**Scope**: Intelligent quick-views, state transitions, weapon comparison analytics
+**Timeline**: Ready for implementation
+
+### Future Next: Crafting & Progression System
+
+**Priority**: MEDIUM - Implements economic loop
+**Feature Plan**: `docs/feature_plans/FP_Crafting_Progression.md`
+**Objective**: Add item salvaging, upgrading, and XP progression
+**Scope**: Currency system, crafting mechanics, entity leveling
+**Dependencies**: UI improvements operational
+
+### Long-term Goals (Phase 3: Finalization & Professionalization)
 
 1. **PR-P3S6 Implementation**: Project restructuring and tooling integration
    - Repository restructuring with proper tooling (e.g., black/isort/mypy/pre-commit integration)

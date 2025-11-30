@@ -160,6 +160,7 @@ ITEM_SCHEMA = {
         "affix_pools": affix_pools_validator,
         "implicit_affixes": affix_pools_validator,  # Same validation as affix_pools
         "num_random_affixes": lambda x: int_validator(x) if x and x.strip() else 0,
+        "default_attack_skill": str_validator, # <--- NEW
     },
 }
 
@@ -209,6 +210,7 @@ SKILLS_SCHEMA = {
         "skill_id": str_validator,
         "name": str_validator,
         "damage_type": str_validator,
+        "damage_multiplier": lambda x: float_validator(x) if x else 1.0, # <--- NEW
         "hits": lambda x: int_validator(x) if x and x.strip() else 1,
         "description": str_validator,
         "resource_cost": lambda x: non_negative_float_validator(x) if x and x.strip() else 0.0,

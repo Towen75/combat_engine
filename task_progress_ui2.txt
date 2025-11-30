@@ -1,0 +1,11 @@
+- [x] A. Add render_combat_log function
+- [x] B. Add helper functions (format_skill_message, format_effect_message, get_entity_display_name)
+- [x] C. Integrate into victory screen
+- [x] D. Integrate into game over screen
+- [x] Fix data flow issue: Add logger_entries to simulation report
+- [x] Fix UI data access: Read from dictionary key instead of attribute
+- [x] Fix CombatLogEntry attribute access (use entry.event_type, not entry.get())
+- [x] Fix duplicate skills in both sections (separate attack_events from skill_events)
+- [x] Fix skill object display (extract name from skill objects instead of showing full repr)
+- [x] Fix basic attacks vs special abilities categorization
+- [x] Test content build validation

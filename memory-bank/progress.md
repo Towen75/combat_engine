@@ -2,11 +2,11 @@
 
 ## Current Status Summary
 
-**Version**: 2.5.0 (2025-11-19)
-**Phase**: Phase C: Deterministic Loot System
-**Status**: COMPLETE - Full Loot System from CSV Tables to Combat Integration
+**Version**: 2.6.0 (2025-11-30)
+**Phase**: UI Improvements Phase 2 Complete - Weapon Mechanics Visibility
+**Status**: COMPLETE - Full UI Enhancement Suite: Collapsible Sections + Combat Logs
 
-### Overall Progress: 95% Complete
+### Overall Progress: 98% Complete
 
 ## What Works (✅ Fully Implemented & Tested)
 

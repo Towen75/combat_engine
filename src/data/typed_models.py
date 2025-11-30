@@ -163,6 +163,7 @@ class ItemTemplate:
     affix_pools: List[str] = field(default_factory=list)
     implicit_affixes: List[str] = field(default_factory=list)
     num_random_affixes: int = 0
+    default_attack_skill: Optional[str] = None # <--- NEW
 
     def __post_init__(self):
         if not self.item_id:
@@ -222,6 +223,7 @@ class SkillDefinition:
     skill_id: str
     name: str
     damage_type: DamageType
+    damage_multiplier: float = 1.0 # <--- NEW
     hits: int = 1
     description: str = ""
     resource_cost: float = 0.0
@@ -390,7 +392,8 @@ def hydrate_item_template(raw_data: Dict[str, Any]) -> ItemTemplate:
         rarity=normalize_enum(Rarity, raw_data['rarity']),
         affix_pools=parse_affix_pools(raw_data.get('affix_pools', '')),
         implicit_affixes=implicit_affixes,
-        num_random_affixes=int(raw_data['num_random_affixes']) if raw_data.get('num_random_affixes') else 0
+        num_random_affixes=int(raw_data['num_random_affixes']) if raw_data.get('num_random_affixes') else 0,
+        default_attack_skill=raw_data.get('default_attack_skill') or None # <--- NEW
     )
 
 def hydrate_quality_tier(raw_data: Dict[str, Any]) -> QualityTier:
@@ -427,6 +430,7 @@ def hydrate_skill_definition(raw_data: Dict[str, Any]) -> SkillDefinition:
         skill_id=raw_data['skill_id'],
         name=raw_data['name'],
         damage_type=normalize_enum(DamageType, raw_data['damage_type']),
+        damage_multiplier=float(raw_data.get('damage_multiplier', 1.0)), # <--- NEW
         hits=int(raw_data['hits']) if raw_data.get('hits') else 1,
         description=raw_data.get('description', ''),
         resource_cost=float(raw_data['resource_cost']) if raw_data.get('resource_cost') else 0.0,
