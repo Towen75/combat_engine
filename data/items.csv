@@ -1,14 +1,14 @@
 item_id,name,slot,rarity,affix_pools,implicit_affixes,num_random_affixes,default_attack_skill
-longsword_common,Common Longsword,Weapon,Common,sword_pool,flat_dmg_common,0,
-longsword_uncommon,Uncommon Longsword,Weapon,Uncommon,sword_pool,flat_dmg_uncommon,1,
-longsword_rare,Rare Longsword,Weapon,Rare,sword_pool,flat_dmg_rare,2,
-longsword_epic,Epic Longsword,Weapon,Epic,sword_pool,flat_dmg_epic,3,
-longsword_legendary,Legendary Longsword,Weapon,Legendary,sword_pool,flat_dmg_epic|crit_chance_epic,4,
-Battle_Axe_common,Common Battle Axe,Weapon,Common,weapon_pool,flat_dmg_common,0,
-Battle_Axe_uncommon,Uncommon Battle Axe,Weapon,Uncommon,weapon_pool,flat_dmg_uncommon,1,
-Battle_Axe_rare,Rare Battle Axe,Weapon,Rare,weapon_pool,flat_dmg_rare,2,
-Battle_Axe_epic,Epic Battle Axe,Weapon,Epic,weapon_pool,flat_dmg_epic,3,
-Battle_Axe_legendary,Legendary Battle Axe,Weapon,Legendary,weapon_pool,flat_dmg_epic|flat_crit_dmg_epic,4,
+longsword_common,Common Longsword,Weapon,Common,sword_pool,flat_dmg_common,0,attack_sword
+longsword_uncommon,Uncommon Longsword,Weapon,Uncommon,sword_pool,flat_dmg_uncommon,1,attack_sword
+longsword_rare,Rare Longsword,Weapon,Rare,sword_pool,flat_dmg_rare,2,attack_sword
+longsword_epic,Epic Longsword,Weapon,Epic,sword_pool,flat_dmg_epic,3,attack_sword
+longsword_legendary,Legendary Longsword,Weapon,Legendary,sword_pool,flat_dmg_epic|crit_chance_epic,4,attack_sword
+Battle_Axe_common,Common Battle Axe,Weapon,Common,weapon_pool,flat_dmg_common,0,attack_axe
+Battle_Axe_uncommon,Uncommon Battle Axe,Weapon,Uncommon,weapon_pool,flat_dmg_uncommon,1,attack_axe
+Battle_Axe_rare,Rare Battle Axe,Weapon,Rare,weapon_pool,flat_dmg_rare,2,attack_axe
+Battle_Axe_epic,Epic Battle Axe,Weapon,Epic,weapon_pool,flat_dmg_epic,3,attack_axe
+Battle_Axe_legendary,Legendary Battle Axe,Weapon,Legendary,weapon_pool,flat_dmg_epic|flat_crit_dmg_epic,4,attack_axe
 iron_plate_common,Common Iron Plate,Chest,Common,armor_pool,flat_health_common,0,
 iron_plate_uncommon,Uncommon Iron Plate,Chest,Uncommon,armor_pool,flat_health_uncommon,1,
 iron_plate_rare,Rare Iron Plate,Chest,Rare,armor_pool,flat_health_rare,2,

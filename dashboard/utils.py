@@ -395,3 +395,137 @@ def get_portrait_cache_key(entity_id: str) -> str:
         Cache key string
     """
     return f"portrait_{entity_id}"
+
+# ========== UI Intelligence Utilities ==========
+
+import time
+import streamlit as st
+from typing import Dict, Any, List
+
+def generate_equipment_quickview(player, provider) -> Dict[str, Any]:
+    """Generate intelligent equipment summary for collapsed header."""
+
+    weapon = player.equipment.get("Weapon")
+    if weapon:
+        weapon_template = provider.items.get(weapon.base_id)
+        skill_id = getattr(weapon_template, 'default_attack_skill', None)
+
+        if skill_id:
+            skill = provider.skills.get(skill_id)
+            weapon_info = {
+                'name': weapon.name,
+                'skill_name': skill.name if skill else 'Basic Attack',
+                'damage_type': skill.damage_type if skill else 'Physical',
+                'hits': skill.hits if skill else 1,
+                'effects': []
+            }
+
+            # Extract weapon effects
+            if hasattr(skill, 'trigger_result') and skill.trigger_result:
+                weapon_info['effects'].append(skill.trigger_result)
+
+            return weapon_info
+
+    return {'name': 'Unarmed', 'skill_name': 'Strike', 'damage_type': 'Physical', 'hits': 1, 'effects': []}
+
+def generate_backpack_quickview(inventory, provider) -> Dict[str, Any]:
+    """Generate intelligent backpack summary for collapsed header."""
+
+    items = inventory.items
+    if not items:
+        return {'status': 'empty', 'highlights': []}
+
+    # Analyze item quality distribution
+    quality_counts = {}
+    highlights = []
+
+    for item in items:
+        quality = item.quality_tier
+        quality_counts[quality] = quality_counts.get(quality, 0) + 1
+
+        # Find notable items
+        if hasattr(item, 'rarity') and item.rarity in ['rare', 'epic', 'legendary']:
+            highlights.append(f"{item.name} ({item.rarity})")
+
+    return {
+        'status': f"{len(items)}/{inventory.capacity} items",
+        'quality_dist': quality_counts,
+        'highlights': highlights[:3]  # Top 3 notable items
+    }
+
+def create_smooth_transition(from_state: str, to_state: str, session):
+    """Create smooth UI transitions between game states."""
+
+    transition_config = {
+        ('preparation', 'combat'): {
+            'message': "⚔️ Entering Combat...",
+            'preview_func': lambda: generate_weapon_preview(session.player),
+            'duration': 2.0
+        },
+        ('combat', 'victory'): {
+            'message': "🎉 Victory Achieved!",
+            'celebration': True,
+            'duration': 3.0
+        },
+        ('combat', 'game_over'): {
+            'message': "💀 Combat Ended...",
+            'reflection': True,
+            'duration': 2.0
+        }
+    }
+
+    config = transition_config.get((from_state, to_state))
+    if config:
+        with st.empty():
+            progress_bar = st.progress(0)
+            status_text = st.empty()
+
+            steps = 100
+            for i in range(steps + 1):
+                progress_bar.progress(i)
+
+                if i < 30:
+                    status_text.markdown(f"## {config['message']}")
+                elif i < 70 and 'preview_func' in config:
+                    preview = config['preview_func']()
+                    status_text.markdown(f"## {config['message']}\n{preview}")
+                else:
+                    status_text.markdown("## Loading results...")
+
+                time.sleep(config['duration'] / steps)
+
+            progress_bar.empty()
+            status_text.empty()
+
+def generate_weapon_preview(player) -> str:
+    """Generate weapon preview for combat transition."""
+    weapon = player.equipment.get("Weapon")
+    if weapon:
+        return f"**Weapon:** {weapon.name}\n*Prepare for battle!* ⚔️"
+    return "*Unarmed combat initiated!* 👊"
+
+def analyze_weapon_performance(current_fight, previous_fights) -> List[str]:
+    """Analyze weapon performance across fights for comparison insights."""
+
+    if not previous_fights:
+        return ["First fight - establishing weapon baseline!"]
+
+    insights = []
+
+    # Extract basic metrics from simulation reports
+    def get_player_hits(report):
+        return report.get('damage_breakdown', {}).get('hero_player', {}).get('hits', 0)
+
+    current_hits = get_player_hits(current_fight)
+    avg_prev_hits = sum(get_player_hits(fight) for fight in previous_fights) / len(previous_fights)
+
+    # Hit count analysis
+    if current_hits > avg_prev_hits * 1.5:
+        insights.append("🎯 **High hit count!** Your current weapon excels at multi-strikes.")
+    elif current_hits < avg_prev_hits * 0.7:
+        insights.append("🎯 **Lower hit count.** Consider weapons with higher attack speed.")
+
+    # Placeholder for more advanced analysis
+    insights.append("📊 Weapon performance analysis is being enhanced...")
+
+    return insights if insights else ["Weapon performance is consistent with previous fights."]

@@ -101,7 +101,8 @@ class ItemGenerator:
             rarity=item_rarity,
             quality_tier=quality_tier_obj.tier_name,
             quality_roll=quality_roll,
-            affixes=rolled_affixes
+            affixes=rolled_affixes,
+            default_attack_skill=template.default_attack_skill
         )
 
     def _roll_quality_tier(self, rarity: str) -> Optional[QualityTier]:

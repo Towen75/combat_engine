@@ -32,5 +32,5 @@ attack_dagger,Dual Slash,Physical,0.55,2,Quick double strike that builds combo p
 attack_greatsword,Heavy Swing,Physical,1.35,1,Slow but devastating single blow.,0,1.5,,0.0,,0.0,0
 attack_axe,Cleave,Physical,1.15,1,Wide swing that causes bleeding damage over time.,0,1.2,OnHit,0.8,bleed,8.0,3
 attack_staff,Arcane Bolt,Magic,0.95,1,Magic missile with spell power scaling.,0,1.0,,0.0,,0.0,0
-attack_bow,Precise Shot,Piercing,0.85,1,Accurate ranged attack with armor penetration.,0,0.8,,0.0,,0.0,0
+attack_bow,Precise Shot,Physical,0.85,1,Accurate ranged attack with armor penetration.,0,0.8,,0.0,,0.0,0
 attack_sword,Slash,Physical,1.0,1,Reliable standard attack.,0,1.0,,0.0,,0.0,0

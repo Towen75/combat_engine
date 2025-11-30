@@ -8,13 +8,14 @@
 **Results**: Complete UI enhancement suite making weapon mechanics visible and accessible
 - **UI-1: Collapsible Equipment Sections**: Equipment/backpack sections collapse to show key info, eliminating scrolling
 - **UI-2: Combat Log Display**: Detailed combat logs show weapon skills, multi-hit damage, and effects in victory/defeat screens
-- **Impact**: Weapon mechanics are now discoverable and testable through improved UX
+- **UI-3: User Experience Polish**: Intelligent quick-views, smooth state transitions, weapon comparison analytics, and contextual guidance
+- **Impact**: Weapon mechanics are now discoverable, testable, and delightful through comprehensive UX improvements
 
-### Next Phase Planning: UI-3 User Experience Polish
+### Next Phase Planning: Crafting & Progression System
 
 **Status**: Ready for Implementation
-**Objective**: Elevate UI from functional to delightful with smooth transitions, weapon intelligence, and contextual guidance
-**Dependencies**: UI-1 and UI-2 completed
+**Objective**: Implement economic loop with item salvaging, upgrading, and XP progression
+**Dependencies**: UI improvements operational
 
 ### Future Phase: Crafting & Progression System
 
@@ -65,21 +66,13 @@
 
 ## Next Steps Priority Queue
 
-### Immediate Next: UI-3 User Experience Polish
-
-**Priority**: HIGH - Completes weapon mechanics visibility suite
-**Work Item**: `docs/work_items/WI_UI_3_User_Experience_Polish.md`
-**Objective**: Transform UI from functional to delightful with smooth transitions and weapon intelligence
-**Scope**: Intelligent quick-views, state transitions, weapon comparison analytics
-**Timeline**: Ready for implementation
-
-### Future Next: Crafting & Progression System
+### Immediate Next: Crafting & Progression System
 
 **Priority**: MEDIUM - Implements economic loop
 **Feature Plan**: `docs/feature_plans/FP_Crafting_Progression.md`
 **Objective**: Add item salvaging, upgrading, and XP progression
 **Scope**: Currency system, crafting mechanics, entity leveling
-**Dependencies**: UI improvements operational
+**Dependencies**: UI improvements operational (COMPLETE)
 
 ### Long-term Goals (Phase 3: Finalization & Professionalization)
 

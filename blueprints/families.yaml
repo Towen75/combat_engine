@@ -3,14 +3,9 @@ families:
   - id: "longsword"
     name: "Longsword"
     slot: "Weapon"
-    implicits: ["flat_dmg", "crit_chance"]
+    default_attack_skill: "attack_sword"
+    implicits: ["flat_dmg", "pierce_bonus"]
     affix_pools: "sword_pool"
-
-  - id: "Battle_Axe"
-    name: "Battle Axe"
-    slot: "Weapon"
-    implicits: ["flat_dmg", "flat_crit_dmg"]
-    affix_pools: "weapon_pool"
 
   - id: "iron_plate"
     name: "Iron Plate"
@@ -18,8 +13,8 @@ families:
     implicits: ["flat_health"]
     affix_pools: "armor_pool"
 
-  - id: "leather_amour"
-    name: "Leather Amour"
+  - id: "leather_armor"
+    name: "Leather Armor"
     slot: "Chest"
     implicits: ["flat_health"]
     affix_pools: "armor_pool"
@@ -27,12 +22,6 @@ families:
   - id: "pants"
     name: "Pants"
     slot: "Legs"
-    implicits: ["flat_health"]
-    affix_pools: "armor_pool"
-
-  - id: "sandals"
-    name: "Sandals"
-    slot: "feet"
     implicits: ["flat_health"]
     affix_pools: "armor_pool"
 
@@ -56,7 +45,7 @@ families:
     name: "Battle Axe"
     slot: "Weapon"
     default_attack_skill: "attack_axe" # <--- NEW
-    implicits: ["melee_damage", "bleed_damage"]
+    implicits: ["melee_damage", "bleed_damage", "crit_chance"]
     affix_pools: "warrior_pool|axe_pool|weapon_pool"
 
   - id: "tower_shield"

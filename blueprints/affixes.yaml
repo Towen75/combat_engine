@@ -14,7 +14,7 @@ definitions:
     name: "Base Damage"
     pools: ["weapon_pool", "jewelry_pool"]
 
-  - id: "Mult_dmg"
+  - id: "mult_dmg"
     stat: "base_damage"
     type: "multiplier"
     base_val: 0.10
@@ -116,6 +116,13 @@ definitions:
     name: "Bleed Damage"
     pools: ["warrior_pool", "axe_pool"]
 
+  - id: "pierce_bonus"
+    stat: "pierce_ratio"
+    type: "flat"
+    base_val: 0.08
+    name: "Pierce Bonus"
+    pools: ["weapon_pool", "sword_pool"]
+
   # ========== ROGUE AFFIXES ==========
   - id: "movement_speed"
     stat: "movement_speed"
@@ -128,7 +135,7 @@ definitions:
     stat: "crit_damage"  # Uses existing crit_damage field
     type: "flat"
     base_val: 0.3
-    name: "Critical Multiplier"
+    name: "Critical multiplier"
     pools: ["rogue_pool", "dagger_pool", "bow_pool"]
 
   - id: "stealth_value"

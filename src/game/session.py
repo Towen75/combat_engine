@@ -60,6 +60,7 @@ class GameSession:
 
         # Last run analytics
         self.last_report: Dict[str, Any] = {}
+        self.combat_log: List[Dict[str, Any]] = []  # History of combat reports
 
     def start_new_run(self, archetype_id: str, seed: int) -> None:
         """Initialize a new run with a specific archetype and seed."""
@@ -153,6 +154,11 @@ class GameSession:
 
             # Store report for UI
             self.last_report = runner.get_simulation_report()
+            # Add to combat history for weapon comparison analytics
+            self.combat_log.append(self.last_report)
+            # Keep only last 10 combats to avoid memory issues
+            if len(self.combat_log) > 10:
+                self.combat_log.pop(0)
 
         except Exception as e:
             self.state = GameState.PREPARATION

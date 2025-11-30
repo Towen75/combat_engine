@@ -4,7 +4,7 @@ goblin_loot,Item,longsword_common,50,1,1,0.5
 goblin_loot,Item,longsword_uncommon,50,1,2,0.3
 goblin_loot,Table,common_reward_loot,50,1,1,0.5
 orc_loot,Item,longsword_uncommon,50,1,1,0.5
-orc_loot,Item,Battle_Axe_uncommon,30,1,1,0.4
+orc_loot,Item,battle_axe_uncommon,30,1,1,0.4
 orc_loot,Item,iron_plate_uncommon,20,1,1,0.3
 orc_loot,Table,common_reward_loot,50,1,1,0.5
 orc_loot,Table,uncommon_reward_loot,50,1,1,0.5

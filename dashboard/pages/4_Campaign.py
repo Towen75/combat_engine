@@ -1,7 +1,17 @@
 import streamlit as st
 import time
-from dashboard.utils import get_game_session, get_game_data_provider, load_css, display_portrait
+from dashboard.utils import (
+    get_game_session,
+    get_game_data_provider,
+    load_css,
+    display_portrait,
+    generate_equipment_quickview,
+    generate_backpack_quickview,
+    create_smooth_transition,
+    analyze_weapon_performance
+)
 from dashboard.components.item_card import render_item_card
+from dashboard.components.weapon_comparison import render_weapon_comparison
 from src.game.enums import GameState
 from src.data.typed_models import ItemSlot
 
@@ -18,6 +28,17 @@ def main():
         return
 
     provider = get_game_data_provider()
+
+    # Add state transition handling
+    if 'previous_state' not in st.session_state:
+        st.session_state.previous_state = session.state
+
+    current_state = session.state
+
+    # Handle transitions
+    if current_state != st.session_state.previous_state:
+        create_smooth_transition(st.session_state.previous_state, current_state, session)
+        st.session_state.previous_state = current_state
 
     # DEBUG: State Visualizer
     with st.expander("Debug State", expanded=True):
@@ -366,8 +387,37 @@ def render_preparation(session, provider):
         stats = player.final_stats
         stats_summary = f"❤️{stats.max_health:.0f} ⚔️{stats.base_damage:.1f} 🛡️{stats.armor:.0f}"
 
-        # Equipment expander with collapsed state by default
-        with st.expander(f"🛡️ Equipment - {player.name} ({weapon_name}: {weapon_skill}) | {stats_summary}", expanded=False):
+        # Equipment expander with intelligent header
+        # Generate quick-view for header display
+        weapon_info = generate_equipment_quickview(player, provider)
+        quick_view = f"{weapon_info['name']} ({weapon_info['skill_name']})"
+
+        with st.expander(f"🛡️ Equipment - {player.name} | {quick_view} | {stats_summary}", expanded=False):
+            # Always show quick view first
+            col1, col2 = st.columns(2)
+
+            with col1:
+                st.markdown("**⚔️ Weapon Summary**")
+                st.markdown(f"""
+                - **Name:** {weapon_info['name']}
+                - **Skill:** {weapon_info['skill_name']}
+                - **Type:** {weapon_info['damage_type']}
+                - **Hits:** {weapon_info['hits']} per attack
+                - **Effects:** {', '.join(weapon_info['effects']) if weapon_info['effects'] else 'None'}
+                """)
+
+            with col2:
+                st.markdown("**📊 Combat Stats**")
+                st.markdown(f"""
+                - **❤️ Health:** {stats.max_health:.0f}
+                - **⚔️ Damage:** {stats.base_damage:.1f}
+                - **🛡️ Armor:** {stats.armor:.0f}
+                - **⚡ Crit:** {stats.crit_chance*100:.1f}%
+                """)
+
+            st.markdown("---")
+
+            # Full expanded view with hero details
             st.markdown(f"### 🛡️ {player.name}")
 
             # NEW: Display hero portrait (with safe lookup)
@@ -379,9 +429,6 @@ def render_preparation(session, provider):
             else:
                 # Fallback if no template found - could use a default portrait
                 st.caption("Hero portrait not available")
-
-            # Stats Bar
-            st.caption(f"❤️ HP: {stats.max_health:.0f} | ⚔️ DMG: {stats.base_damage:.1f} | 🛡️ ARM: {stats.armor:.0f} | ⚡ CRIT: {stats.crit_chance*100:.1f}%")
 
             st.markdown("#### Currently Equipped")
 
@@ -581,10 +628,28 @@ def render_victory(session):
     render_combat_stats(session)
     st.balloons()
 
-    # NEW: Add combat log display
+    # Add weapon comparison insights
     provider = get_game_data_provider()
+    if provider and session.combat_log and len(session.combat_log) > 1:
+        st.markdown("---")
+        st.subheader("🎯 Weapon Performance Analysis")
+
+        insights = analyze_weapon_performance(
+            session.combat_log[-1],  # Current fight
+            session.combat_log[:-1]  # Previous fights
+        )
+
+        if insights:
+            for insight in insights:
+                st.info(insight)
+
+        # Full weapon comparison component
+        render_weapon_comparison(session, provider)
+
+    # NEW: Add combat log display with insights
     if provider:
-        render_combat_log(session, provider)
+        from dashboard.components.battle_log import render_battle_log_with_insights
+        render_battle_log_with_insights(session.last_report.get('logger_entries', []), session.player, provider)
 
     st.markdown("### 💰 Loot Found")
 
